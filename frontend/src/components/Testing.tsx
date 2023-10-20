@@ -4,7 +4,7 @@ import { AppDetails } from '@algorandfoundation/algokit-utils/types/app-client'
 import { useWallet } from '@txnlab/use-wallet'
 import { useSnackbar } from 'notistack'
 import { useState } from 'react'
-import { LaunchVestClient } from '../contracts/launch_vest'
+// import { LaunchVestClient } from '../contracts/launch_vest'
 import { getAlgodConfigFromViteEnvironment, getIndexerConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
 
 interface AppCallsInterface {
@@ -43,7 +43,7 @@ const AppCalls = ({ openModal, setModalState }: AppCallsInterface) => {
       findExistingUsing: indexer,
     } as AppDetails
 
-    const appClient = new LaunchVestClient(appDetails, algodClient)
+    // const appClient = new LaunchVestClient(appDetails, algodClient)
 
     // Please note, in typical production scenarios,
     // you wouldn't want to use deploy directly from your frontend.
