@@ -2,12 +2,15 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import './styles/main.css'
-import ErrorBoundary from './components/ErrorBoundary'
+import { Provider } from "react-redux";
+import { store } from "./services/store/store.js";
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <ErrorBoundary>
+    <Provider store={store}>
       <App />
-    </ErrorBoundary>
-  </React.StrictMode>,
-)
+    </Provider>
+  </React.StrictMode>
+);
+

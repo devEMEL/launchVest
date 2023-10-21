@@ -2,8 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "author": {
-    "name": "Go Project",
-    "email": ""
+    "name": "Go Project"
   },
   "private": true,
   "engines": {
@@ -41,12 +40,18 @@
     "daisyui": "3.1.0",
     "notistack": "^3.0.1",
     "react": "^18.2.0",
+    "redux": "^4.2.1",
+    "react-redux": "^8.1.2",
+    "@pinata/sdk": "^2.1.0",
+    "@reduxjs/toolkit": "^1.9.5",
+    "dotenv": "^16.3.1",
+    "multiformats": "^12.1.1",
     "react-dom": "18.2.0",
     "tslib": "^2.6.2"
   },
   "scripts": {
     "generate:app-clients": "algokit generate client -o src/contracts/{contract_name}.ts ../backend",
-    "dev": "npm run generate:app-clients && vite",
+    "dev": "vite",
     "build": "npm run generate:app-clients && tsc && vite build",
     "test": "jest --coverage --passWithNoTests",
     "playwright:test": "playwright test",
