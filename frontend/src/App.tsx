@@ -47,6 +47,7 @@ export default function App() {
           {/* ROUTES */}
           <ListToken />
 
+
           {/* FOOTER */}
           <Footer />
         </div>
