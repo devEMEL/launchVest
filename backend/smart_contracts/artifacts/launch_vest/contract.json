@@ -1,0 +1,148 @@
+{
+    "name": "launch_vest",
+    "methods": [
+        {
+            "name": "bootstrap",
+            "args": [],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Initialize LaunchVest global states.\nReturns     :return: PyTeal Expression to initialize global state.     :rtype: pt.Expr."
+        },
+        {
+            "name": "list_project",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset_id"
+                },
+                {
+                    "type": "uint64",
+                    "name": "start_timestamp"
+                },
+                {
+                    "type": "uint64",
+                    "name": "end_timestamp"
+                },
+                {
+                    "type": "uint64",
+                    "name": "claim_timestamp"
+                },
+                {
+                    "type": "uint64",
+                    "name": "asset_price"
+                },
+                {
+                    "type": "uint64",
+                    "name": "min_investment_per_user"
+                },
+                {
+                    "type": "uint64",
+                    "name": "max_investment_per_user"
+                },
+                {
+                    "type": "uint64",
+                    "name": "max_cap"
+                },
+                {
+                    "type": "uint64",
+                    "name": "total_tokens_for_sale"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Creates a new IDO Project listing on LaunchVest."
+        },
+        {
+            "name": "invest",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                },
+                {
+                    "type": "pay",
+                    "name": "txn"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Allows interested investors invest in an IDO Project."
+        },
+        {
+            "name": "claim_tokens",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Allows investors claim their tokens if qualified."
+        },
+        {
+            "name": "pause",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "unpause",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "deposit_ido_tokens",
+            "args": [],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Alternate function for token deposit."
+        },
+        {
+            "name": "change_end_time",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "withdraw_amount_raised",
+            "args": [],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Charge fee before withdrawal"
+        },
+        {
+            "name": "change_launchpad_admin",
+            "args": [],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "get_project",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "project_id"
+                }
+            ],
+            "returns": {
+                "type": "(address,uint64,uint64,uint64,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64)",
+                "desc": ":return: A valid IDO project. :rtype: pt.Expr."
+            },
+            "desc": "Retrieves a specific IDO project."
+        }
+    ],
+    "networks": {},
+    "desc": "LaunchVest Application"
+}

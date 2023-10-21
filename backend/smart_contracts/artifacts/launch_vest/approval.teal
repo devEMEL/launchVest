@@ -1,0 +1,906 @@
+#pragma version 8
+intcblock 0 1 4 32
+bytecblock 0x 0x657363726f775f6163636f756e74 0x00 0x61646d696e5f61636374
+txn NumAppArgs
+intc_0 // 0
+==
+bnz main_l24
+txna ApplicationArgs 0
+pushbytes 0xbec76d87 // "bootstrap()void"
+==
+bnz main_l23
+txna ApplicationArgs 0
+pushbytes 0x9e820e03 // "list_project(asset,uint64,uint64,uint64,uint64,uint64,uint64,uint64,uint64)void"
+==
+bnz main_l22
+txna ApplicationArgs 0
+pushbytes 0x6fa53472 // "invest(asset,pay)void"
+==
+bnz main_l21
+txna ApplicationArgs 0
+pushbytes 0x70a461bc // "claim_tokens(asset)void"
+==
+bnz main_l20
+txna ApplicationArgs 0
+pushbytes 0x0178f94b // "pause()void"
+==
+bnz main_l19
+txna ApplicationArgs 0
+pushbytes 0x1b529de8 // "unpause()void"
+==
+bnz main_l18
+txna ApplicationArgs 0
+pushbytes 0xeca6606b // "deposit_ido_tokens()void"
+==
+bnz main_l17
+txna ApplicationArgs 0
+pushbytes 0x45bb67d3 // "change_end_time()void"
+==
+bnz main_l16
+txna ApplicationArgs 0
+pushbytes 0x73110090 // "withdraw_amount_raised()void"
+==
+bnz main_l15
+txna ApplicationArgs 0
+pushbytes 0x9475ecd9 // "change_launchpad_admin()void"
+==
+bnz main_l14
+txna ApplicationArgs 0
+pushbytes 0x7016f9fc // "get_project(uint64)(address,uint64,uint64,uint64,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64)"
+==
+bnz main_l13
+err
+main_l13:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub getprojectcaster_21
+intc_1 // 1
+return
+main_l14:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub changelaunchpadadmincaster_20
+intc_1 // 1
+return
+main_l15:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub withdrawamountraisedcaster_19
+intc_1 // 1
+return
+main_l16:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub changeendtimecaster_18
+intc_1 // 1
+return
+main_l17:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub depositidotokenscaster_17
+intc_1 // 1
+return
+main_l18:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub unpausecaster_16
+intc_1 // 1
+return
+main_l19:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub pausecaster_15
+intc_1 // 1
+return
+main_l20:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub claimtokenscaster_14
+intc_1 // 1
+return
+main_l21:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub investcaster_13
+intc_1 // 1
+return
+main_l22:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub listprojectcaster_12
+intc_1 // 1
+return
+main_l23:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub bootstrapcaster_11
+intc_1 // 1
+return
+main_l24:
+txn OnCompletion
+intc_0 // NoOp
+==
+bnz main_l26
+err
+main_l26:
+txn ApplicationID
+intc_0 // 0
+==
+assert
+intc_1 // 1
+return
+
+// bootstrap
+bootstrap_0:
+proto 0 0
+bytec_3 // "admin_acct"
+bytec_0 // ""
+app_global_put
+bytec_1 // "escrow_account"
+bytec_0 // ""
+app_global_put
+bytec_3 // "admin_acct"
+global CreatorAddress
+app_global_put
+bytec_1 // "escrow_account"
+global CurrentApplicationAddress
+app_global_put
+retsub
+
+// list_project
+listproject_1:
+proto 9 0
+bytec_0 // ""
+dup
+intc_0 // 0
+dupn 5
+bytec_0 // ""
+dup
+frame_dig -9
+txnas Assets
+intc_0 // 0
+!=
+// A valid asset id must be provided
+assert
+frame_dig -5
+intc_0 // 0
+>
+// Asset price must be greater than 0
+assert
+frame_dig -4
+intc_0 // 0
+>
+// Min. and max. investment must be greater than 0
+assert
+frame_dig -3
+intc_0 // 0
+>
+// Min. and max. investment must be greater than 0
+assert
+frame_dig -4
+frame_dig -3
+<
+// Min. investment must be lesser than max. investment
+assert
+frame_dig -8
+global LatestTimestamp
+>
+// Start, end and claim times must be greater than current time
+assert
+frame_dig -7
+global LatestTimestamp
+>
+// Start, end and claim times must be greater than current time
+assert
+frame_dig -6
+global LatestTimestamp
+>
+// Start, end and claim times must be greater than current time
+assert
+frame_dig -8
+frame_dig -7
+<
+// Start time must be less than end time
+assert
+frame_dig -6
+frame_dig -8
+>
+// Claim time must be greater than start and end time
+assert
+frame_dig -6
+frame_dig -7
+>
+// Claim time must be greater than start and end time
+assert
+global LatestTimestamp
+itob
+log
+itxn_begin
+intc_2 // axfer
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field AssetAmount
+bytec_1 // "escrow_account"
+app_global_get
+itxn_field AssetReceiver
+frame_dig -9
+txnas Assets
+itxn_field XferAsset
+itxn_submit
+txn Sender
+frame_bury 1
+frame_dig 1
+len
+intc_3 // 32
+==
+assert
+intc_0 // 0
+!
+!
+frame_bury 2
+intc_0 // 0
+!
+!
+frame_bury 3
+intc_0 // 0
+frame_bury 4
+intc_0 // 0
+frame_bury 5
+frame_dig 1
+frame_dig -8
+itob
+concat
+frame_dig -7
+itob
+concat
+frame_dig -6
+itob
+concat
+frame_dig -5
+itob
+concat
+frame_dig -4
+itob
+concat
+frame_dig -3
+itob
+concat
+frame_dig -2
+itob
+concat
+frame_dig -1
+itob
+concat
+bytec_2 // 0x00
+intc_0 // 0
+frame_dig 2
+setbit
+intc_1 // 1
+frame_dig 3
+setbit
+concat
+frame_dig 4
+itob
+concat
+frame_dig 5
+itob
+concat
+frame_bury 0
+frame_dig -9
+txnas Assets
+itob
+box_del
+pop
+frame_dig -9
+txnas Assets
+itob
+frame_dig 0
+box_put
+retsub
+
+// invest
+invest_2:
+proto 2 0
+bytec_0 // ""
+intc_0 // 0
+dupn 3
+bytec_0 // ""
+dup
+intc_0 // 0
+dupn 16
+bytec_0 // ""
+dup
+intc_0 // 0
+dup
+bytec_0 // ""
+dup
+frame_dig -2
+txnas Assets
+itob
+box_len
+store 1
+store 0
+load 1
+// 1
+assert
+frame_dig -2
+txnas Assets
+itob
+box_get
+store 3
+store 2
+load 3
+assert
+load 2
+frame_bury 5
+bytec_1 // "escrow_account"
+app_global_get
+frame_dig -2
+txnas Assets
+asset_holding_get AssetBalance
+store 4
+intc_0 // 0
+>
+// 2
+assert
+frame_dig -2
+txnas Assets
+asset_params_get AssetDecimals
+store 6
+store 5
+load 5
+intc_0 // 0
+!=
+// 3
+assert
+frame_dig 5
+extract 0 32
+frame_bury 6
+frame_dig 5
+intc_3 // 32
+extract_uint64
+frame_bury 7
+frame_dig 5
+pushint 40 // 40
+extract_uint64
+frame_bury 8
+frame_dig 5
+pushint 48 // 48
+extract_uint64
+frame_bury 9
+frame_dig 5
+pushint 56 // 56
+extract_uint64
+frame_bury 10
+frame_dig 5
+pushint 64 // 64
+extract_uint64
+frame_bury 11
+frame_dig 5
+pushint 72 // 72
+extract_uint64
+frame_bury 12
+frame_dig 5
+pushint 80 // 80
+extract_uint64
+frame_bury 13
+frame_dig 5
+pushint 88 // 88
+extract_uint64
+frame_bury 14
+frame_dig 5
+pushint 768 // 768
+getbit
+frame_bury 15
+frame_dig 5
+pushint 769 // 769
+getbit
+frame_bury 16
+frame_dig 5
+pushint 97 // 97
+extract_uint64
+frame_bury 17
+frame_dig 5
+pushint 105 // 105
+extract_uint64
+frame_bury 18
+frame_dig 15
+intc_0 // 0
+==
+// 4
+assert
+frame_dig 18
+frame_dig 13
+<
+assert
+global LatestTimestamp
+frame_dig 7
+>=
+// 5
+assert
+global LatestTimestamp
+frame_dig 8
+<
+// 5
+assert
+frame_dig -1
+gtxns Amount
+intc_0 // 0
+!=
+// 6
+assert
+frame_dig -1
+gtxns Amount
+frame_dig 11
+>=
+// 6
+assert
+frame_dig -1
+gtxns Amount
+frame_dig 12
+<=
+// 6
+assert
+frame_dig -1
+gtxns Receiver
+bytec_1 // "escrow_account"
+app_global_get
+==
+// 6
+assert
+frame_dig -1
+gtxns TypeEnum
+intc_1 // pay
+==
+// 6
+assert
+frame_dig -1
+gtxns Sender
+txn Sender
+==
+// 6
+assert
+frame_dig -2
+txnas Assets
+frame_bury 1
+frame_dig -1
+gtxns Amount
+frame_bury 2
+intc_0 // 0
+!
+!
+frame_bury 4
+load 5
+frame_bury 19
+frame_dig -1
+gtxns Amount
+frame_bury 20
+frame_dig 10
+frame_bury 21
+frame_dig 20
+frame_dig 21
+/
+pushint 10 // 10
+frame_dig 19
+exp
+*
+frame_bury 3
+frame_dig 1
+itob
+frame_dig 2
+itob
+concat
+frame_dig 3
+itob
+concat
+bytec_2 // 0x00
+intc_0 // 0
+frame_dig 4
+setbit
+concat
+frame_bury 0
+txn Sender
+box_del
+pop
+txn Sender
+frame_dig 0
+box_put
+frame_dig 6
+frame_dig 7
+itob
+concat
+frame_dig 8
+itob
+concat
+frame_dig 9
+itob
+concat
+frame_dig 10
+itob
+concat
+frame_dig 11
+itob
+concat
+frame_dig 12
+itob
+concat
+frame_dig 13
+itob
+concat
+frame_dig 14
+itob
+concat
+bytec_2 // 0x00
+intc_0 // 0
+frame_dig 15
+setbit
+intc_1 // 1
+frame_dig 16
+setbit
+concat
+frame_dig 17
+itob
+concat
+frame_dig 18
+itob
+concat
+frame_bury 5
+retsub
+
+// claim_tokens
+claimtokens_3:
+proto 1 0
+bytec_0 // ""
+intc_0 // 0
+bytec_0 // ""
+intc_0 // 0
+dupn 6
+bytec_0 // ""
+dup
+frame_dig -1
+txnas Assets
+itob
+box_get
+store 8
+store 7
+load 8
+assert
+load 7
+frame_bury 0
+frame_dig 0
+pushint 48 // 48
+extract_uint64
+frame_bury 1
+global LatestTimestamp
+frame_dig 1
+>
+assert
+txn Sender
+box_get
+store 10
+store 9
+load 10
+assert
+load 9
+frame_bury 2
+frame_dig -1
+txnas Assets
+itob
+box_len
+store 12
+store 11
+load 12
+assert
+frame_dig 2
+intc_0 // 0
+extract_uint64
+frame_bury 3
+frame_dig 2
+pushint 8 // 8
+extract_uint64
+frame_bury 4
+frame_dig 2
+pushint 16 // 16
+extract_uint64
+frame_bury 5
+frame_dig 2
+pushint 192 // 192
+getbit
+frame_bury 6
+frame_dig 3
+frame_dig -1
+txnas Assets
+==
+assert
+frame_dig 4
+intc_0 // 0
+>
+assert
+frame_dig 5
+intc_0 // 0
+>
+assert
+frame_dig 6
+intc_0 // 0
+==
+assert
+itxn_begin
+intc_2 // axfer
+itxn_field TypeEnum
+frame_dig 5
+itxn_field AssetAmount
+txn Sender
+itxn_field AssetReceiver
+frame_dig -1
+txnas Assets
+itxn_field XferAsset
+itxn_submit
+intc_1 // 1
+!
+!
+frame_bury 7
+frame_dig 3
+itob
+frame_dig 4
+itob
+concat
+frame_dig 5
+itob
+concat
+bytec_2 // 0x00
+intc_0 // 0
+frame_dig 7
+setbit
+concat
+frame_bury 2
+retsub
+
+// pause
+pause_4:
+proto 0 0
+retsub
+
+// unpause
+unpause_5:
+proto 0 0
+retsub
+
+// deposit_ido_tokens
+depositidotokens_6:
+proto 0 0
+retsub
+
+// change_end_time
+changeendtime_7:
+proto 0 0
+retsub
+
+// withdraw_amount_raised
+withdrawamountraised_8:
+proto 0 0
+retsub
+
+// change_launchpad_admin
+changelaunchpadadmin_9:
+proto 0 0
+retsub
+
+// get_project
+getproject_10:
+proto 1 1
+bytec_0 // ""
+frame_dig -1
+itob
+box_get
+store 14
+store 13
+load 14
+assert
+load 13
+frame_bury 0
+retsub
+
+// bootstrap_caster
+bootstrapcaster_11:
+proto 0 0
+callsub bootstrap_0
+retsub
+
+// list_project_caster
+listprojectcaster_12:
+proto 0 0
+intc_0 // 0
+dupn 8
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+frame_bury 0
+txna ApplicationArgs 2
+btoi
+frame_bury 1
+txna ApplicationArgs 3
+btoi
+frame_bury 2
+txna ApplicationArgs 4
+btoi
+frame_bury 3
+txna ApplicationArgs 5
+btoi
+frame_bury 4
+txna ApplicationArgs 6
+btoi
+frame_bury 5
+txna ApplicationArgs 7
+btoi
+frame_bury 6
+txna ApplicationArgs 8
+btoi
+frame_bury 7
+txna ApplicationArgs 9
+btoi
+frame_bury 8
+frame_dig 0
+frame_dig 1
+frame_dig 2
+frame_dig 3
+frame_dig 4
+frame_dig 5
+frame_dig 6
+frame_dig 7
+frame_dig 8
+callsub listproject_1
+retsub
+
+// invest_caster
+investcaster_13:
+proto 0 0
+intc_0 // 0
+dup
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+frame_bury 0
+txn GroupIndex
+intc_1 // 1
+-
+frame_bury 1
+frame_dig 1
+gtxns TypeEnum
+intc_1 // pay
+==
+assert
+frame_dig 0
+frame_dig 1
+callsub invest_2
+retsub
+
+// claim_tokens_caster
+claimtokenscaster_14:
+proto 0 0
+intc_0 // 0
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+frame_bury 0
+frame_dig 0
+callsub claimtokens_3
+retsub
+
+// pause_caster
+pausecaster_15:
+proto 0 0
+callsub pause_4
+retsub
+
+// unpause_caster
+unpausecaster_16:
+proto 0 0
+callsub unpause_5
+retsub
+
+// deposit_ido_tokens_caster
+depositidotokenscaster_17:
+proto 0 0
+callsub depositidotokens_6
+retsub
+
+// change_end_time_caster
+changeendtimecaster_18:
+proto 0 0
+callsub changeendtime_7
+retsub
+
+// withdraw_amount_raised_caster
+withdrawamountraisedcaster_19:
+proto 0 0
+callsub withdrawamountraised_8
+retsub
+
+// change_launchpad_admin_caster
+changelaunchpadadmincaster_20:
+proto 0 0
+callsub changelaunchpadadmin_9
+retsub
+
+// get_project_caster
+getprojectcaster_21:
+proto 0 0
+bytec_0 // ""
+intc_0 // 0
+txna ApplicationArgs 1
+btoi
+frame_bury 1
+frame_dig 1
+callsub getproject_10
+frame_bury 0
+pushbytes 0x151f7c75 // 0x151f7c75
+frame_dig 0
+concat
+log
+retsub
