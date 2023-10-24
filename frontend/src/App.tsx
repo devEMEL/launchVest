@@ -1,3 +1,4 @@
+import { Routes, Route } from 'react-router-dom'
 import { DeflyWalletConnect } from '@blockshake/defly-connect'
 import { DaffiWalletConnect } from '@daffiwallet/connect'
 import { PeraWalletConnect } from '@perawallet/connect'
@@ -45,8 +46,13 @@ export default function App() {
           <ConnectModal />
 
           {/* ROUTES */}
-          <ListToken />
+          <Routes>
+            {/* <Route path="/" element={<Collection />} /> */}
 
+            <Route path="/list-token" element={<ListToken />} />
+            {/* <Route path="/asset/:assetId" element={<Asset />} /> */}
+            {/* <Route path="*" element={<NotFound />} /> */}
+          </Routes>
 
           {/* FOOTER */}
           <Footer />
