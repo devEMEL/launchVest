@@ -4,75 +4,79 @@ import pyteal as pt
 from beaker.consts import FALSE, TRUE
 from beaker.lib.storage import BoxMapping
 
+from backend.smart_contracts.launch_vest.formula_helpers import (
+    calculate_project_max_cap,
+    calculate_allocation_for_investor,
+    calculate_proceeds_after_fee_deduction
+)
 
-BASE_VALUE = pt.Int(10)
+LAUNCH_VEST_FEE = pt.Int(10)
 
 
 class Investor(pt.abi.NamedTuple):
     """
-    NamedTuple for tracking investment info for investors.
+    Represents an investor, extends ``pt.abi.NamedTuple``.
 
-    Attributes:
-        pt.abi.Uint64 project_id: ID of Project IDO.
-        pt.abi.Uint64 amount_invested: Amount invested by investor.
-        pt.abi.Uint64 asset_allocated: Tokens allocated to investor.
-        pt.abi.Uint64 claimed: Flag to indicate token claim.
+    :ivar pt.abi.Address address: The Algorand address of the investor.
+    :ivar pt.abi.Uint64 project_id: The unique identifier of the project.
+    :ivar pt.abi.Uint64 amount_invested: The amount of the investment in Algos.
+    :ivar pt.abi.Uint64 asset_allocated: The amount of allocated assets.
+    :ivar pt.abi.Bool claimed: A boolean indicating whether the investor has claimed assets.
     """
+    address: pt.abi.Field[pt.abi.Address]
     project_id: pt.abi.Field[pt.abi.Uint64]
-    amount_invested: pt.abi.Field[pt.abi.Uint64]
+    investment_amount: pt.abi.Field[pt.abi.Uint64]
     asset_allocated: pt.abi.Field[pt.abi.Uint64]
     claimed: pt.abi.Field[pt.abi.Bool]
 
 
 class Project(pt.abi.NamedTuple):
     """
-    The following NamedTuple fields are the necessary project details for a particular IDO Project.
+    Represents a project, extends ``pt.abi.NamedTuple``.
 
-    Attributes:
-        pt.abi.Address project_owner_address: The project owner address.
-        pt.abi.Uint64 start_timestamp: IDO start timestamp.
-        pt.abi.Uint64 end_timestamp: IDO end timestamp.
-        pt.abi.Uint64 claim_timestamp: IDO claim timestamp.
-        pt.abi.Uint64 asset_price: Price of each token in the IDO.
-        pt.abi.Uint64 min_investment_per_user: Minimum Algo per user.
-        pt.abi.Uint64 max_investment_per_user: Maximum Algo per user.
-        pt.abi.Uint64 max_cap: Maximum amount of funds that can be raised during the IDO.
-        pt.abi.Uint64 total_tokens_for_sale: Total number of tokens available for purchase in the IDO.
-        pt.abi.Bool is_paused: IDO pause flag.
-        pt.abi.Bool withdrawn: Withdrawal flag.
-        pt.abi.Uint64 total_tokens_sold: Tokens sold during the IDO.
-        pt.abi.Uint64 total_amount_raised: Total raised amount.
+    :ivar pt.abi.Address owner_address: The Algorand address of the project owner.
+    :ivar pt.abi.Uint64 start_timestamp: The timestamp when the project starts.
+    :ivar pt.abi.Uint64 end_timestamp: The timestamp when the project ends.
+    :ivar pt.abi.Uint64 claim_timestamp: The timestamp for asset claiming.
+    :ivar pt.abi.Uint64 price_per_asset: The price of each asset.
+    :ivar pt.abi.Uint64 min_investment_per_investor: The minimum investment per user.
+    :ivar pt.abi.Uint64 max_investment_per_investor: The maximum investment per user.
+    :ivar pt.abi.Uint64 max_cap: The maximum investment cap.
+    :ivar pt.abi.Uint64 total_assets_for_sale: The total assets available for sale.
+    :ivar pt.abi.Bool is_paused: A boolean indicating whether the project is paused.
+    :ivar pt.abi.Bool proceeds_withdrawn: A boolean indicating whether funds have been withdrawn.
+    :ivar pt.abi.Uint64 total_assets_sold: The total assets sold.
+    :ivar pt.abi.Uint64 total_amount_raised: The total amount raised.
     """
-    project_owner_address: pt.abi.Field[pt.abi.Address]
+    owner_address: pt.abi.Field[pt.abi.Address]
     start_timestamp: pt.abi.Field[pt.abi.Uint64]
     end_timestamp: pt.abi.Field[pt.abi.Uint64]
     claim_timestamp: pt.abi.Field[pt.abi.Uint64]
-    asset_price: pt.abi.Field[pt.abi.Uint64]
-    min_investment_per_user: pt.abi.Field[pt.abi.Uint64]
-    max_investment_per_user: pt.abi.Field[pt.abi.Uint64]
+    price_per_asset: pt.abi.Field[pt.abi.Uint64]
+    min_investment_per_investor: pt.abi.Field[pt.abi.Uint64]
+    max_investment_per_investor: pt.abi.Field[pt.abi.Uint64]
     max_cap: pt.abi.Field[pt.abi.Uint64]
-    total_tokens_for_sale: pt.abi.Field[pt.abi.Uint64]
+    total_assets_for_sale: pt.abi.Field[pt.abi.Uint64]
     is_paused: pt.abi.Field[pt.abi.Bool]
-    withdrawn: pt.abi.Field[pt.abi.Bool]
-    total_tokens_sold: pt.abi.Field[pt.abi.Uint64]
+    proceeds_withdrawn: pt.abi.Field[pt.abi.Bool]
+    total_assets_sold: pt.abi.Field[pt.abi.Uint64]
     total_amount_raised: pt.abi.Field[pt.abi.Uint64]
 
 
 class ProjectState:
     """
-    States of LaunchVest
+    Defines Launch Vest state.
 
-    Attributes:
-        bk.GlobalStateValue project_id: The project id of a particular project.
-        bk.GlobalStateValue admin_acct: The Algorand address of LaunchVest owner.
-        bk.GlobalStateValue escrow_acct: Escrow address or application address of LaunchVest.
-        bk.lib.storage.BoxMapping pid_to_project: A mapping of project id to a particular project.
+    :ivar bk.GlobalStateValue admin_acct: A global state value representing the administrator's account.
+    :ivar bk.GlobalStateValue escrow_address: A global state value representing the escrow address.
+    :ivar BoxMapping pid_to_project: A box mapping with key of type ``Uint64`` and value of type ``Project``.
+    :ivar BoxMapping investor_to_project: A box mapping with key of type ``Address`` and value of type ``Investor``.
     """
     admin_acct = bk.GlobalStateValue(
         stack_type=pt.TealType.bytes,
         default=pt.Bytes(""),
     )
-    escrow_account = bk.GlobalStateValue(
+    escrow_address = bk.GlobalStateValue(
         stack_type=pt.TealType.bytes,
         default=pt.Bytes(""),
     )
@@ -89,66 +93,56 @@ class ProjectState:
 app = bk.Application(name="launch_vest", state=ProjectState(), descr="LaunchVest Application")
 
 
-def asset_escrow_opt_in(asset: pt.abi.Asset) -> pt.Expr:
+def escrow_asset_opt_in(asset: pt.abi.Asset) -> pt.Expr:
     """
     Executes LaunchVest escrow (application) address asset opt in.
 
-    Args:
-        :params pt.abi.Asset asset_id: The ID of the asset to be opted into by the escrow address.
-
-    Returns
-        :return: PyTeal expression to execute an asset opt in by the escrow address.
-        :rtype: pt.Expr.
+    :param pt.abi.Asset asset: The asset to opt in.
+    :rtype pt.Expr:
     """
     return pt.Seq(
         pt.InnerTxnBuilder.Execute(
             {
                 pt.TxnField.type_enum: pt.TxnType.AssetTransfer,
                 pt.TxnField.asset_amount: pt.Int(0),
-                pt.TxnField.asset_receiver: app.state.escrow_account,
+                pt.TxnField.asset_receiver: app.state.escrow_address,
                 pt.TxnField.xfer_asset: asset.asset_id(),
             },
         )
     )
 
 
-def calculate_allocation_for_investor(
-    asset_decimal: pt.abi.Uint64,
-    amount_bought: pt.abi.Uint64,
-    asset_price: pt.abi.Uint64,
-    *,
-    output: pt.abi.Uint64
-) -> pt.Expr:
-    """
-    Formula for calculating an investor's asset allocation.
-
-    asset_allocated = (amount_bought / asset_price) ^ 10 * decimals.
-
-    Args:
-        :param pt.abi.Uint64 asset_decimal: IDO Project asset decimal.
-        :param pt.abi.Uint64 amount_bought: The amount of tokens bought in the base token (ALGO).
-        :param pt.abi.Uint64 asset_price: The price of the IDO Project asset.
-        :param pt.abi.Uint64 output: Result output of the computation.
-    Returns:
-        :return: Calculated asset allocation for an investor.
-        :rtype: pt.Expr
-    """
-    return output.set((amount_bought.get() / asset_price.get()) * BASE_VALUE ** asset_decimal.get())
-
-
 @app.external
 def bootstrap() -> pt.Expr:
     """
-    Initialize LaunchVest global states.
+    Initializes Launch Vest application's global state, sets the admin account, and sets the escrow address.
 
-    Returns
-        :return: PyTeal Expression to initialize global state.
-        :rtype: pt.Expr.
+    :rtype: pt.Expr.
     """
     return pt.Seq(
         app.initialize_global_state(),
         app.state.admin_acct.set(pt.Global.creator_address()),
-        app.state.escrow_account.set(pt.Global.current_application_address())
+        app.state.escrow_address.set(pt.Global.current_application_address())
+    )
+
+
+# noinspection PyTypeChecker
+@app.external
+def fund_escrow_address(
+    txn: pt.abi.PaymentTransaction
+) -> pt.Expr:
+    """
+    Fund escrow address with Algos.
+
+   :param pt.abi.PaymentTransaction txn: The payment transaction to fund the escrow address.
+   :rtype: pt.Expr
+    """
+    return pt.Seq(
+        pt.Assert(
+            txn.get().amount() > pt.Int(0),
+            txn.get().receiver() == app.state.escrow_address,
+            txn.get().type_enum() == pt.TxnType.Payment,
+        )
     )
 
 
@@ -156,65 +150,48 @@ def bootstrap() -> pt.Expr:
 @app.external
 def list_project(
     asset_id: pt.abi.Asset,
-
     start_timestamp: pt.abi.Uint64,
     end_timestamp: pt.abi.Uint64,
     claim_timestamp: pt.abi.Uint64,
-    asset_price: pt.abi.Uint64,
-    min_investment_per_user: pt.abi.Uint64,
-    max_investment_per_user: pt.abi.Uint64,
-    max_cap: pt.abi.Uint64,
-    total_tokens_for_sale: pt.abi.Uint64
+    price_per_asset: pt.abi.Uint64,
+    min_investment_per_investor: pt.abi.Uint64,
+    max_investment_per_investor: pt.abi.Uint64,
 ) -> pt.Expr:
     """
-    Creates a new IDO Project listing on LaunchVest.
+    Lists a new IDO Project on LaunchVest.
 
-    Args:
-        :param pt.abi.Asset asset_id: The asset ID of IDO Project.
+    :param (pt.abi.Asset) asset_id: The unique identifier of the asset.
+    :param pt.abi.Uint64 start_timestamp: The timestamp when the project starts.
+    :param pt.abi.Uint64 end_timestamp: The timestamp when the project ends.
+    :param pt.abi.Uint64 claim_timestamp: The timestamp for asset claiming.
+    :param pt.abi.Uint64 price_per_asset: The price of each asset.
+    :param pt.abi.Uint64 min_investment_per_investor: The minimum investment per user.
+    :param pt.abi.Uint64 max_investment_per_investor: The maximum investment per user.
+    :rtype: pt.Expr.
 
-        :param pt.abi.Uint64 start_timestamp: IDO start timestamp.
-        :param pt.abi.Uint64 end_timestamp: IDO end timestamp.
-        :param pt.abi.Uint64 claim_timestamp: IDO tokens claim timestamp.
-        :param pt.abi.Uint64 asset_price: Price of each token in the IDO.
-        :param pt.abi.Uint64 min_investment_per_user: Minimum Algo per user.
-        :param pt.abi.Uint64 max_investment_per_user: Maximum Algo per user.
-        :param pt.abi.Uint64 max_cap: Maximum amount of funds that can be raised during the IDO.
-        :param pt.abi.Uint64 total_tokens_for_sale: Total number of tokens available for purchase in the IDO.
-
-    Returns
-        :return: PyTeal expression to list an IDO project on LaunchVest.
-        :rtype: pt.Expr.
-
-    Note:
-        For our project box: project_id (key) is obtained from asset_id, and this is mapped to an IDO Project (value).
+    .. Note::
+        project_id (key) is obtained from asset_id of the provided asset, and this is mapped to a Project (value).
     """
     project = Project()
     project_id = asset_id.asset_id()
     project_id_in_bytes = pt.Itob(project_id)
-
-    project_owner_address = pt.abi.Address()
-    is_paused = pt.abi.Bool()
-    withdrawn = pt.abi.Bool()
-
-    total_tokens_sold = pt.abi.Uint64()
-    total_amount_raised = pt.abi.Uint64()
-
     return pt.Seq(
+        (asset_decimal := pt.AssetParam.decimals(asset_id.asset_id())),
         pt.Assert(
-            asset_id.asset_id() != pt.Int(0),
-            comment="A valid asset id must be provided",
+            asset_decimal.value() != pt.Int(0),
+            comment="A valid asset ID must be provided",
         ),
         pt.Assert(
-            asset_price.get() > pt.Int(0),
+            price_per_asset.get() > pt.Int(0),
             comment="Asset price must be greater than 0",
         ),
         pt.Assert(
-            min_investment_per_user.get() > pt.Int(0),
-            max_investment_per_user.get() > pt.Int(0),
+            min_investment_per_investor.get() > pt.Int(0),
+            max_investment_per_investor.get() > pt.Int(0),
             comment="Min. and max. investment must be greater than 0",
         ),
         pt.Assert(
-            min_investment_per_user.get() < max_investment_per_user.get(),
+            min_investment_per_investor.get() < max_investment_per_investor.get(),
             comment="Min. investment must be lesser than max. investment",
         ),
         pt.Assert(
@@ -232,30 +209,98 @@ def list_project(
             claim_timestamp.get() > end_timestamp.get(),
             comment="Claim time must be greater than start and end time",
         ),
-        pt.Log(pt.Itob(pt.Global.latest_timestamp())),
-        asset_escrow_opt_in(asset=asset_id),
-        project_owner_address.set(pt.Txn.sender()),
-
-        is_paused.set(FALSE),
-        withdrawn.set(FALSE),
-
-        total_tokens_sold.set(pt.Int(0)),
-        total_amount_raised.set(pt.Int(0)),
+        escrow_asset_opt_in(asset=asset_id),
+        (project_owner_address := pt.abi.Address()).set(pt.Txn.sender()),
+        (project_max_cap := pt.abi.Uint64()).set(pt.Int(0)),
+        (project_total_assets_for_sale := pt.abi.Uint64()).set(pt.Int(0)),
+        (project_is_paused := pt.abi.Bool()).set(FALSE),
+        (project_proceeds_withdrawn := pt.abi.Bool()).set(FALSE),
+        (project_total_assets_sold := pt.abi.Uint64()).set(pt.Int(0)),
+        (project_total_amount_raised := pt.abi.Uint64()).set(pt.Int(0)),
 
         project.set(
             project_owner_address,
             start_timestamp,
             end_timestamp,
             claim_timestamp,
-            asset_price,
-            min_investment_per_user,
-            max_investment_per_user,
-            max_cap,
-            total_tokens_for_sale,
-            is_paused,
-            withdrawn,
-            total_tokens_sold,
-            total_amount_raised,
+            price_per_asset,
+            min_investment_per_investor,
+            max_investment_per_investor,
+            project_max_cap,
+            project_total_assets_for_sale,
+            project_is_paused,
+            project_proceeds_withdrawn,
+            project_total_assets_sold,
+            project_total_amount_raised,
+        ),
+        app.state.pid_to_project[project_id_in_bytes].set(project)
+    )
+
+
+# noinspection PyTypeChecker
+@app.external
+def deposit_ido_assets(
+    txn: pt.abi.AssetTransferTransaction,
+    asset: pt.abi.Asset
+) -> pt.Expr:
+    """
+    Allows depositing IDO assets using the provided transaction and asset.
+
+    :param pt.abi.AssetTransferTransaction txn: The asset transfer transaction used for the deposit.
+    :param pt.abi.Asset asset: The asset to be deposited.
+    :rtype: pt.Expr.
+    """
+    project_id = asset.asset_id()
+    project_id_in_bytes = pt.Itob(project_id)
+    return pt.Seq(
+        (project := Project()).decode(app.state.pid_to_project[project_id_in_bytes].get()),
+        (project_owner_address := pt.abi.Address()).set(project.owner_address),
+
+        pt.Assert(
+            pt.Txn.sender() == project_owner_address.get(),
+            comment="Transaction sender must be the project owner."
+        ),
+        pt.Assert(
+            txn.get().asset_amount() > pt.Int(0),
+            txn.get().asset_receiver() == app.state.escrow_address,
+            txn.get().type_enum() == pt.TxnType.AssetTransfer,
+            txn.get().xfer_asset() == asset.asset_id(),
+            txn.get().sender() == project_owner_address.get(),
+        ),
+        # Set total assets for sale based on amount of asset sent.
+        (project_start_timestamp := pt.abi.Uint64()).set(project.start_timestamp),
+        (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
+        (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
+        (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
+        (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
+        (project_max_investment_per_investor := pt.abi.Uint64()).set(project.max_investment_per_investor),
+        (project_max_cap := pt.abi.Uint64()).set(project.max_cap),
+        (project_total_assets_for_sale := pt.abi.Uint64()).set(txn.get().asset_amount()),
+        (project_is_paused := pt.abi.Bool()).set(project.is_paused),
+        (project_proceeds_withdrawn := pt.abi.Bool()).set(project.proceeds_withdrawn),
+        (project_total_assets_sold := pt.abi.Uint64()).set(project.total_assets_sold),
+        (project_total_amount_raised := pt.abi.Uint64()).set(project.total_amount_raised),
+
+        calculate_project_max_cap(
+            total_assets_for_sale=project_total_assets_for_sale,
+            price_per_asset=project_price_per_asset,
+            output=project_max_cap
+        ),
+
+        project.set(
+            project_owner_address,
+            project_start_timestamp,
+            project_end_timestamp,
+            project_claim_timestamp,
+            project_price_per_asset,
+            project_min_investment_per_investor,
+            project_max_investment_per_investor,
+            project_max_cap,
+            project_total_assets_for_sale,
+            project_is_paused,
+            project_proceeds_withdrawn,
+            project_total_assets_sold,
+            project_total_amount_raised
         ),
         app.state.pid_to_project[project_id_in_bytes].set(project)
     )
@@ -264,202 +309,355 @@ def list_project(
 # noinspection PyTypeChecker
 @app.external
 def invest(
-    asset: pt.abi.Asset,
+    project: pt.abi.Asset,
     txn: pt.abi.PaymentTransaction
 ) -> pt.Expr:
     """
-    Allows interested investors invest in an IDO Project.
+    Allows investors invest in a Project.
 
-    Args:
-        :param pt.abi.Asset asset: Asset ID of asset to invest in.
-        :param pt.abi.PaymentTransaction txn: PaymentTransaction for given asset.
-
-    Returns:
-        :return: PyTeal expression for an investor to invest in an IDO Launchpad.
-        :rtype: pt.Expr.
+    :param pt.abi.Asset project: The project (asset) ID to invest in.
+    :param pt.abi.PaymentTransaction txn: The payment transaction for the investment.
+    :rtype: pt.Expr.
     """
-    project_id = asset.asset_id()
-    project_id_in_bytes = pt.Itob(project_id)
-
     investor = Investor()
-    abi_investor_project_id = pt.abi.Uint64()
-    abi_investor_amount_invested = pt.abi.Uint64()
-    abi_investor_asset_allocated = pt.abi.Uint64()
-    abi_investor_claimed = pt.abi.Bool()
 
+    project_asset_id = project.asset_id()
+    project_id = project.asset_id()
+    project_id_in_bytes = pt.Itob(project_id)
     return pt.Seq(
-        pt.Assert(app.state.pid_to_project[project_id_in_bytes].exists(), comment="1"),
-
-        (project := Project()).decode(app.state.pid_to_project[pt.Itob(project_id)].get()),
+        pt.Assert(
+            app.state.pid_to_project[project_id_in_bytes].exists(),
+            comment="A valid project ID must be provided"
+        ),
+        (project := Project()).decode(app.state.pid_to_project[project_id_in_bytes].get()),
 
         (project_asset_bal_in_escrow := pt.AssetHolding.balance(
-            account=app.state.escrow_account,
-            asset=asset.asset_id())
+            account=app.state.escrow_address,
+            asset=project_asset_id
+        )
          ),
-        pt.Assert(project_asset_bal_in_escrow.value() > pt.Int(0), comment="2"),
-
-        (asset_decimal := pt.AssetParam.decimals(asset.asset_id())),
-        pt.Assert(asset_decimal.value() != pt.Int(0), comment="3"),
-
-        (project_owner_address := pt.abi.Address()).set(project.project_owner_address),
-        (start_timestamp := pt.abi.Uint64()).set(project.start_timestamp),
-        (end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
-        (claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
-        (asset_price := pt.abi.Uint64()).set(project.asset_price),
-        (min_investment_per_user := pt.abi.Uint64()).set(project.min_investment_per_user),
-        (max_investment_per_user := pt.abi.Uint64()).set(project.max_investment_per_user),
-        (max_cap := pt.abi.Uint64()).set(project.max_cap),
-        (total_tokens_for_sale := pt.abi.Uint64()).set(project.total_tokens_for_sale),
-        (is_paused := pt.abi.Bool()).set(project.is_paused),
-        (withdrawn := pt.abi.Bool()).set(project.withdrawn),
-        (total_tokens_sold := pt.abi.Uint64()).set(project.total_tokens_sold),
-        (total_amount_raised := pt.abi.Uint64()).set(project.total_amount_raised),
-
-        pt.Assert(is_paused.get() == FALSE, comment="4"),
-        pt.Assert(total_amount_raised.get() < max_cap.get()),
-
         pt.Assert(
-            pt.Global.latest_timestamp() >= start_timestamp.get(),
-            pt.Global.latest_timestamp() < end_timestamp.get(),
-            comment="5"
+            project_asset_bal_in_escrow.value() > pt.Int(0),
+            comment="Project assets must be available in escrow."
+        ),
+        (project_owner_address := pt.abi.Address()).set(project.owner_address),
+        (project_start_timestamp := pt.abi.Uint64()).set(project.start_timestamp),
+        (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
+        (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
+        (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
+        (project_min_investment_per_user := pt.abi.Uint64()).set(project.min_investment_per_investor),
+        (project_max_investment_per_user := pt.abi.Uint64()).set(project.max_investment_per_investor),
+        (project_max_cap := pt.abi.Uint64()).set(project.max_cap),
+        (project_total_assets_for_sale := pt.abi.Uint64()).set(project.total_assets_for_sale),
+        (project_is_paused := pt.abi.Bool()).set(project.is_paused),
+        (project_proceeds_withdrawn := pt.abi.Bool()).set(project.proceeds_withdrawn),
+        (project_total_assets_sold := pt.abi.Uint64()).set(project.total_assets_sold),
+        (project_total_amount_raised := pt.abi.Uint64()).set(project.total_amount_raised),
+
+        pt.Assert(project_is_paused.get() == FALSE),
+        pt.Assert(
+            project_total_amount_raised.get() < project_max_cap.get(),
+            comment="Total amount raised must be less than Max. cap"
+        ),
+        pt.Assert(
+            pt.Global.latest_timestamp() >= project_start_timestamp.get(),
+            pt.Global.latest_timestamp() < project_end_timestamp.get(),
+            comment="Project must be live and ongoing."
         ),
         pt.Assert(
             txn.get().amount() != pt.Int(0),
-            txn.get().amount() >= min_investment_per_user.get(),
-            txn.get().amount() <= max_investment_per_user.get(),
-            txn.get().receiver() == app.state.escrow_account.get(),
-            txn.get().type_enum() == pt.TxnType.Payment,
-            txn.get().sender() == pt.Txn.sender(),
-            comment="6"
+            txn.get().amount() >= project_min_investment_per_user.get(),
+            txn.get().amount() <= project_max_investment_per_user.get(),
+            txn.get().receiver() == app.state.escrow_address.get(),
+            txn.get().type_enum() == pt.TxnType.Payment
         ),
 
-        abi_investor_project_id.set(project_id),
-        abi_investor_amount_invested.set(txn.get().amount()),
-        abi_investor_claimed.set(FALSE),
-        # # Store the result of `calculate_allocation_for_investor` in our `abi_investor_asset_allocated`
-        (abi_asset_decimal := pt.abi.Uint64()).set(asset_decimal.value()),
-        (abi_amount_bought := pt.abi.Uint64()).set(txn.get().amount()),
-        (abi_asset_price := pt.abi.Uint64()).set(asset_price.get()),
+        (investor_address := pt.abi.Address()).set(pt.Txn.sender()),
+        (investor_project_id := pt.abi.Uint64()).set(project_id),
+        (investor_investment_amount := pt.abi.Uint64()).set(txn.get().amount()),
+        (investor_claimed := pt.abi.Bool()).set(FALSE),
+
+        (investor_asset_allocation := pt.abi.Uint64()).set(pt.Int(0)),
+
+        # # Store the result of `calculate_allocation_for_investor` in our `investor_asset_allocation`
         calculate_allocation_for_investor(
-            asset_decimal=abi_asset_decimal,
-            asset_price=abi_asset_price,
-            amount_bought=abi_amount_bought,
-            output=abi_investor_asset_allocated
+            price_per_asset=project_price_per_asset,
+            investment_amount=investor_investment_amount,
+            output=investor_asset_allocation
         ),
 
         investor.set(
-            abi_investor_project_id,
-            abi_investor_amount_invested,
-            abi_investor_asset_allocated,
-            abi_investor_claimed
+            investor_address,
+            investor_project_id,
+            investor_investment_amount,
+            investor_asset_allocation,
+            investor_claimed
         ),
-        app.state.investor_to_project[pt.Txn.sender()].set(investor),
+        app.state.investor_to_project[investor_address].set(investor),
 
-        total_tokens_sold.set(total_tokens_for_sale.get() - abi_investor_asset_allocated.get()),
-        total_amount_raised.set(total_amount_raised.get() + abi_investor_amount_invested.get()),
+        project_total_assets_sold.set(project_total_assets_for_sale.get() - investor_asset_allocation.get()),
+        project_total_amount_raised.set(project_total_amount_raised.get() + investor_investment_amount.get()),
 
         project.set(
             project_owner_address,
-            start_timestamp,
-            end_timestamp,
-            claim_timestamp,
-            asset_price,
-            min_investment_per_user,
-            max_investment_per_user,
-            max_cap,
-            total_tokens_for_sale,
-            is_paused,
-            withdrawn,
-            total_tokens_sold,
-            total_amount_raised
-        )
+            project_start_timestamp,
+            project_end_timestamp,
+            project_claim_timestamp,
+            project_price_per_asset,
+            project_min_investment_per_user,
+            project_max_investment_per_user,
+            project_max_cap,
+            project_total_assets_for_sale,
+            project_is_paused,
+            project_proceeds_withdrawn,
+            project_total_assets_sold,
+            project_total_amount_raised
+        ),
+        app.state.pid_to_project[project_id_in_bytes].set(project)
     )
 
 
-# TODO: Refactor this function and do a proper test on it.
 # noinspection PyTypeChecker
 @app.external
-def claim_tokens(asset: pt.abi.Asset) -> pt.Expr:
+def claim_project_asset(project: pt.abi.Asset) -> pt.Expr:
     """
-    Allows investors claim their tokens if qualified.
+    Allows users to claim a specific IDO Project asset.
 
-    Args:
-        :param pt.abi.Asset asset: Asset ID to be claimed.
-    Returns:
-        :return: PyTeal expression to let investors claim their tokens.
-        :rtype: pt.Expr.
+    :param pt.abi.Asset project: Project (asset) ID to be claimed.
+    :rtype: pt.Expr.
     """
-    project_asset_id = asset.asset_id()
+    project_asset_id = project.asset_id()
+    project_id_in_bytes = pt.Itob(project_asset_id)
 
     return pt.Seq(
-        (project := Project()).decode(app.state.pid_to_project[pt.Itob(project_asset_id)].get()),
-        (claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
-
-        pt.Assert(pt.Global.latest_timestamp() > claim_timestamp.get()),
+        pt.Assert(app.state.investor_to_project[pt.Txn.sender()].exists()),
+        pt.Assert(app.state.pid_to_project[project_id_in_bytes].exists()),
 
         (investor := Investor()).decode(app.state.investor_to_project[pt.Txn.sender()].get()),
-        pt.Assert(app.state.pid_to_project[pt.Itob(project_asset_id)].exists()),
 
-        (project_id := pt.abi.Uint64()).set(investor.project_id),
-        (amount_invested := pt.abi.Uint64()).set(investor.amount_invested),
-        (asset_allocated := pt.abi.Uint64()).set(investor.asset_allocated),
-        (claimed := pt.abi.Bool()).set(investor.claimed),
+        (project := Project()).decode(app.state.pid_to_project[pt.Itob(project_asset_id)].get()),
+        (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
 
-        pt.Assert(project_id.get() == project_asset_id),
-        pt.Assert(amount_invested.get() > pt.Int(0)),
-        pt.Assert(asset_allocated.get() > pt.Int(0)),
-        pt.Assert(claimed.get() == FALSE),
+        pt.Assert(pt.Global.latest_timestamp() > project_claim_timestamp.get()),
+
+        (investor_address := pt.abi.Address()).set(investor.address),
+        (investor_project_id := pt.abi.Uint64()).set(investor.project_id),
+        (investor_investment_amount := pt.abi.Uint64()).set(investor.investment_amount),
+        (investor_asset_allocated := pt.abi.Uint64()).set(investor.asset_allocated),
+        (investor_claimed := pt.abi.Bool()).set(investor.claimed),
+
+        pt.Assert(investor_address.get() == pt.Txn.sender()),
+        pt.Assert(investor_project_id.get() == project_asset_id),
+        pt.Assert(investor_investment_amount.get() > pt.Int(0)),
+        pt.Assert(investor_asset_allocated.get() > pt.Int(0)),
+        pt.Assert(investor_claimed.get() == FALSE),
 
         pt.InnerTxnBuilder.Execute({
             pt.TxnField.type_enum: pt.TxnType.AssetTransfer,
-            pt.TxnField.asset_amount: asset_allocated.get(),
+            pt.TxnField.asset_amount: investor_asset_allocated.get(),
             pt.TxnField.asset_receiver: pt.Txn.sender(),
-            pt.TxnField.xfer_asset: asset.asset_id(),
+            pt.TxnField.xfer_asset: project_asset_id,
         }),
 
-        (claimed := pt.abi.Bool()).set(TRUE),
+        investor_claimed.set(TRUE),
         investor.set(
-            project_id,
-            amount_invested,
-            asset_allocated,
-            claimed
-        )
+            investor_address,
+            investor_project_id,
+            investor_investment_amount,
+            investor_asset_allocated,
+            investor_claimed
+        ),
+        app.state.investor_to_project[investor_address.get()].set(investor)
     )
 
 
+# noinspection PyTypeChecker
 @app.external
-def pause() -> pt.Expr:
-    return pt.Seq()
+def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
+    """
+    Allows withdrawing the amount raised for a specific project and retains the fee on the escrow address.
+
+    :param pt.abi.Uint64 project_id: The unique identifier of the project for which funds are withdrawn.
+    :rtype: pt.Expr
+    """
+    project_id_in_bytes = pt.Itob(project_id.get())
+    return pt.Seq(
+        pt.Assert(app.state.pid_to_project[project_id_in_bytes].exists()),
+
+        (project := Project()).decode(app.state.pid_to_project[project_id_in_bytes].get()),
+
+        (project_owner_address := pt.abi.Address()).set(project.owner_address),
+        (project_start_timestamp := pt.abi.Uint64()).set(project.start_timestamp),
+        (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
+        (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
+        (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
+        (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
+        (project_max_investment_per_investor := pt.abi.Uint64()).set(project.max_investment_per_investor),
+        (project_max_cap := pt.abi.Uint64()).set(project.max_cap),
+        (project_total_assets_for_sale := pt.abi.Uint64()).set(project.total_assets_for_sale),
+        (project_is_paused := pt.abi.Bool()).set(project.is_paused),
+        (project_proceeds_withdrawn := pt.abi.Bool()).set(project.proceeds_withdrawn),
+        (project_total_assets_sold := pt.abi.Uint64()).set(project.total_assets_sold),
+        (project_total_amount_raised := pt.abi.Uint64()).set(project.total_amount_raised),
+
+        pt.Assert(pt.Txn.sender() == project_owner_address.get()),
+        pt.Assert(project_total_amount_raised.get() > pt.Int(0)),
+        pt.Assert(pt.Global.latest_timestamp() > project_end_timestamp.get()),
+
+        (abi_launch_vest_fee := pt.abi.Uint64()).set(LAUNCH_VEST_FEE),
+        (withdraw_amount := pt.abi.Uint64()).set(pt.Int(0)),
+        calculate_proceeds_after_fee_deduction(
+            proceeds=project_total_amount_raised,
+            launch_vest_fee=abi_launch_vest_fee,
+            output=withdraw_amount
+        ),
+        pt.InnerTxnBuilder.Execute({
+            pt.TxnField.type_enum: pt.TxnType.Payment,
+            pt.TxnField.amount: withdraw_amount.get(),
+            pt.TxnField.receiver: project_owner_address.get(),
+        }),
+        project_proceeds_withdrawn.set(TRUE),
+
+        project.set(
+            project_owner_address,
+            project_start_timestamp,
+            project_end_timestamp,
+            project_claim_timestamp,
+            project_price_per_asset,
+            project_min_investment_per_investor,
+            project_max_investment_per_investor,
+            project_max_cap,
+            project_total_assets_for_sale,
+            project_is_paused,
+            project_proceeds_withdrawn,
+            project_total_assets_sold,
+            project_total_amount_raised,
+        ),
+        app.state.pid_to_project[project_id_in_bytes].set(project)
+    )
 
 
+# noinspection PyTypeChecker
 @app.external
-def unpause() -> pt.Expr:
-    return pt.Seq()
+def pause_project(project_id: pt.abi.Uint64) -> pt.Expr:
+    """
+    Allows pausing a project with the specified project ID.
+    :param pt.abi.Uint64 project_id: The unique identifier of the project to be paused.
+    :rtype: pt.Expr
+    """
+    project_id_in_bytes = pt.Itob(project_id.get())
+    return pt.Seq(
+        pt.Assert(app.state.admin_acct.get() == pt.Txn.sender()),
+        pt.Assert(app.state.pid_to_project[project_id_in_bytes].exists()),
+
+        (project := Project()).decode(app.state.pid_to_project[project_id_in_bytes].get()),
+
+        (project_owner_address := pt.abi.Address()).set(project.owner_address),
+        (project_start_timestamp := pt.abi.Uint64()).set(project.start_timestamp),
+        (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
+        (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
+        (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
+        (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
+        (project_max_investment_per_investor := pt.abi.Uint64()).set(project.max_investment_per_investor),
+        (project_max_cap := pt.abi.Uint64()).set(project.max_cap),
+        (project_total_assets_for_sale := pt.abi.Uint64()).set(project.total_assets_for_sale),
+        (project_is_paused := pt.abi.Bool()).set(project.is_paused),
+        (project_proceeds_withdrawn := pt.abi.Bool()).set(project.proceeds_withdrawn),
+        (project_total_assets_sold := pt.abi.Uint64()).set(project.total_assets_sold),
+        (project_total_amount_raised := pt.abi.Uint64()).set(project.total_amount_raised),
+
+        pt.Assert(project_is_paused.get() == FALSE),
+        project_is_paused.set(TRUE),
+
+        project.set(
+            project_owner_address,
+            project_start_timestamp,
+            project_end_timestamp,
+            project_claim_timestamp,
+            project_price_per_asset,
+            project_min_investment_per_investor,
+            project_max_investment_per_investor,
+            project_max_cap,
+            project_total_assets_for_sale,
+            project_is_paused,
+            project_proceeds_withdrawn,
+            project_total_assets_sold,
+            project_total_amount_raised,
+        ),
+        app.state.pid_to_project[project_id_in_bytes].set(project)
+    )
 
 
+# noinspection PyTypeChecker
 @app.external
-def deposit_ido_tokens() -> pt.Expr:
-    """Alternate function for token deposit."""
-    return pt.Seq()
+def unpause_project(project_id: pt.abi.Uint64) -> pt.Expr:
+    """
+    Allows un-pausing a project with the specified project ID.
+
+    :param pt.abi.Uint64 project_id:The unique identifier of the project to be un-paused.
+    :rtype: pt.Expr.
+    """
+    project_id_in_bytes = pt.Itob(project_id.get())
+    return pt.Seq(
+        pt.Assert(app.state.admin_acct.get() == pt.Txn.sender()),
+        pt.Assert(app.state.pid_to_project[project_id_in_bytes].exists()),
+
+        (project := Project()).decode(app.state.pid_to_project[project_id_in_bytes].get()),
+
+        (project_owner_address := pt.abi.Address()).set(project.owner_address),
+        (project_start_timestamp := pt.abi.Uint64()).set(project.start_timestamp),
+        (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
+        (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
+        (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
+        (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
+        (project_max_investment_per_investor := pt.abi.Uint64()).set(project.max_investment_per_investor),
+        (project_max_cap := pt.abi.Uint64()).set(project.max_cap),
+        (project_total_assets_for_sale := pt.abi.Uint64()).set(project.total_assets_for_sale),
+        (project_is_paused := pt.abi.Bool()).set(project.is_paused),
+        (project_proceeds_withdrawn := pt.abi.Bool()).set(project.proceeds_withdrawn),
+        (project_total_assets_sold := pt.abi.Uint64()).set(project.total_assets_sold),
+        (project_total_amount_raised := pt.abi.Uint64()).set(project.total_amount_raised),
+
+        pt.Assert(project_is_paused.get() == TRUE),
+        project_is_paused.set(FALSE),
+
+        project.set(
+            project_owner_address,
+            project_start_timestamp,
+            project_end_timestamp,
+            project_claim_timestamp,
+            project_price_per_asset,
+            project_min_investment_per_investor,
+            project_max_investment_per_investor,
+            project_max_cap,
+            project_total_assets_for_sale,
+            project_is_paused,
+            project_proceeds_withdrawn,
+            project_total_assets_sold,
+            project_total_amount_raised,
+        ),
+        app.state.pid_to_project[project_id_in_bytes].set(project)
+    )
 
 
+# noinspection PyTypeChecker
 @app.external
-def change_end_time() -> pt.Expr:
-    return pt.Seq()
+def change_launchpad_admin(
+    new_admin_acct: pt.abi.Address
+) -> pt.Expr:
+    """
+    Allows changing the admin account for the launchpad.
 
+    :param pt.abi.Address new_admin_acct: The new admin account address.
+    :rtype: pt.Expr
+    """
+    return pt.Seq(
+        pt.Assert(pt.Txn.sender() == app.state.admin_acct.get()),
+        app.state.admin_acct.set(new_admin_acct.get())
+    )
 
-@app.external
-def withdraw_amount_raised() -> pt.Expr:
-    """Charge fee before withdrawal"""
-    return pt.Seq()
+    # TODO: Implement insurance for $VEST hodlers.
 
-
-@app.external
-def change_launchpad_admin() -> pt.Expr:
-    return pt.Seq()
-
-
-"""Implement IDO Insurance."""
 
 @app.external
 def get_project(
@@ -468,13 +666,26 @@ def get_project(
     output: Project
 ) -> pt.Expr:
     """
-    Retrieves a specific IDO project.
+    Retrieves project information for the specified project ID and stores it in the output.
 
-    Args:
-        :param pt.abi.Uint64 project_id: The unique project ID obtained from an asset_id.
-        :param Project output: An object to store the retrieved IDO project.
-    Returns:
-        :return: A valid IDO project.
-        :rtype: pt.Expr.
+    :param pt.abi.Uint64 project_id: The unique identifier of the project to retrieve.
+    :param Project output: The object where project information will be stored.
+    :rtype: pt.Expr
     """
     return app.state.pid_to_project[project_id].store_into(output)
+
+
+@app.external
+def get_investor(
+    investor: pt.abi.Address,
+    *,
+    output: Investor
+) -> pt.Expr:
+    """
+    Retrieves investor information for the specified investor address and stores it in the output.
+
+    :param pt.abi.Uint64 investor: The Algorand address of the investor to retrieve.
+    :param Project output: The object where investor information will be stored.
+    :rtype: pt.Expr.
+    """
+    return app.state.investor_to_project[investor].store_into(output)
