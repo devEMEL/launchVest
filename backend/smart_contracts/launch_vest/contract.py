@@ -107,6 +107,7 @@ def escrow_asset_opt_in(asset: pt.abi.Asset) -> pt.Expr:
                 pt.TxnField.asset_amount: pt.Int(0),
                 pt.TxnField.asset_receiver: app.state.escrow_address,
                 pt.TxnField.xfer_asset: asset.asset_id(),
+                pt.TxnField.fee: pt.Int(0)
             },
         )
     )
@@ -457,6 +458,7 @@ def claim_project_asset(project: pt.abi.Asset) -> pt.Expr:
             pt.TxnField.asset_amount: investor_asset_allocated.get(),
             pt.TxnField.asset_receiver: pt.Txn.sender(),
             pt.TxnField.xfer_asset: project_asset_id,
+            pt.TxnField.fee: pt.Int(0)
         }),
 
         investor_claimed.set(TRUE),
@@ -515,6 +517,7 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
             pt.TxnField.type_enum: pt.TxnType.Payment,
             pt.TxnField.amount: withdraw_amount.get(),
             pt.TxnField.receiver: project_owner_address.get(),
+            pt.TxnField.fee: pt.Int(0),
         }),
         project_proceeds_withdrawn.set(TRUE),
 
