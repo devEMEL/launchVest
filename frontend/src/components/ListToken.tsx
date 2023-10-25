@@ -15,7 +15,6 @@ const ListToken = () => {
   const [assetPrice, setAssetPrice] = useState<bigint>(0n)
   const [minimumBuy, setMinimumBuy] = useState<bigint>(0n)
   const [maximumBuy, setMaximumBuy] = useState<bigint>(0n)
-  const [maxCap, setMaxCap] = useState<bigint>(0n)
 
   const { enqueueSnackbar } = useSnackbar()
   const { signer, activeAddress } = useWallet()
@@ -56,7 +55,6 @@ const ListToken = () => {
       asset_price: assetPrice,
       max_investment_per_user: maximumBuy,
       min_investment_per_user: minimumBuy,
-      max_cap: maxCap,
 
     }, {})
   }
