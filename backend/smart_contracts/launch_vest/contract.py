@@ -38,6 +38,7 @@ class Project(pt.abi.NamedTuple):
     :ivar pt.abi.Uint64 start_timestamp: The timestamp when the project starts.
     :ivar pt.abi.Uint64 end_timestamp: The timestamp when the project ends.
     :ivar pt.abi.Uint64 claim_timestamp: The timestamp for asset claiming.
+    :ivar pt.abi.Uint64 asset_id: The unique asset ID of the Project.
     :ivar pt.abi.Uint64 price_per_asset: The price of each asset.
     :ivar pt.abi.Uint64 min_investment_per_investor: The minimum investment per user.
     :ivar pt.abi.Uint64 max_investment_per_investor: The maximum investment per user.
@@ -52,6 +53,7 @@ class Project(pt.abi.NamedTuple):
     start_timestamp: pt.abi.Field[pt.abi.Uint64]
     end_timestamp: pt.abi.Field[pt.abi.Uint64]
     claim_timestamp: pt.abi.Field[pt.abi.Uint64]
+    asset_id: pt.abi.Field[pt.abi.Uint64]
     price_per_asset: pt.abi.Field[pt.abi.Uint64]
     min_investment_per_investor: pt.abi.Field[pt.abi.Uint64]
     max_investment_per_investor: pt.abi.Field[pt.abi.Uint64]
@@ -107,6 +109,7 @@ def escrow_asset_opt_in(asset: pt.abi.Asset) -> pt.Expr:
                 pt.TxnField.asset_amount: pt.Int(0),
                 pt.TxnField.asset_receiver: app.state.escrow_address,
                 pt.TxnField.xfer_asset: asset.asset_id(),
+                pt.TxnField.fee: pt.Int(0)
             },
         )
     )
@@ -211,6 +214,7 @@ def list_project(
         ),
         escrow_asset_opt_in(asset=asset_id),
         (project_owner_address := pt.abi.Address()).set(pt.Txn.sender()),
+        (project_asset_id := pt.abi.Uint64()).set(asset_id.asset_id()),
         (project_max_cap := pt.abi.Uint64()).set(pt.Int(0)),
         (project_total_assets_for_sale := pt.abi.Uint64()).set(pt.Int(0)),
         (project_is_paused := pt.abi.Bool()).set(FALSE),
@@ -223,6 +227,7 @@ def list_project(
             start_timestamp,
             end_timestamp,
             claim_timestamp,
+            project_asset_id,
             price_per_asset,
             min_investment_per_investor,
             max_investment_per_investor,
@@ -267,10 +272,10 @@ def deposit_ido_assets(
             txn.get().xfer_asset() == asset.asset_id(),
             txn.get().sender() == project_owner_address.get(),
         ),
-        # Set total assets for sale based on amount of asset sent.
         (project_start_timestamp := pt.abi.Uint64()).set(project.start_timestamp),
         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
+        (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
         (project_max_investment_per_investor := pt.abi.Uint64()).set(project.max_investment_per_investor),
@@ -292,6 +297,7 @@ def deposit_ido_assets(
             project_start_timestamp,
             project_end_timestamp,
             project_claim_timestamp,
+            project_asset_id,
             project_price_per_asset,
             project_min_investment_per_investor,
             project_max_investment_per_investor,
@@ -344,6 +350,7 @@ def invest(
         (project_start_timestamp := pt.abi.Uint64()).set(project.start_timestamp),
         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
+        (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_user := pt.abi.Uint64()).set(project.min_investment_per_investor),
         (project_max_investment_per_user := pt.abi.Uint64()).set(project.max_investment_per_investor),
@@ -403,6 +410,7 @@ def invest(
             project_start_timestamp,
             project_end_timestamp,
             project_claim_timestamp,
+            project_asset_id,
             project_price_per_asset,
             project_min_investment_per_user,
             project_max_investment_per_user,
@@ -457,6 +465,7 @@ def claim_project_asset(project: pt.abi.Asset) -> pt.Expr:
             pt.TxnField.asset_amount: investor_asset_allocated.get(),
             pt.TxnField.asset_receiver: pt.Txn.sender(),
             pt.TxnField.xfer_asset: project_asset_id,
+            pt.TxnField.fee: pt.Int(0)
         }),
 
         investor_claimed.set(TRUE),
@@ -490,6 +499,7 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
         (project_start_timestamp := pt.abi.Uint64()).set(project.start_timestamp),
         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
+        (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
         (project_max_investment_per_investor := pt.abi.Uint64()).set(project.max_investment_per_investor),
@@ -515,6 +525,7 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
             pt.TxnField.type_enum: pt.TxnType.Payment,
             pt.TxnField.amount: withdraw_amount.get(),
             pt.TxnField.receiver: project_owner_address.get(),
+            pt.TxnField.fee: pt.Int(0),
         }),
         project_proceeds_withdrawn.set(TRUE),
 
@@ -523,6 +534,7 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
             project_start_timestamp,
             project_end_timestamp,
             project_claim_timestamp,
+            project_asset_id,
             project_price_per_asset,
             project_min_investment_per_investor,
             project_max_investment_per_investor,
@@ -556,6 +568,7 @@ def pause_project(project_id: pt.abi.Uint64) -> pt.Expr:
         (project_start_timestamp := pt.abi.Uint64()).set(project.start_timestamp),
         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
+        (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
         (project_max_investment_per_investor := pt.abi.Uint64()).set(project.max_investment_per_investor),
@@ -574,6 +587,7 @@ def pause_project(project_id: pt.abi.Uint64) -> pt.Expr:
             project_start_timestamp,
             project_end_timestamp,
             project_claim_timestamp,
+            project_asset_id,
             project_price_per_asset,
             project_min_investment_per_investor,
             project_max_investment_per_investor,
@@ -608,6 +622,7 @@ def unpause_project(project_id: pt.abi.Uint64) -> pt.Expr:
         (project_start_timestamp := pt.abi.Uint64()).set(project.start_timestamp),
         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
+        (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
         (project_max_investment_per_investor := pt.abi.Uint64()).set(project.max_investment_per_investor),
@@ -626,6 +641,7 @@ def unpause_project(project_id: pt.abi.Uint64) -> pt.Expr:
             project_start_timestamp,
             project_end_timestamp,
             project_claim_timestamp,
+            project_asset_id,
             project_price_per_asset,
             project_min_investment_per_investor,
             project_max_investment_per_investor,
