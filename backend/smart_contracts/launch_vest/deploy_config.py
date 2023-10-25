@@ -112,15 +112,16 @@ def deploy(
     app_client.bootstrap()
 
     # Fund escrow account
-    if algod_client.account_info(app_addr)['amount'] == 0:
-        app_client.fund_escrow_address(
-            txn=send_algos(
-                sender=deployer,
-                receiver=app_addr,
-                amt=algos_to_microalgos(1),
-                sp=algod_client.suggested_params()
-            )
+    # if algod_client.account_info(app_addr)['amount'] == 0:
+    #     print("hey")
+    app_client.fund_escrow_address(
+        txn=send_algos(
+            sender=deployer,
+            receiver=app_addr,
+            amt=algos_to_microalgos(3),
+            sp=algod_client.suggested_params()
         )
+    )
 
     project_owner_account = Account(private_key=mnemonic.to_private_key(os.getenv("PROJECT_OWNER_MNEMONIC")))
     project_id = project_asset_id = TESTNET_ASSET_ID_T
