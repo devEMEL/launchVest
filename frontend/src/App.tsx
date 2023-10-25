@@ -10,6 +10,7 @@ import ConnectModal from './components/Modals/ConnectModal'
 import Navbar from './components/Navbar'
 import { getAlgodConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
 import ListToken from './components/ListToken'
+import Projects from './components/Projects'
 
 let providersArray: ProvidersArray
 
@@ -50,6 +51,7 @@ export default function App() {
             {/* <Route path="/" element={<Collection />} /> */}
 
             <Route path="/list-token" element={<ListToken />} />
+            <Route path="/projects" element={<Projects />} />
             {/* <Route path="/asset/:assetId" element={<Asset />} /> */}
             {/* <Route path="*" element={<NotFound />} /> */}
           </Routes>

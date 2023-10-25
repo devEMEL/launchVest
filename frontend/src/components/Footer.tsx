@@ -11,6 +11,9 @@ const Footer = () => {
             <p>
               <Link to='/list-token'>List Token</Link>
             </p>
+            <p>
+              <Link to='/projects'>Projects</Link>
+            </p>
           </div>
           <div>
             <p></p>
