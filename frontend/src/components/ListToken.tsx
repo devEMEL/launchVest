@@ -7,7 +7,7 @@ import { useSnackbar } from 'notistack'
 import algosdk from 'algosdk'
 
 const ListToken = () => {
-  const [appId, setAppId] = useState<number>(454802801)
+  const [appId, setAppId] = useState<number>(0)
   const [assetId, setAssetId] = useState<bigint>(0n)
   const [startTimestamp, setStartTimestamp] = useState<bigint>(0n)
   const [endTimestamp, setEndTimestamp] = useState<bigint>(0n)
@@ -54,8 +54,7 @@ const ListToken = () => {
       claim_timestamp: claimTimestamp,
       asset_price: assetPrice,
       max_investment_per_user: maximumBuy,
-      min_investment_per_user: minimumBuy,
-
+      min_investment_per_user: minimumBuy
     }, {})
   }
   return (
