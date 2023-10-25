@@ -1,18 +1,21 @@
-import logging
 import os.path
 import shutil
 import time
 from pathlib import Path
 
 import algokit_utils
+from algosdk.util import algos_to_microalgos
 from algokit_utils import Account, TransactionParameters
 from algosdk import encoding, mnemonic
-from algosdk.atomic_transaction_composer import TransactionWithSigner
-from algosdk.transaction import PaymentTxn, SuggestedParams
+from algosdk.atomic_transaction_composer import TransactionSigner, TransactionWithSigner
+from algosdk.transaction import AssetTransferTxn, PaymentTxn, SuggestedParams
 from algosdk.v2client.algod import AlgodClient
 from algosdk.v2client.indexer import IndexerClient
 from dotenv import load_dotenv
 
+from backend.smart_contracts.helpers.formula_helpers import (
+    asset_price_with_decimals
+)
 from backend.smart_contracts.helpers.account_helpers.account import (
     fund_account_with_algos,
     generate_algo_funded_account
@@ -37,9 +40,48 @@ DOTENV_TESTNET_PATH = "../../.env.testnet"
 dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), DOTENV_TESTNET_PATH))
 load_dotenv(dotenv_path)
 
-TESTNET_ASSET_ID = 444276289
+TESTNET_ASSET_ID_T = 444276289
+TESTNET_ASSET_ID_Z = 454954862
+ASSET_PRICE = 0.093685
+ASSET_DECIMAL = 6
+MIN_BUY = 1
+MAX_BUY = 5
 
-logger = logging.getLogger(__name__)
+
+def send_algos(
+    sender: Account,
+    receiver: Account | str,
+    amt: int,
+    sp: SuggestedParams
+) -> TransactionWithSigner:
+    return TransactionWithSigner(
+        txn=PaymentTxn(
+            sender=sender.address,
+            sp=sp,
+            receiver=receiver.address if isinstance(receiver, Account) else receiver,
+            amt=amt
+        ),
+        signer=sender.signer
+    )
+
+
+def deposit_ido_assets(
+    sender: Account,
+    receiver: Account | str,
+    amt: int,
+    asset_id: int,
+    sp: SuggestedParams
+) -> TransactionWithSigner:
+    return TransactionWithSigner(
+        txn=AssetTransferTxn(
+            sender=sender.address,
+            sp=sp,
+            receiver=receiver.address if isinstance(receiver, Account) else receiver,
+            amt=amt,
+            index=asset_id
+        ),
+        signer=sender.signer
+    )
 
 
 # define deployment behaviour based on supplied app spec
@@ -69,20 +111,33 @@ def deploy(
     # # Bootstrap app
     app_client.bootstrap()
 
+    # Fund escrow account
+    if algod_client.account_info(app_addr)['amount'] == 0:
+        app_client.fund_escrow_address(
+            txn=send_algos(
+                sender=deployer,
+                receiver=app_addr,
+                amt=algos_to_microalgos(1),
+                sp=algod_client.suggested_params()
+            )
+        )
+
     project_owner_account = Account(private_key=mnemonic.to_private_key(os.getenv("PROJECT_OWNER_MNEMONIC")))
-    project_id = project_asset_id = TESTNET_ASSET_ID
+    project_id = project_asset_id = TESTNET_ASSET_ID_T
 
     print(f"Deployer: {deployer.address}")
     print(f"Project owner address: {project_owner_account.address}")
     print(f"Escrow address: {app_addr}")
 
-    print(f"Deployer asset holding: {algod_client.account_info(deployer.address)['amount']}")
-    print(f"Project owner asset holding: {algod_client.account_info(project_owner_account.address)['amount']}")
-    print(f"Escrow address asset holding: {algod_client.account_info(app_addr)['amount']}")
+    print(f"Deployer Algo holding: {algod_client.account_info(deployer.address)['amount']}")
+    print(f"Project owner Algo holding: {algod_client.account_info(project_owner_account.address)['amount']}")
+    print(f"Escrow address Algo holding: {algod_client.account_info(app_addr)['amount']}")
 
-    project_start_timestamp = convert_to_timestamp("2023-10-21 08:01:00")
-    project_end_timestamp = convert_to_timestamp("2023-10-21 08:05:00")
-    claim_timestamp = convert_to_timestamp("2023-10-21 09:00:00")
+    current_time = int(time.time())
+    print(f"Current local timestamp: {current_time}")
+    project_start_timestamp = current_time + 5
+    project_end_timestamp = project_start_timestamp + 30
+    claim_timestamp = project_end_timestamp + 50
 
     # # List project
     project_owner_client = LaunchVestClient(
@@ -91,25 +146,18 @@ def deploy(
         signer=project_owner_account,
         indexer_client=indexer_client
     )
-    txn = project_owner_client.list_project(
+    project_owner_client.list_project(
         asset_id=project_asset_id,
         start_timestamp=project_start_timestamp,
         end_timestamp=project_end_timestamp,
         claim_timestamp=claim_timestamp,
-        asset_price=1,
-        min_investment_per_user=1,
-        max_investment_per_user=5,
-        max_cap=2500,
-        total_tokens_for_sale=2500,
+        price_per_asset=int(asset_price_with_decimals(ASSET_PRICE, ASSET_DECIMAL)),
+        min_investment_per_investor=algos_to_microalgos(MIN_BUY),
+        max_investment_per_investor=algos_to_microalgos(MAX_BUY),
         transaction_parameters=TransactionParameters(
             boxes=[(app_id, project_id.to_bytes(8, "big"))]
         )
     )
-    try:
-        tx_info = txn.tx_info['logs']
-        timestamp_from_log_to_time(tx_info[0])
-    except KeyError as e:
-        raise f"No time log {e}"
 
     response = project_owner_client.get_project(
         project_id=project_id,
@@ -119,10 +167,31 @@ def deploy(
     )
     print(response.return_value)
 
-    transfer_asset(sender=project_owner_account, receiver=app_addr, amt=250_000_000_000, asset_id=project_asset_id)
+    # # Deposit IDO tokens
+    project_owner_client.deposit_ido_assets(
+        txn=deposit_ido_assets(
+            sender=project_owner_account,
+            receiver=app_addr,
+            amt=int(asset_price_with_decimals(ASSET_PRICE, ASSET_DECIMAL)),
+            asset_id=project_asset_id,
+            sp=algod_client.suggested_params()
+        ),
+        asset=project_asset_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+
+    response = project_owner_client.get_project(
+        project_id=project_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+    print(response.return_value)
 
     # # Invest in project
-    time.sleep(60)
+    time.sleep(15)
     investor1_account = Account(private_key=mnemonic.to_private_key(os.getenv("INVESTOR_MNEMONIC")))
 
     investor1_account_client = LaunchVestClient(
@@ -132,13 +201,13 @@ def deploy(
         indexer_client=indexer_client
     )
     investor1_account_client.invest(
-        asset=project_id,
+        project=project_id,
         txn=TransactionWithSigner(
             txn=PaymentTxn(
                 sender=investor1_account.address,
                 sp=algod_client.suggested_params(),
                 receiver=app_addr,
-                amt=2
+                amt=algos_to_microalgos(MIN_BUY)
             ),
             signer=investor1_account.signer
         ),
@@ -149,6 +218,207 @@ def deploy(
             ],
         )
     )
+
+    response = investor1_account_client.get_investor(
+        investor=investor1_account.address,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, encoding.decode_address(investor1_account.address))]
+        )
+    )
+    print(response.return_value)
+
+    response = project_owner_client.get_project(
+        project_id=project_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+    print(response.return_value)
+
+    # # Claim asset
+    time.sleep(60)
+    investor1_account_client.claim_project_asset(
+        project=project_asset_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[
+                (app_id, project_id.to_bytes(8, "big")),
+                (app_id, encoding.decode_address(investor1_account.address)),
+            ]
+        )
+    )
+    response = investor1_account_client.get_investor(
+        investor=investor1_account.address,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, encoding.decode_address(investor1_account.address))]
+        )
+    )
+    print(response.return_value)
+
+    # # Withdraw funds
+    time.sleep(120)
+    project_owner_client.withdraw_amount_raised(
+        project_id=project_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+
+    response = project_owner_client.get_project(
+        project_id=project_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+    print(response.return_value)
+
+    # # Second transaction
+    project_owner_account_2 = Account(private_key=mnemonic.to_private_key(os.getenv("PROJECT_OWNER_MNEMONIC_2")))
+    project_id = project_asset_id = TESTNET_ASSET_ID_Z
+
+    print(f"Project owner address: {project_owner_account_2.address}")
+    print(f"Escrow address: {app_addr}")
+
+    print(f"Deployer Algo holding: {algod_client.account_info(deployer.address)['amount']}")
+    print(f"Project owner Algo holding: {algod_client.account_info(project_owner_account_2.address)['amount']}")
+    print(f"Escrow address Algo holding: {algod_client.account_info(app_addr)['amount']}")
+
+    current_time = int(time.time())
+    print(f"Current local timestamp: {current_time}")
+    project_start_timestamp = current_time + 5
+    project_end_timestamp = project_start_timestamp + 30
+    claim_timestamp = project_end_timestamp + 50
+
+    # # List project
+    project_owner_client = LaunchVestClient(
+        algod_client=algod_client,
+        app_id=app_id,
+        signer=project_owner_account_2,
+        indexer_client=indexer_client
+    )
+    project_owner_client.list_project(
+        asset_id=project_asset_id,
+        start_timestamp=project_start_timestamp,
+        end_timestamp=project_end_timestamp,
+        claim_timestamp=claim_timestamp,
+        price_per_asset=int(asset_price_with_decimals(ASSET_PRICE, ASSET_DECIMAL)),
+        min_investment_per_investor=algos_to_microalgos(MIN_BUY),
+        max_investment_per_investor=algos_to_microalgos(MAX_BUY),
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+
+    response = project_owner_client.get_project(
+        project_id=project_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+    print(response.return_value)
+
+    # # Deposit IDO tokens
+    project_owner_client.deposit_ido_assets(
+        txn=deposit_ido_assets(
+            sender=project_owner_account_2,
+            receiver=app_addr,
+            amt=int(asset_price_with_decimals(ASSET_PRICE, ASSET_DECIMAL)),
+            asset_id=project_asset_id,
+            sp=algod_client.suggested_params()
+        ),
+        asset=project_asset_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+
+    response = project_owner_client.get_project(
+        project_id=project_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+    print(response.return_value)
+
+    # # Invest in project
+    time.sleep(15)
+    investor1_account = Account(private_key=mnemonic.to_private_key(os.getenv("INVESTOR_MNEMONIC")))
+
+    investor1_account_client = LaunchVestClient(
+        algod_client,
+        app_id=app_id,
+        signer=investor1_account.signer,
+        indexer_client=indexer_client
+    )
+    investor1_account_client.invest(
+        project=project_id,
+        txn=TransactionWithSigner(
+            txn=PaymentTxn(
+                sender=investor1_account.address,
+                sp=algod_client.suggested_params(),
+                receiver=app_addr,
+                amt=algos_to_microalgos(MIN_BUY)
+            ),
+            signer=investor1_account.signer
+        ),
+        transaction_parameters=TransactionParameters(
+            boxes=[
+                (app_id, project_id.to_bytes(8, "big")),
+                (app_id, encoding.decode_address(investor1_account.address)),
+            ],
+        )
+    )
+
+    response = investor1_account_client.get_investor(
+        investor=investor1_account.address,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, encoding.decode_address(investor1_account.address))]
+        )
+    )
+    print(response.return_value)
+
+    response = project_owner_client.get_project(
+        project_id=project_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+    print(response.return_value)
+
+    # # Claim asset
+    time.sleep(60)
+    investor1_account_client.claim_project_asset(
+        project=project_asset_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[
+                (app_id, project_id.to_bytes(8, "big")),
+                (app_id, encoding.decode_address(investor1_account.address)),
+            ]
+        )
+    )
+    response = investor1_account_client.get_investor(
+        investor=investor1_account.address,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, encoding.decode_address(investor1_account.address))]
+        )
+    )
+    print(response.return_value)
+
+    # # Withdraw funds
+    time.sleep(120)
+    project_owner_client.withdraw_amount_raised(
+        project_id=project_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+
+    response = project_owner_client.get_project(
+        project_id=project_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+    print(response.return_value)
 
 
 def execute_deployment(network: str = "localnet") -> None:
