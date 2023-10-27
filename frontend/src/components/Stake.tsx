@@ -38,7 +38,7 @@ const Stake = () => {
   const vestStakeClient = new VestStakeClient(
     {
       resolveBy: 'id',
-      id: 0,
+      id: 460442958,
       sender,
     },
     algodClient,
