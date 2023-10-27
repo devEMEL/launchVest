@@ -39,7 +39,7 @@ const Stake = () => {
     {
       resolveBy: 'id',
       // id: 60169641,
-      id: 460372856,
+      id: 0,
       sender,
     },
     algodClient,
