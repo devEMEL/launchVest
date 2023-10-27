@@ -398,7 +398,7 @@ def invest(
             txn.get().asset_receiver() == app.state.escrow_address.get(),
             txn.get().type_enum() == pt.TxnType.AssetTransfer,
             txn.get().xfer_asset() == usdc_asset_id.asset_id(),
-        ),
+        ), 
 
         (investor_address := pt.abi.Address()).set(pt.Txn.sender()),
         (investor_project_id := pt.abi.Uint64()).set(project_id),
