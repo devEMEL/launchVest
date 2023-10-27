@@ -52,7 +52,7 @@ class State:
     )
 
 
-app = bk.Application(name="LaunchVestStake", state=State())
+app = bk.Application(name="vest_stake", state=State())
 
 
 # noinspection PyTypeChecker

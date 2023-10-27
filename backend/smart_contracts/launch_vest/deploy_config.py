@@ -29,7 +29,8 @@ from backend.smart_contracts.helpers.date_time_helpers.time_conversion import (
     convert_to_timestamp,
     timestamp_from_log_to_time
 )
-from backend.smart_contracts.launch_vest.contract import app
+# from backend.smart_contracts.launch_vest.contract import app
+from backend.smart_contracts.launch_vest.staking import app
 
 
 ARTIFACTS_PATH = "../artifacts"
@@ -430,8 +431,8 @@ def execute_deployment(network: str = "localnet") -> None:
 
     artifacts_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ARTIFACTS_PATH))
 
-    if os.path.exists(artifacts_path):
-        shutil.rmtree(artifacts_path)
+    # if os.path.exists(artifacts_path):
+    #     shutil.rmtree(artifacts_path)
     build(Path(f"{artifacts_path}/{app.name}"), app)
 
     if network == "localnet":
