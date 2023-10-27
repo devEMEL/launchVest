@@ -2,10 +2,18 @@ import React, { useState, useRef, useEffect } from 'react'
 import ConfirmModal from './Modals/ConfirmModal'
 import { useDispatch } from 'react-redux'
 import { showConfirmModal } from '../services/features/confirmModal/confirmModalSlice'
+import { VestStakeClient } from '../contracts/vest_stake'
+import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
+import * as algokit from '@algorandfoundation/algokit-utils'
+import { useWallet } from '@txnlab/use-wallet'
+import { useSnackbar } from 'notistack'
+import algosdk from 'algosdk'
 
 const QUATERLY = 7_884_000n
 const HALF_A_YEAR = 15_768_000n
 const YEARLY = 31_536_000n
+
+const ASSET_ID = 460043736
 
 const Stake = () => {
   const _3months = useRef()
@@ -15,14 +23,36 @@ const Stake = () => {
   const [amount, setAmount] = useState<bigint>(0n)
   const [stakeDuration, setStakeDuration] = useState<bigint>(300n)
 
-  const txn = () => {
-    console.log('hello world')
+  const { enqueueSnackbar } = useSnackbar()
+  const { signer, activeAddress } = useWallet()
+  const algodConfig = getAlgodConfigFromViteEnvironment()
+  const algodClient = algokit.getAlgoClient({
+    server: algodConfig.server,
+    port: algodConfig.port,
+    token: algodConfig.token,
+  })
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const sender = { signer, addr: activeAddress! }
+
+  const vestStakeClient = new VestStakeClient(
+    {
+      resolveBy: 'id',
+      id: 60169641,
+      sender,
+    },
+    algodClient,
+  )
+
+  const txn = async () => {
+    const decimals = (await algodClient.getAssetByID(ASSET_ID).do()).params.decimals
+    const stakeAmount = BigInt(amount) * BigInt(10 ** decimals)
+    // stake
   }
 
   return (
     <div className="max-w-[60%] w-[100%] mx-auto">
       <div className="capitalize text-4xl flex justify-center py-5">Stake Vest</div>
-
       <div className="border-2 border-black-100 rounded-[50px] p-10 mb-10">
         <div className="mb-5">
           <label htmlFor="amount" className="text-2xl mr-5">
@@ -118,19 +148,32 @@ const Stake = () => {
           className="w-[100%] h-[60px] capitalize border-2 outline-0 rounded-full bg-[#000000] text-[26px] text-[#ffffff] font-bold shadow-lg shadow-indigo-500/40"
           onClick={() => {
             dispatch(showConfirmModal())
+            // make sure stake duration is either of the 3 durations
             console.log(stakeDuration)
           }}
         >
           Stake
         </button>
       </div>
-
       {/* CONFIRM MODAL */}
 
       <ConfirmModal
         text={`Stake ${amount} vest for ${stakeDuration === QUATERLY ? '3 months' : stakeDuration === HALF_A_YEAR ? '6 months' : '1 year'}`}
         txn={txn}
       />
+
+      <button
+        onClick={async () => {
+          await vestStakeClient.create.bare()
+          const vestStakeAppId = (await vestStakeClient.appClient.getAppReference()).appId
+          await vestStakeClient.appClient.fundAppAccount(algokit.microAlgos(300_000))
+          await vestStakeClient.bootstrap({ asset: BigInt(ASSET_ID) })
+
+          console.log(vestStakeAppId)
+        }}
+      >
+        create staking app
+      </button>
     </div>
   )
 }
