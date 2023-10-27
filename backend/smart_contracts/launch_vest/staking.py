@@ -145,10 +145,15 @@ def stake(
     return pt.Seq(
         pt.Assert(
             txn.get().type_enum() == pt.TxnType.AssetTransfer,
-            txn.get().asset_amount() > app.state.min_stake,
-            txn.get().asset_amount() <= app.state.max_stake,
             txn.get().asset_receiver() == app.state.escrow_address,
             txn.get().xfer_asset() == asset.asset_id()
+        ),
+        pt.Assert(
+            pt.Or(
+                txn.get().asset_amount() > app.state.min_stake,
+                txn.get().asset_amount() <= app.state.max_stake,
+                # 500_000_000_00 <= 20_000*(10^decimals)
+            )
         ),
         pt.Assert(
             pt.Or(
