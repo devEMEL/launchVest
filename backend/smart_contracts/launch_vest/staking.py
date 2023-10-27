@@ -38,11 +38,11 @@ class State:
     )
     min_stake = bk.GlobalStateValue(
         stack_type=pt.TealType.uint64,
-        default=pt.Int(100) * (BASE_VALUE ** pt.Int(100_000_000))
+        default=pt.Int(100) * pt.Int(100_000_000_0)
     )
     max_stake = bk.GlobalStateValue(
         stack_type=pt.TealType.uint64,
-        default=pt.Int(20_000) * (BASE_VALUE ** pt.Int(100_000_000))
+        default=pt.Int(20_000) * pt.Int(100_000_000_0)
     )
     annual_rate = bk.GlobalStateValue(
         stack_type=pt.TealType.uint64,
@@ -132,8 +132,8 @@ def set_stake_amounts(
             max_stake.get() > pt.Int(0),
             max_stake.get() > min_stake.get()
         ),
-        app.state.min_stake.set(min_stake.get() * (BASE_VALUE ** app.state.asset_decimal)),
-        app.state.max_stake.set(max_stake.get() * (BASE_VALUE ** app.state.asset_decimal))
+        app.state.min_stake.set(min_stake.get() * app.state.asset_decimal),
+        app.state.max_stake.set(max_stake.get() * app.state.asset_decimal)
     )
 
 
