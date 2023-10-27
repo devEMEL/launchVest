@@ -38,17 +38,17 @@ class State:
     )
     min_stake = bk.GlobalStateValue(
         stack_type=pt.TealType.uint64,
-        default=pt.Int(100) * pt.Int(100_000_000_0)
+        default=pt.Int(100) * BASE_VALUE * pt.Int(10_000_000)
     )
     max_stake = bk.GlobalStateValue(
         stack_type=pt.TealType.uint64,
-        default=pt.Int(20_000) * pt.Int(100_000_000_0)
+        default=pt.Int(20_000) * BASE_VALUE * pt.Int(10_000_000)
     )
     annual_rate = bk.GlobalStateValue(
         stack_type=pt.TealType.uint64,
         default=pt.Int(10)
     )
-    asset_decimal = bk.GlobalStateValue(
+    vest_decimals = bk.GlobalStateValue(
         stack_type=pt.TealType.uint64
     )
     staker_to_stake = BoxMapping(
@@ -83,7 +83,7 @@ def bootstrap(
         app.state.escrow_address.set(pt.Global.current_application_address()),
         (decimal := pt.AssetParam.decimals(asset.asset_id())),
         pt.Assert(decimal.value() != pt.Int(0)),
-        app.state.asset_decimal.set(decimal.value()),
+        app.state.vest_decimals.set(decimal.value()),
         (escrow_asset_bal := pt.AssetHolding.balance(app.state.escrow_address, asset.asset_id())),
         pt.If(escrow_asset_bal.value() == pt.Int(0), escrow_asset_opt_in(asset=asset)),
     )
@@ -132,8 +132,8 @@ def set_stake_amounts(
             max_stake.get() > pt.Int(0),
             max_stake.get() > min_stake.get()
         ),
-        app.state.min_stake.set(min_stake.get() * app.state.asset_decimal),
-        app.state.max_stake.set(max_stake.get() * app.state.asset_decimal)
+        app.state.min_stake.set(min_stake.get() * BASE_VALUE * app.state.vest_decimals),
+        app.state.max_stake.set(max_stake.get() * BASE_VALUE * app.state.vest_decimals)
     )
 
 
