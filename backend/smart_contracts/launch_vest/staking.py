@@ -150,7 +150,14 @@ def stake(
             txn.get().asset_receiver() == app.state.escrow_address,
             txn.get().xfer_asset() == asset.asset_id()
         ),
-
+        pt.Assert(
+            pt.Or(
+                stake_duration.get() == FIVE_MINS_STAKING_PERIOD,
+                stake_duration.get() == QUARTER_STAKING_PERIOD,
+                stake_duration.get() == HALF_YEAR_STAKING_PERIOD,
+                stake_duration.get() == ANNUAL_STAKING_PERIOD
+            ),
+        ),
         (address := pt.abi.Address()).set(pt.Txn.sender()),
         (amount_staked := pt.abi.Uint64()).set(txn.get().asset_amount()),
         (asset_id := pt.abi.Uint64()).set(asset.asset_id()),
@@ -189,14 +196,6 @@ def un_stake(asset: pt.abi.Asset) -> pt.Expr:
         pt.Assert(asset.asset_id() == staker_asset.get(), comment="here"),
 
         (staker_duration := pt.abi.Uint64()).set(staker_end_timestamp.get() - staker_start_timestamp.get()),
-        pt.Assert(
-            pt.Or(
-                staker_duration.get() == FIVE_MINS_STAKING_PERIOD,
-                staker_duration.get() == QUARTER_STAKING_PERIOD,
-                staker_duration.get() == HALF_YEAR_STAKING_PERIOD,
-                staker_duration.get() == ANNUAL_STAKING_PERIOD
-            ),
-        ),
         (reward_amount := pt.abi.Uint64()).set(pt.Int(0)),
 
         calculate_stake_reward(

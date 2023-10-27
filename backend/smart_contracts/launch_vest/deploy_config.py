@@ -29,8 +29,8 @@ from backend.smart_contracts.helpers.date_time_helpers.time_conversion import (
     convert_to_timestamp,
     timestamp_from_log_to_time
 )
-# from backend.smart_contracts.launch_vest.contract import app
-from backend.smart_contracts.launch_vest.staking import app
+from backend.smart_contracts.launch_vest.contract import app
+# from backend.smart_contracts.launch_vest.staking import app
 
 
 ARTIFACTS_PATH = "../artifacts"
