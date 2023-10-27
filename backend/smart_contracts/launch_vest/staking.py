@@ -164,6 +164,13 @@ def stake(
         ),
         pt.Assert(
             pt.Or(
+                txn.get().asset_amount() > app.state.min_stake,
+                txn.get().asset_amount() <= app.state.max_stake,
+                # 500_000_000_00 <= 20_000*(10^decimals)
+            )
+        ),
+        pt.Assert(
+            pt.Or(
                 stake_duration.get() == FIVE_MINS_STAKING_PERIOD,
                 stake_duration.get() == QUARTER_STAKING_PERIOD,
                 stake_duration.get() == HALF_YEAR_STAKING_PERIOD,

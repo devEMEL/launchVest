@@ -7,7 +7,7 @@ import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClien
 import * as algokit from '@algorandfoundation/algokit-utils'
 import { useWallet } from '@txnlab/use-wallet'
 import { useSnackbar } from 'notistack'
-import algosdk from 'algosdk'
+import algosdk, { Transaction } from 'algosdk'
 
 const QUATERLY = 7_884_000n
 const HALF_A_YEAR = 15_768_000n
@@ -24,7 +24,7 @@ const Stake = () => {
   const [stakeDuration, setStakeDuration] = useState<bigint>(300n)
 
   const { enqueueSnackbar } = useSnackbar()
-  const { signer, activeAddress } = useWallet()
+  const { signer, activeAddress, activeAccount } = useWallet()
   const algodConfig = getAlgodConfigFromViteEnvironment()
   const algodClient = algokit.getAlgoClient({
     server: algodConfig.server,
@@ -38,7 +38,8 @@ const Stake = () => {
   const vestStakeClient = new VestStakeClient(
     {
       resolveBy: 'id',
-      id: 60169641,
+      // id: 60169641,
+      id: 0,
       sender,
     },
     algodClient,
@@ -48,6 +49,28 @@ const Stake = () => {
     const decimals = (await algodClient.getAssetByID(ASSET_ID).do()).params.decimals
     const stakeAmount = BigInt(amount) * BigInt(10 ** decimals)
     // stake
+    console.log(stakeAmount)
+    console.log(stakeDuration)
+
+    const appAddress = (await vestStakeClient.appClient.getAppReference()).appAddress;
+    // const txn = algokit.transferAsset({
+    //   from: sender,
+    //   to: appAddress,
+    //   amount: BigInt(stakeAmount),
+    //   assetId: ASSET_ID
+    // }, algodClient);
+
+    
+    const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+      from: String(activeAddress),
+      to: appAddress,
+      amount: BigInt(stakeAmount),
+      assetIndex: ASSET_ID,
+      suggestedParams: await algodClient.getTransactionParams().do(),
+    });
+
+    const tx = await vestStakeClient.stake({ asset: BigInt(ASSET_ID), stake_duration: BigInt(stakeDuration), txn }, { boxes: [algosdk.decodeAddress(activeAddress).publicKey] })
+    console.log(tx)
   }
 
   return (
