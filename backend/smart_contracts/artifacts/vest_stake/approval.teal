@@ -279,6 +279,22 @@ frame_dig -3
 txnas Assets
 ==
 assert
+frame_dig -2
+pushint 300 // 300
+==
+frame_dig -2
+pushint 7884000 // 7884000
+==
+||
+frame_dig -2
+pushint 15768000 // 15768000
+==
+||
+frame_dig -2
+intc 4 // 31536000
+==
+||
+assert
 txn Sender
 frame_bury 1
 frame_dig 1
@@ -393,22 +409,6 @@ frame_dig 6
 frame_dig 5
 -
 frame_bury 7
-frame_dig 7
-pushint 300 // 300
-==
-frame_dig 7
-pushint 7884000 // 7884000
-==
-||
-frame_dig 7
-pushint 15768000 // 15768000
-==
-||
-frame_dig 7
-intc 4 // 31536000
-==
-||
-assert
 intc_0 // 0
 frame_bury 8
 frame_dig 2
