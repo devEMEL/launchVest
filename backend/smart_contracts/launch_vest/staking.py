@@ -5,6 +5,8 @@ from beaker.consts import FALSE, TRUE
 from beaker.lib.storage import BoxMapping
 
 
+BASE_VALUE = pt.Int(10)
+
 FIVE_MINS_STAKING_PERIOD = pt.Int(300)
 QUARTER_STAKING_PERIOD = pt.Int(7_884_000)
 HALF_YEAR_STAKING_PERIOD = pt.Int(15_768_000)
@@ -36,15 +38,18 @@ class State:
     )
     min_stake = bk.GlobalStateValue(
         stack_type=pt.TealType.uint64,
-        default=pt.Int(100)
+        default=pt.Int(100) * (BASE_VALUE ** pt.Int(100_000_000))
     )
     max_stake = bk.GlobalStateValue(
         stack_type=pt.TealType.uint64,
-        default=pt.Int(20_000)
+        default=pt.Int(20_000) * (BASE_VALUE ** pt.Int(100_000_000))
     )
     annual_rate = bk.GlobalStateValue(
         stack_type=pt.TealType.uint64,
         default=pt.Int(10)
+    )
+    asset_decimal = bk.GlobalStateValue(
+        stack_type=pt.TealType.uint64
     )
     staker_to_stake = BoxMapping(
         key_type=pt.abi.Address,
@@ -76,6 +81,9 @@ def bootstrap(
         app.initialize_global_state(),
         app.state.admin_acct.set(pt.Global.creator_address()),
         app.state.escrow_address.set(pt.Global.current_application_address()),
+        (decimal := pt.AssetParam.decimals(asset.asset_id())),
+        pt.Assert(decimal.value() != pt.Int(0)),
+        app.state.asset_decimal.set(decimal.value()),
         (escrow_asset_bal := pt.AssetHolding.balance(app.state.escrow_address, asset.asset_id())),
         pt.If(escrow_asset_bal.value() == pt.Int(0), escrow_asset_opt_in(asset=asset)),
     )
@@ -106,7 +114,7 @@ def fund_escrow_address(
     return pt.Seq(
         pt.Assert(
             txn.get().amount() > pt.Int(0),
-            txn.get().receiver() == pt.Global.current_application_address(),
+            txn.get().receiver() == app.state.escrow_address,
             txn.get().type_enum() == pt.TxnType.Payment,
         )
     )
@@ -124,8 +132,8 @@ def set_stake_amounts(
             max_stake.get() > pt.Int(0),
             max_stake.get() > min_stake.get()
         ),
-        app.state.min_stake.set(min_stake.get()),
-        app.state.max_stake.set(max_stake.get())
+        app.state.min_stake.set(min_stake.get() * (BASE_VALUE ** app.state.asset_decimal)),
+        app.state.max_stake.set(max_stake.get() * (BASE_VALUE ** app.state.asset_decimal))
     )
 
 
@@ -147,6 +155,12 @@ def stake(
             txn.get().type_enum() == pt.TxnType.AssetTransfer,
             txn.get().asset_receiver() == app.state.escrow_address,
             txn.get().xfer_asset() == asset.asset_id()
+        ),
+        pt.Assert(
+            pt.And(
+                txn.get().asset_amount() >= app.state.min_stake,
+                txn.get().asset_amount() <= app.state.max_stake,
+            ),
         ),
         pt.Assert(
             pt.Or(
