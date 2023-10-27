@@ -7,15 +7,16 @@ import { useSnackbar } from 'notistack'
 import algosdk from 'algosdk'
 
 // 444276289 - Tokenza
-// 1698251223
-// 1698272123
-// 1698276123
+// 1698243333
+
+// 1698275123
+// 1698277123
 
 const PER_BOX_MBR = 0.0025e6
 const PER_BYTE_MBR = 0.0004e6
 
 const ListToken = () => {
-  const [appId, setAppId] = useState<number>(0)
+  const [appId, setAppId] = useState<number>(455380620)
   const [assetId, setAssetId] = useState<bigint>(0n)
   const [startTimestamp, setStartTimestamp] = useState<bigint>(0n)
   const [endTimestamp, setEndTimestamp] = useState<bigint>(0n)
@@ -49,6 +50,7 @@ const ListToken = () => {
     await launchVestClient.create.bare()
     const launchVestAppId = (await launchVestClient.appClient.getAppReference()).appId
     setAppId(Number(launchVestAppId))
+    await launchVestClient.appClient.fundAppAccount(algokit.microAlgos(200_000))
     await launchVestClient.bootstrap()
     console.log(launchVestAppId)
   }
@@ -215,7 +217,7 @@ const ListToken = () => {
 
           <button
             type="submit"
-            className="w-[100%] h-[45px] border-2 outline-0 rounded-full bg-[#000000] text-[16px] text-[#ffffff] font-bold shadow-lg shadow-indigo-500/40"
+            className="w-[100%] h-[50px] border-2 outline-0 rounded-full bg-[#000000] text-[16px] text-[#ffffff] font-bold shadow-lg shadow-indigo-500/40"
           >
             Submit
           </button>

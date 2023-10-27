@@ -8,7 +8,7 @@ import algosdk from 'algosdk'
 
 
 const Projects = () => {
-  const [appId, setAppId] = useState<number>(454968947)
+  const [appId, setAppId] = useState<number>(455380620)
   const [projects, setProjects] = useState<Array<object>>([]);
   const { enqueueSnackbar } = useSnackbar()
   const { signer, activeAddress } = useWallet()

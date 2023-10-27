@@ -11,6 +11,7 @@ import Navbar from './components/Navbar'
 import { getAlgodConfigFromViteEnvironment } from './utils/network/getAlgoClientConfigs'
 import ListToken from './components/ListToken'
 import Projects from './components/Projects'
+import Stake from './components/Stake'
 
 let providersArray: ProvidersArray
 
@@ -52,6 +53,7 @@ export default function App() {
 
             <Route path="/list-token" element={<ListToken />} />
             <Route path="/projects" element={<Projects />} />
+            <Route path="/stake" element={<Stake />} />
             {/* <Route path="/asset/:assetId" element={<Asset />} /> */}
             {/* <Route path="*" element={<NotFound />} /> */}
           </Routes>

@@ -14,6 +14,9 @@ const Footer = () => {
             <p>
               <Link to='/projects'>Projects</Link>
             </p>
+            <p>
+              <Link to='/stake'>Stake</Link>
+            </p>
           </div>
           <div>
             <p></p>
