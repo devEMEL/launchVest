@@ -8,7 +8,6 @@ from algosdk.transaction import (
 )
 from algosdk.v2client.algod import AlgodClient
 from algokit_utils import get_algod_client, Account
-
 from backend.smart_contracts.helpers.asset_helpers.asset_info import asset_holding_info
 from backend.smart_contracts.helpers.account_helpers.account import generate_algo_funded_account
 
@@ -134,12 +133,13 @@ if __name__ == "__main__":
     owner_acct = generate_algo_funded_account(amount=100, client=algod_client)
     asset_id = create_asset(
         account=owner_acct,
-        unit_name="TKA",
-        asset_name="Tokenza",
-        total=1_000_000,
+        unit_name="TOKENZA",
+        asset_name="TOKENZA",
+        total=20_000_000_000_000_000,
         decimals=8,
         client=algod_client
     )
+    print(asset_id)
     asset_holding_info(algod_client=algod_client, address=owner_acct.address, asset_id=asset_id)
     acct1 = generate_algo_funded_account(amount=100, client=algod_client)
     optin_asset(account=acct1, asset_id=asset_id, client=algod_client)

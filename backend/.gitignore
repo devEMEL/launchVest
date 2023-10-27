@@ -170,3 +170,5 @@ cython_debug/
 
 # NPM
 node_modules
+
+backend/smart_contracts/launch_vest/demo.py
