@@ -1,0 +1,104 @@
+{
+    "name": "vest_stake",
+    "methods": [
+        {
+            "name": "bootstrap",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "fund_escrow_address",
+            "args": [
+                {
+                    "type": "pay",
+                    "name": "txn",
+                    "desc": "The payment transaction to fund the escrow address."
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Fund escrow address with Algos."
+        },
+        {
+            "name": "set_stake_amounts",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "min_stake"
+                },
+                {
+                    "type": "uint64",
+                    "name": "max_stake"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "set_annual_rate",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "new_annual_rate"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "stake",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                },
+                {
+                    "type": "uint64",
+                    "name": "stake_duration"
+                },
+                {
+                    "type": "axfer",
+                    "name": "txn"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "un_stake",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "get_staker",
+            "args": [
+                {
+                    "type": "address",
+                    "name": "staker"
+                }
+            ],
+            "returns": {
+                "type": "(address,uint64,uint64,bool,uint64,uint64)"
+            }
+        }
+    ],
+    "networks": {}
+}

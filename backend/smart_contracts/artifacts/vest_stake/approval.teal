@@ -1,0 +1,587 @@
+#pragma version 8
+intcblock 0 1 4 100 31536000
+bytecblock 0x 0x657363726f775f61646472657373 0x616e6e75616c5f72617465 0x6d61785f7374616b65 0x6d696e5f7374616b65 0x61646d696e5f61636374 0x00
+txn NumAppArgs
+intc_0 // 0
+==
+bnz main_l16
+txna ApplicationArgs 0
+pushbytes 0x34494d87 // "bootstrap(asset)void"
+==
+bnz main_l15
+txna ApplicationArgs 0
+pushbytes 0x963a596e // "fund_escrow_address(pay)void"
+==
+bnz main_l14
+txna ApplicationArgs 0
+pushbytes 0x2ca6ae02 // "set_stake_amounts(uint64,uint64)void"
+==
+bnz main_l13
+txna ApplicationArgs 0
+pushbytes 0x1c094b60 // "set_annual_rate(uint64)void"
+==
+bnz main_l12
+txna ApplicationArgs 0
+pushbytes 0xae4b9e92 // "stake(asset,uint64,axfer)void"
+==
+bnz main_l11
+txna ApplicationArgs 0
+pushbytes 0x57baa5b5 // "un_stake(asset)void"
+==
+bnz main_l10
+txna ApplicationArgs 0
+pushbytes 0x2fe2cb4e // "get_staker(address)(address,uint64,uint64,bool,uint64,uint64)"
+==
+bnz main_l9
+err
+main_l9:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub getstakercaster_13
+intc_1 // 1
+return
+main_l10:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub unstakecaster_12
+intc_1 // 1
+return
+main_l11:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub stakecaster_11
+intc_1 // 1
+return
+main_l12:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub setannualratecaster_10
+intc_1 // 1
+return
+main_l13:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub setstakeamountscaster_9
+intc_1 // 1
+return
+main_l14:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub fundescrowaddresscaster_8
+intc_1 // 1
+return
+main_l15:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub bootstrapcaster_7
+intc_1 // 1
+return
+main_l16:
+txn OnCompletion
+intc_0 // NoOp
+==
+bnz main_l18
+err
+main_l18:
+txn ApplicationID
+intc_0 // 0
+==
+assert
+intc_1 // 1
+return
+
+// bootstrap
+bootstrap_0:
+proto 1 0
+bytec 5 // "admin_acct"
+bytec_0 // ""
+app_global_put
+bytec_2 // "annual_rate"
+pushint 10 // 10
+app_global_put
+bytec_1 // "escrow_address"
+bytec_0 // ""
+app_global_put
+bytec_3 // "max_stake"
+pushint 20000 // 20000
+app_global_put
+bytec 4 // "min_stake"
+intc_3 // 100
+app_global_put
+bytec 5 // "admin_acct"
+global CreatorAddress
+app_global_put
+bytec_1 // "escrow_address"
+global CurrentApplicationAddress
+app_global_put
+bytec_1 // "escrow_address"
+app_global_get
+frame_dig -1
+txnas Assets
+asset_holding_get AssetBalance
+store 0
+intc_0 // 0
+==
+bz bootstrap_0_l2
+itxn_begin
+intc_2 // axfer
+itxn_field TypeEnum
+frame_dig -1
+txnas Assets
+itxn_field XferAsset
+intc_0 // 0
+itxn_field AssetAmount
+bytec_1 // "escrow_address"
+app_global_get
+itxn_field AssetReceiver
+itxn_submit
+bootstrap_0_l2:
+retsub
+
+// fund_escrow_address
+fundescrowaddress_1:
+proto 1 0
+frame_dig -1
+gtxns Amount
+intc_0 // 0
+>
+assert
+frame_dig -1
+gtxns Receiver
+global CurrentApplicationAddress
+==
+assert
+frame_dig -1
+gtxns TypeEnum
+intc_1 // pay
+==
+assert
+retsub
+
+// set_stake_amounts
+setstakeamounts_2:
+proto 2 0
+txn Sender
+global CreatorAddress
+==
+// unauthorized
+assert
+frame_dig -2
+intc_0 // 0
+>
+assert
+frame_dig -1
+intc_0 // 0
+>
+assert
+frame_dig -1
+frame_dig -2
+>
+assert
+bytec 4 // "min_stake"
+frame_dig -2
+app_global_put
+bytec_3 // "max_stake"
+frame_dig -1
+app_global_put
+retsub
+
+// set_annual_rate
+setannualrate_3:
+proto 1 0
+txn Sender
+global CreatorAddress
+==
+// unauthorized
+assert
+bytec_2 // "annual_rate"
+frame_dig -1
+app_global_put
+retsub
+
+// stake
+stake_4:
+proto 3 0
+bytec_0 // ""
+dup
+intc_0 // 0
+dupn 6
+bytec_0 // ""
+dup
+frame_dig -1
+gtxns TypeEnum
+intc_2 // axfer
+==
+assert
+frame_dig -1
+gtxns AssetAmount
+bytec 4 // "min_stake"
+app_global_get
+>
+assert
+frame_dig -1
+gtxns AssetAmount
+bytec_3 // "max_stake"
+app_global_get
+<=
+assert
+frame_dig -1
+gtxns AssetReceiver
+bytec_1 // "escrow_address"
+app_global_get
+==
+assert
+frame_dig -1
+gtxns XferAsset
+frame_dig -3
+txnas Assets
+==
+assert
+txn Sender
+frame_bury 1
+frame_dig 1
+len
+pushint 32 // 32
+==
+assert
+frame_dig -1
+gtxns AssetAmount
+frame_bury 2
+frame_dig -3
+txnas Assets
+frame_bury 3
+intc_1 // 1
+!
+!
+frame_bury 4
+global LatestTimestamp
+frame_bury 5
+frame_dig 5
+frame_dig -2
++
+frame_bury 6
+frame_dig 1
+frame_dig 2
+itob
+concat
+frame_dig 3
+itob
+concat
+bytec 6 // 0x00
+intc_0 // 0
+frame_dig 4
+setbit
+concat
+frame_dig 5
+itob
+concat
+frame_dig 6
+itob
+concat
+frame_bury 0
+frame_dig 1
+box_del
+pop
+frame_dig 1
+frame_dig 0
+box_put
+retsub
+
+// un_stake
+unstake_5:
+proto 1 0
+bytec_0 // ""
+dup
+intc_0 // 0
+dupn 8
+bytec_0 // ""
+dup
+txn Sender
+box_len
+store 2
+store 1
+load 2
+assert
+txn Sender
+box_get
+store 4
+store 3
+load 4
+assert
+load 3
+frame_bury 0
+frame_dig 0
+extract 0 32
+frame_bury 1
+frame_dig 0
+pushint 32 // 32
+extract_uint64
+frame_bury 2
+frame_dig 0
+pushint 40 // 40
+extract_uint64
+frame_bury 3
+frame_dig 0
+pushint 384 // 384
+getbit
+frame_bury 4
+frame_dig 0
+pushint 49 // 49
+extract_uint64
+frame_bury 5
+frame_dig 0
+pushint 57 // 57
+extract_uint64
+frame_bury 6
+frame_dig 4
+intc_1 // 1
+==
+assert
+global LatestTimestamp
+frame_dig 6
+>=
+assert
+frame_dig -1
+txnas Assets
+frame_dig 3
+==
+// here
+assert
+frame_dig 6
+frame_dig 5
+-
+frame_bury 7
+frame_dig 7
+pushint 300 // 300
+==
+frame_dig 7
+pushint 7884000 // 7884000
+==
+||
+frame_dig 7
+pushint 15768000 // 15768000
+==
+||
+frame_dig 7
+intc 4 // 31536000
+==
+||
+assert
+intc_0 // 0
+frame_bury 8
+frame_dig 2
+bytec_2 // "annual_rate"
+app_global_get
+*
+frame_dig 7
+*
+intc_3 // 100
+intc 4 // 31536000
+*
+/
+frame_bury 8
+itxn_begin
+intc_2 // axfer
+itxn_field TypeEnum
+frame_dig -1
+txnas Assets
+itxn_field XferAsset
+frame_dig 1
+itxn_field AssetReceiver
+frame_dig 8
+itxn_field AssetAmount
+itxn_submit
+intc_0 // 0
+!
+!
+frame_bury 4
+frame_dig 1
+frame_dig 2
+itob
+concat
+frame_dig 3
+itob
+concat
+bytec 6 // 0x00
+intc_0 // 0
+frame_dig 4
+setbit
+concat
+frame_dig 5
+itob
+concat
+frame_dig 6
+itob
+concat
+frame_bury 0
+frame_dig 1
+box_del
+pop
+retsub
+
+// get_staker
+getstaker_6:
+proto 1 1
+bytec_0 // ""
+frame_dig -1
+box_get
+store 6
+store 5
+load 6
+assert
+load 5
+frame_bury 0
+retsub
+
+// bootstrap_caster
+bootstrapcaster_7:
+proto 0 0
+intc_0 // 0
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+frame_bury 0
+frame_dig 0
+callsub bootstrap_0
+retsub
+
+// fund_escrow_address_caster
+fundescrowaddresscaster_8:
+proto 0 0
+intc_0 // 0
+txn GroupIndex
+intc_1 // 1
+-
+frame_bury 0
+frame_dig 0
+gtxns TypeEnum
+intc_1 // pay
+==
+assert
+frame_dig 0
+callsub fundescrowaddress_1
+retsub
+
+// set_stake_amounts_caster
+setstakeamountscaster_9:
+proto 0 0
+intc_0 // 0
+dup
+txna ApplicationArgs 1
+btoi
+frame_bury 0
+txna ApplicationArgs 2
+btoi
+frame_bury 1
+frame_dig 0
+frame_dig 1
+callsub setstakeamounts_2
+retsub
+
+// set_annual_rate_caster
+setannualratecaster_10:
+proto 0 0
+intc_0 // 0
+txna ApplicationArgs 1
+btoi
+frame_bury 0
+frame_dig 0
+callsub setannualrate_3
+retsub
+
+// stake_caster
+stakecaster_11:
+proto 0 0
+intc_0 // 0
+dupn 2
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+frame_bury 0
+txna ApplicationArgs 2
+btoi
+frame_bury 1
+txn GroupIndex
+intc_1 // 1
+-
+frame_bury 2
+frame_dig 2
+gtxns TypeEnum
+intc_2 // axfer
+==
+assert
+frame_dig 0
+frame_dig 1
+frame_dig 2
+callsub stake_4
+retsub
+
+// un_stake_caster
+unstakecaster_12:
+proto 0 0
+intc_0 // 0
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+frame_bury 0
+frame_dig 0
+callsub unstake_5
+retsub
+
+// get_staker_caster
+getstakercaster_13:
+proto 0 0
+bytec_0 // ""
+dup
+txna ApplicationArgs 1
+frame_bury 1
+frame_dig 1
+callsub getstaker_6
+frame_bury 0
+pushbytes 0x151f7c75 // 0x151f7c75
+frame_dig 0
+concat
+log
+retsub
