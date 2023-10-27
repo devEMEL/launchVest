@@ -1,6 +1,6 @@
 #pragma version 8
-intcblock 0 1 4 1000000000 31536000
-bytecblock 0x 0x657363726f775f61646472657373 0x61737365745f646563696d616c 0x616e6e75616c5f72617465 0x6d61785f7374616b65 0x6d696e5f7374616b65 0x61646d696e5f61636374 0x00
+intcblock 0 1 10 4 10000000 31536000
+bytecblock 0x 0x657363726f775f61646472657373 0x6d61785f7374616b65 0x6d696e5f7374616b65 0x766573745f646563696d616c73 0x616e6e75616c5f72617465 0x61646d696e5f61636374 0x00
 txn NumAppArgs
 intc_0 // 0
 ==
@@ -138,24 +138,28 @@ proto 1 0
 bytec 6 // "admin_acct"
 bytec_0 // ""
 app_global_put
-bytec_3 // "annual_rate"
-pushint 10 // 10
-app_global_put
-bytec_2 // "asset_decimal"
-intc_0 // 0
+bytec 5 // "annual_rate"
+intc_2 // 10
 app_global_put
 bytec_1 // "escrow_address"
 bytec_0 // ""
 app_global_put
-bytec 4 // "max_stake"
+bytec_2 // "max_stake"
 pushint 20000 // 20000
-intc_3 // 1000000000
+intc_2 // 10
+*
+intc 4 // 10000000
 *
 app_global_put
-bytec 5 // "min_stake"
+bytec_3 // "min_stake"
 pushint 100 // 100
-intc_3 // 1000000000
+intc_2 // 10
 *
+intc 4 // 10000000
+*
+app_global_put
+bytec 4 // "vest_decimals"
+intc_0 // 0
 app_global_put
 bytec 6 // "admin_acct"
 global CreatorAddress
@@ -172,7 +176,7 @@ load 0
 intc_0 // 0
 !=
 assert
-bytec_2 // "asset_decimal"
+bytec 4 // "vest_decimals"
 load 0
 app_global_put
 bytec_1 // "escrow_address"
@@ -185,7 +189,7 @@ intc_0 // 0
 ==
 bz bootstrap_0_l2
 itxn_begin
-intc_2 // axfer
+intc_3 // axfer
 itxn_field TypeEnum
 frame_dig -1
 txnas Assets
@@ -240,15 +244,19 @@ frame_dig -1
 frame_dig -2
 >
 assert
-bytec 5 // "min_stake"
+bytec_3 // "min_stake"
 frame_dig -2
-bytec_2 // "asset_decimal"
+intc_2 // 10
+*
+bytec 4 // "vest_decimals"
 app_global_get
 *
 app_global_put
-bytec 4 // "max_stake"
+bytec_2 // "max_stake"
 frame_dig -1
-bytec_2 // "asset_decimal"
+intc_2 // 10
+*
+bytec 4 // "vest_decimals"
 app_global_get
 *
 app_global_put
@@ -262,7 +270,7 @@ global CreatorAddress
 ==
 // unauthorized
 assert
-bytec_3 // "annual_rate"
+bytec 5 // "annual_rate"
 frame_dig -1
 app_global_put
 retsub
@@ -278,7 +286,7 @@ bytec_0 // ""
 dup
 frame_dig -1
 gtxns TypeEnum
-intc_2 // axfer
+intc_3 // axfer
 ==
 assert
 frame_dig -1
@@ -295,15 +303,27 @@ txnas Assets
 assert
 frame_dig -1
 gtxns AssetAmount
-bytec 5 // "min_stake"
+bytec_3 // "min_stake"
 app_global_get
 >=
 frame_dig -1
 gtxns AssetAmount
-bytec 4 // "max_stake"
+bytec_2 // "max_stake"
 app_global_get
 <=
 &&
+assert
+frame_dig -1
+gtxns AssetAmount
+bytec_3 // "min_stake"
+app_global_get
+>
+frame_dig -1
+gtxns AssetAmount
+bytec_2 // "max_stake"
+app_global_get
+<=
+||
 assert
 frame_dig -2
 pushint 300 // 300
@@ -317,7 +337,7 @@ pushint 15768000 // 15768000
 ==
 ||
 frame_dig -2
-intc 4 // 31536000
+intc 5 // 31536000
 ==
 ||
 assert
@@ -438,18 +458,18 @@ frame_bury 7
 intc_0 // 0
 frame_bury 8
 frame_dig 2
-bytec_3 // "annual_rate"
+bytec 5 // "annual_rate"
 app_global_get
 *
 frame_dig 7
 *
 pushint 100 // 100
-intc 4 // 31536000
+intc 5 // 31536000
 *
 /
 frame_bury 8
 itxn_begin
-intc_2 // axfer
+intc_3 // axfer
 itxn_field TypeEnum
 frame_dig -1
 txnas Assets
@@ -575,7 +595,7 @@ intc_1 // 1
 frame_bury 2
 frame_dig 2
 gtxns TypeEnum
-intc_2 // axfer
+intc_3 // axfer
 ==
 assert
 frame_dig 0
