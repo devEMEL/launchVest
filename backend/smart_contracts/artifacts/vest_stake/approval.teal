@@ -1,63 +1,47 @@
 #pragma version 8
 intcblock 0 1 10 4 10000000 31536000
-bytecblock 0x 0x657363726f775f61646472657373 0x6d61785f7374616b65 0x6d696e5f7374616b65 0x766573745f646563696d616c73 0x616e6e75616c5f72617465 0x61646d696e5f61636374 0x00
+bytecblock 0x 0x657363726f775f61646472657373 0x766573745f646563696d616c73 0x6d61785f7374616b65 0x6d696e5f7374616b65 0x616e6e75616c5f72617465 0x61646d696e5f61636374 0x61737365745f6964 0x00
 txn NumAppArgs
 intc_0 // 0
 ==
-bnz main_l16
+bnz main_l20
 txna ApplicationArgs 0
 pushbytes 0x34494d87 // "bootstrap(asset)void"
 ==
-bnz main_l15
+bnz main_l19
 txna ApplicationArgs 0
 pushbytes 0x963a596e // "fund_escrow_address(pay)void"
 ==
-bnz main_l14
+bnz main_l18
 txna ApplicationArgs 0
 pushbytes 0x2ca6ae02 // "set_stake_amounts(uint64,uint64)void"
 ==
-bnz main_l13
+bnz main_l17
 txna ApplicationArgs 0
 pushbytes 0x1c094b60 // "set_annual_rate(uint64)void"
 ==
-bnz main_l12
+bnz main_l16
+txna ApplicationArgs 0
+pushbytes 0x3b46be58 // "set_asset_decimal(uint64)void"
+==
+bnz main_l15
+txna ApplicationArgs 0
+pushbytes 0xd130c74a // "set_asset_id(uint64)void"
+==
+bnz main_l14
 txna ApplicationArgs 0
 pushbytes 0xae4b9e92 // "stake(asset,uint64,axfer)void"
 ==
-bnz main_l11
+bnz main_l13
 txna ApplicationArgs 0
 pushbytes 0x57baa5b5 // "un_stake(asset)void"
 ==
-bnz main_l10
+bnz main_l12
 txna ApplicationArgs 0
 pushbytes 0x2fe2cb4e // "get_staker(address)(address,uint64,uint64,bool,uint64,uint64)"
 ==
-bnz main_l9
+bnz main_l11
 err
-main_l9:
-txn OnCompletion
-intc_0 // NoOp
-==
-txn ApplicationID
-intc_0 // 0
-!=
-&&
-assert
-callsub getstakercaster_13
-intc_1 // 1
-return
-main_l10:
-txn OnCompletion
-intc_0 // NoOp
-==
-txn ApplicationID
-intc_0 // 0
-!=
-&&
-assert
-callsub unstakecaster_12
-intc_1 // 1
-return
 main_l11:
 txn OnCompletion
 intc_0 // NoOp
@@ -67,7 +51,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub stakecaster_11
+callsub getstakercaster_17
 intc_1 // 1
 return
 main_l12:
@@ -79,7 +63,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub setannualratecaster_10
+callsub unstakecaster_16
 intc_1 // 1
 return
 main_l13:
@@ -91,7 +75,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub setstakeamountscaster_9
+callsub stakecaster_15
 intc_1 // 1
 return
 main_l14:
@@ -103,7 +87,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub fundescrowaddresscaster_8
+callsub setassetidcaster_14
 intc_1 // 1
 return
 main_l15:
@@ -115,16 +99,64 @@ intc_0 // 0
 !=
 &&
 assert
-callsub bootstrapcaster_7
+callsub setassetdecimalcaster_13
 intc_1 // 1
 return
 main_l16:
 txn OnCompletion
 intc_0 // NoOp
 ==
-bnz main_l18
-err
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub setannualratecaster_12
+intc_1 // 1
+return
+main_l17:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub setstakeamountscaster_11
+intc_1 // 1
+return
 main_l18:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub fundescrowaddresscaster_10
+intc_1 // 1
+return
+main_l19:
+txn OnCompletion
+intc_0 // NoOp
+==
+txn ApplicationID
+intc_0 // 0
+!=
+&&
+assert
+callsub bootstrapcaster_9
+intc_1 // 1
+return
+main_l20:
+txn OnCompletion
+intc_0 // NoOp
+==
+bnz main_l22
+err
+main_l22:
 txn ApplicationID
 intc_0 // 0
 ==
@@ -141,24 +173,27 @@ app_global_put
 bytec 5 // "annual_rate"
 intc_2 // 10
 app_global_put
+bytec 7 // "asset_id"
+intc_0 // 0
+app_global_put
 bytec_1 // "escrow_address"
 bytec_0 // ""
 app_global_put
-bytec_2 // "max_stake"
+bytec_3 // "max_stake"
 pushint 20000 // 20000
 intc_2 // 10
 *
 intc 4 // 10000000
 *
 app_global_put
-bytec_3 // "min_stake"
+bytec 4 // "min_stake"
 pushint 100 // 100
 intc_2 // 10
 *
 intc 4 // 10000000
 *
 app_global_put
-bytec 4 // "vest_decimals"
+bytec_2 // "vest_decimals"
 intc_0 // 0
 app_global_put
 bytec 6 // "admin_acct"
@@ -176,7 +211,7 @@ load 0
 intc_0 // 0
 !=
 assert
-bytec 4 // "vest_decimals"
+bytec_2 // "vest_decimals"
 load 0
 app_global_put
 bytec_1 // "escrow_address"
@@ -213,8 +248,7 @@ intc_0 // 0
 assert
 frame_dig -1
 gtxns Receiver
-bytec_1 // "escrow_address"
-app_global_get
+global CurrentApplicationAddress
 ==
 assert
 frame_dig -1
@@ -244,19 +278,19 @@ frame_dig -1
 frame_dig -2
 >
 assert
-bytec_3 // "min_stake"
+bytec 4 // "min_stake"
 frame_dig -2
 intc_2 // 10
 *
-bytec 4 // "vest_decimals"
+bytec_2 // "vest_decimals"
 app_global_get
 *
 app_global_put
-bytec_2 // "max_stake"
+bytec_3 // "max_stake"
 frame_dig -1
 intc_2 // 10
 *
-bytec 4 // "vest_decimals"
+bytec_2 // "vest_decimals"
 app_global_get
 *
 app_global_put
@@ -275,8 +309,34 @@ frame_dig -1
 app_global_put
 retsub
 
+// set_asset_decimal
+setassetdecimal_4:
+proto 1 0
+txn Sender
+global CreatorAddress
+==
+// unauthorized
+assert
+bytec_2 // "vest_decimals"
+frame_dig -1
+app_global_put
+retsub
+
+// set_asset_id
+setassetid_5:
+proto 1 0
+txn Sender
+global CreatorAddress
+==
+// unauthorized
+assert
+bytec 7 // "asset_id"
+frame_dig -1
+app_global_put
+retsub
+
 // stake
-stake_4:
+stake_6:
 proto 3 0
 bytec_0 // ""
 dup
@@ -303,24 +363,24 @@ txnas Assets
 assert
 frame_dig -1
 gtxns AssetAmount
-bytec_3 // "min_stake"
+bytec 4 // "min_stake"
 app_global_get
 >=
 frame_dig -1
 gtxns AssetAmount
-bytec_2 // "max_stake"
+bytec_3 // "max_stake"
 app_global_get
 <=
 &&
 assert
 frame_dig -1
 gtxns AssetAmount
-bytec_3 // "min_stake"
+bytec 4 // "min_stake"
 app_global_get
 >
 frame_dig -1
 gtxns AssetAmount
-bytec_2 // "max_stake"
+bytec_3 // "max_stake"
 app_global_get
 <=
 ||
@@ -371,7 +431,7 @@ concat
 frame_dig 3
 itob
 concat
-bytec 7 // 0x00
+bytec 8 // 0x00
 intc_0 // 0
 frame_dig 4
 setbit
@@ -392,7 +452,7 @@ box_put
 retsub
 
 // un_stake
-unstake_5:
+unstake_7:
 proto 1 0
 bytec_0 // ""
 dup
@@ -458,6 +518,7 @@ frame_bury 7
 intc_0 // 0
 frame_bury 8
 frame_dig 2
+frame_dig 2
 bytec 5 // "annual_rate"
 app_global_get
 *
@@ -467,6 +528,7 @@ pushint 100 // 100
 intc 5 // 31536000
 *
 /
++
 frame_bury 8
 itxn_begin
 intc_3 // axfer
@@ -490,7 +552,7 @@ concat
 frame_dig 3
 itob
 concat
-bytec 7 // 0x00
+bytec 8 // 0x00
 intc_0 // 0
 frame_dig 4
 setbit
@@ -508,7 +570,7 @@ pop
 retsub
 
 // get_staker
-getstaker_6:
+getstaker_8:
 proto 1 1
 bytec_0 // ""
 frame_dig -1
@@ -522,7 +584,7 @@ frame_bury 0
 retsub
 
 // bootstrap_caster
-bootstrapcaster_7:
+bootstrapcaster_9:
 proto 0 0
 intc_0 // 0
 txna ApplicationArgs 1
@@ -534,7 +596,7 @@ callsub bootstrap_0
 retsub
 
 // fund_escrow_address_caster
-fundescrowaddresscaster_8:
+fundescrowaddresscaster_10:
 proto 0 0
 intc_0 // 0
 txn GroupIndex
@@ -551,7 +613,7 @@ callsub fundescrowaddress_1
 retsub
 
 // set_stake_amounts_caster
-setstakeamountscaster_9:
+setstakeamountscaster_11:
 proto 0 0
 intc_0 // 0
 dup
@@ -567,7 +629,7 @@ callsub setstakeamounts_2
 retsub
 
 // set_annual_rate_caster
-setannualratecaster_10:
+setannualratecaster_12:
 proto 0 0
 intc_0 // 0
 txna ApplicationArgs 1
@@ -577,8 +639,30 @@ frame_dig 0
 callsub setannualrate_3
 retsub
 
+// set_asset_decimal_caster
+setassetdecimalcaster_13:
+proto 0 0
+intc_0 // 0
+txna ApplicationArgs 1
+btoi
+frame_bury 0
+frame_dig 0
+callsub setassetdecimal_4
+retsub
+
+// set_asset_id_caster
+setassetidcaster_14:
+proto 0 0
+intc_0 // 0
+txna ApplicationArgs 1
+btoi
+frame_bury 0
+frame_dig 0
+callsub setassetid_5
+retsub
+
 // stake_caster
-stakecaster_11:
+stakecaster_15:
 proto 0 0
 intc_0 // 0
 dupn 2
@@ -601,11 +685,11 @@ assert
 frame_dig 0
 frame_dig 1
 frame_dig 2
-callsub stake_4
+callsub stake_6
 retsub
 
 // un_stake_caster
-unstakecaster_12:
+unstakecaster_16:
 proto 0 0
 intc_0 // 0
 txna ApplicationArgs 1
@@ -613,18 +697,18 @@ intc_0 // 0
 getbyte
 frame_bury 0
 frame_dig 0
-callsub unstake_5
+callsub unstake_7
 retsub
 
 // get_staker_caster
-getstakercaster_13:
+getstakercaster_17:
 proto 0 0
 bytec_0 // ""
 dup
 txna ApplicationArgs 1
 frame_bury 1
 frame_dig 1
-callsub getstaker_6
+callsub getstaker_8
 frame_bury 0
 pushbytes 0x151f7c75 // 0x151f7c75
 frame_dig 0

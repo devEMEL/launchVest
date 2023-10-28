@@ -1,6 +1,9 @@
 import pyteal as pt
 
 
+BASE_VALUE = pt.Int(10)
+
+
 def calculate_project_max_cap(
     total_assets_for_sale: pt.abi.Uint64,
     price_per_asset: pt.abi.Uint64,
@@ -52,3 +55,22 @@ def calculate_proceeds_after_fee_deduction(
     return output.set(
         proceeds.get() - ((proceeds.get() * launch_vest_fee.get()) / pt.Int(100))
     )
+
+
+def asset_amount_in_decimals(
+    asset_price: pt.abi.Uint64,
+    asset_decimals: pt.abi.Uint64,
+    asset_amount: pt.abi.Uint64,
+    *,
+    output: pt.abi.Uint64
+) -> pt.Expr:
+    return output.set((asset_amount.get() / asset_price.get()) * BASE_VALUE ** asset_decimals.get())
+
+
+def asset_amount_in_whole_number(
+    asset_amount: pt.abi.Uint64,
+    asset_decimals: pt.abi.Uint64,
+    *,
+    output: pt.abi.Uint64
+) -> pt.Expr:
+    return output.set(asset_amount.get() / (BASE_VALUE ** asset_decimals))

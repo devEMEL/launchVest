@@ -29,8 +29,8 @@ from backend.smart_contracts.helpers.date_time_helpers.time_conversion import (
     convert_to_timestamp,
     timestamp_from_log_to_time
 )
-# from backend.smart_contracts.launch_vest.contract import app
-from backend.smart_contracts.launch_vest.staking import app
+from backend.smart_contracts.launch_vest.contract import app as launch_vest
+from backend.smart_contracts.launch_vest.staking import app as vest_stake
 
 
 ARTIFACTS_PATH = "../artifacts"
@@ -433,7 +433,8 @@ def execute_deployment(network: str = "localnet") -> None:
 
     # if os.path.exists(artifacts_path):
     #     shutil.rmtree(artifacts_path)
-    build(Path(f"{artifacts_path}/{app.name}"), app)
+    build(Path(f"{artifacts_path}/{vest_stake.name}"), vest_stake)
+    build(Path(f"{artifacts_path}/{launch_vest.name}"), launch_vest)
 
     if network == "localnet":
         algod_client = algokit_utils.get_algod_client()
@@ -451,7 +452,13 @@ def execute_deployment(network: str = "localnet") -> None:
     deploy(
         algod_client=algod_client,
         indexer_client=indexer_client,
-        app_spec=app.build(),
+        app_spec=vest_stake.build(),
+        deployer=deployer
+    )
+    deploy(
+        algod_client=algod_client,
+        indexer_client=indexer_client,
+        app_spec=launch_vest.build(),
         deployer=deployer
     )
 
