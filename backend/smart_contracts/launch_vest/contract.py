@@ -66,6 +66,7 @@ class Project(pt.abi.NamedTuple):
     end_timestamp: pt.abi.Field[pt.abi.Uint64]
     claim_timestamp: pt.abi.Field[pt.abi.Uint64]
     asset_id: pt.abi.Field[pt.abi.Uint64]
+    asset_decimal: pt.abi.Field[pt.abi.Uint64]
     price_per_asset: pt.abi.Field[pt.abi.Uint64]
     min_investment_per_investor: pt.abi.Field[pt.abi.Uint64]
     max_investment_per_investor: pt.abi.Field[pt.abi.Uint64]
@@ -79,12 +80,14 @@ class Project(pt.abi.NamedTuple):
 
 class ProjectState:
     """
-    Defines Launch Vest state.
+    Defines Launch Vest states.
 
-    :ivar bk.GlobalStateValue admin_acct: A global state value representing the administrator's account.
-    :ivar bk.GlobalStateValue escrow_address: A global state value representing the escrow address.
-    :ivar BoxMapping pid_to_project: A box mapping with key of type ``Uint64`` and value of type ``Project``.
-    :ivar BoxMapping investor_to_project: A box mapping with key of type ``Address`` and value of type ``Investor``.
+    :ivar bk.GlobalStateValue(bytes) admin_acct: A global state value representing the administrator's account.
+    :ivar bk.GlobalStateValue(bytes) escrow_address: A global state value representing the escrow address.
+    :ivar BoxMapping(abi.Uint64, Project) pid_to_project: A box mapping with key of type ``Uint64`` and value of type
+    ``Project``.
+    :ivar BoxMapping(abi.Address, Investor) investor_to_project: A box mapping with key of type ``Address`` and
+    value of type ``Investor``.
     """
     admin_acct = bk.GlobalStateValue(
         stack_type=pt.TealType.bytes,
@@ -107,12 +110,11 @@ class ProjectState:
 app = bk.Application(name="launch_vest", state=ProjectState(), descr="LaunchVest Application")
 
 
-
 def escrow_asset_opt_in(asset: pt.abi.Asset) -> pt.Expr:
     """
     Executes LaunchVest escrow (application) address asset opt in.
 
-    :param pt.abi.Asset asset: The asset to opt in.
+    :param pt.abi.Asset asset: The asset to be opted into.
     :rtype pt.Expr:
     """
     return pt.Seq(
@@ -194,9 +196,9 @@ def list_project(
     project_id = asset_id.asset_id()
     project_id_in_bytes = pt.Itob(project_id)
     return pt.Seq(
-        (asset_decimal := pt.AssetParam.decimals(asset_id.asset_id())),
+        (project_asset_decimal := pt.AssetParam.decimals(asset_id.asset_id())),
         pt.Assert(
-            asset_decimal.value() != pt.Int(0),
+            project_asset_decimal.value() != pt.Int(0),
             comment="A valid asset ID must be provided",
         ),
         pt.Assert(
@@ -243,6 +245,7 @@ def list_project(
             end_timestamp,
             claim_timestamp,
             project_asset_id,
+            project_asset_decimal,
             price_per_asset,
             min_investment_per_investor,
             max_investment_per_investor,
@@ -267,7 +270,7 @@ def deposit_ido_assets(
     """
     Allows depositing IDO assets using the provided transaction and asset.
 
-    :param pt.abi.AssetTransferTransaction txn: The asset transfer transaction used for the deposit.
+    :param pt.abi.AssetTransferTransaction txn: The asset transfer transaction for the deposit.
     :param pt.abi.Asset asset: The asset to be deposited.
     :rtype: pt.Expr.
     """
@@ -393,12 +396,16 @@ def invest(
         ),
         pt.Assert(usdc_asset_id.asset_id() == USDC_ASSET_ID),
         pt.Assert(
-            txn.get().asset_amount() >= project_min_investment_per_user.get(),
-            txn.get().asset_amount() <= project_max_investment_per_user.get(),
             txn.get().asset_receiver() == app.state.escrow_address.get(),
             txn.get().type_enum() == pt.TxnType.AssetTransfer,
             txn.get().xfer_asset() == usdc_asset_id.asset_id(),
-        ), 
+        ),
+        pt.Assert(
+            pt.Or(
+                txn.get().asset_amount() >= project_min_investment_per_user.get(),
+                txn.get().asset_amount() <= project_max_investment_per_user.get(),
+            ),
+        ),
 
         (investor_address := pt.abi.Address()).set(pt.Txn.sender()),
         (investor_project_id := pt.abi.Uint64()).set(project_id),

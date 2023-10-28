@@ -41,6 +41,16 @@ _APP_SPEC_JSON = r"""{
                 "no_op": "CALL"
             }
         },
+        "set_asset_decimal(uint64)void": {
+            "call_config": {
+                "no_op": "CALL"
+            }
+        },
+        "set_asset_id(uint64)void": {
+            "call_config": {
+                "no_op": "CALL"
+            }
+        },
         "stake(asset,uint64,axfer)void": {
             "call_config": {
                 "no_op": "CALL"
@@ -90,13 +100,13 @@ _APP_SPEC_JSON = r"""{
         }
     },
     "source": {
-        "approval": "I3ByYWdtYSB2ZXJzaW9uIDgKaW50Y2Jsb2NrIDAgMSAxMCA0IDEwMDAwMDAwIDMxNTM2MDAwCmJ5dGVjYmxvY2sgMHggMHg2NTczNjM3MjZmNzc1ZjYxNjQ2NDcyNjU3MzczIDB4NmQ2MTc4NWY3Mzc0NjE2YjY1IDB4NmQ2OTZlNWY3Mzc0NjE2YjY1IDB4NzY2NTczNzQ1ZjY0NjU2MzY5NmQ2MTZjNzMgMHg2MTZlNmU3NTYxNmM1ZjcyNjE3NDY1IDB4NjE2NDZkNjk2ZTVmNjE2MzYzNzQgMHgwMAp0eG4gTnVtQXBwQXJncwppbnRjXzAgLy8gMAo9PQpibnogbWFpbl9sMTYKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMApwdXNoYnl0ZXMgMHgzNDQ5NGQ4NyAvLyAiYm9vdHN0cmFwKGFzc2V0KXZvaWQiCj09CmJueiBtYWluX2wxNQp0eG5hIEFwcGxpY2F0aW9uQXJncyAwCnB1c2hieXRlcyAweDk2M2E1OTZlIC8vICJmdW5kX2VzY3Jvd19hZGRyZXNzKHBheSl2b2lkIgo9PQpibnogbWFpbl9sMTQKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMApwdXNoYnl0ZXMgMHgyY2E2YWUwMiAvLyAic2V0X3N0YWtlX2Ftb3VudHModWludDY0LHVpbnQ2NCl2b2lkIgo9PQpibnogbWFpbl9sMTMKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMApwdXNoYnl0ZXMgMHgxYzA5NGI2MCAvLyAic2V0X2FubnVhbF9yYXRlKHVpbnQ2NCl2b2lkIgo9PQpibnogbWFpbl9sMTIKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMApwdXNoYnl0ZXMgMHhhZTRiOWU5MiAvLyAic3Rha2UoYXNzZXQsdWludDY0LGF4ZmVyKXZvaWQiCj09CmJueiBtYWluX2wxMQp0eG5hIEFwcGxpY2F0aW9uQXJncyAwCnB1c2hieXRlcyAweDU3YmFhNWI1IC8vICJ1bl9zdGFrZShhc3NldCl2b2lkIgo9PQpibnogbWFpbl9sMTAKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMApwdXNoYnl0ZXMgMHgyZmUyY2I0ZSAvLyAiZ2V0X3N0YWtlcihhZGRyZXNzKShhZGRyZXNzLHVpbnQ2NCx1aW50NjQsYm9vbCx1aW50NjQsdWludDY0KSIKPT0KYm56IG1haW5fbDkKZXJyCm1haW5fbDk6CnR4biBPbkNvbXBsZXRpb24KaW50Y18wIC8vIE5vT3AKPT0KdHhuIEFwcGxpY2F0aW9uSUQKaW50Y18wIC8vIDAKIT0KJiYKYXNzZXJ0CmNhbGxzdWIgZ2V0c3Rha2VyY2FzdGVyXzEzCmludGNfMSAvLyAxCnJldHVybgptYWluX2wxMDoKdHhuIE9uQ29tcGxldGlvbgppbnRjXzAgLy8gTm9PcAo9PQp0eG4gQXBwbGljYXRpb25JRAppbnRjXzAgLy8gMAohPQomJgphc3NlcnQKY2FsbHN1YiB1bnN0YWtlY2FzdGVyXzEyCmludGNfMSAvLyAxCnJldHVybgptYWluX2wxMToKdHhuIE9uQ29tcGxldGlvbgppbnRjXzAgLy8gTm9PcAo9PQp0eG4gQXBwbGljYXRpb25JRAppbnRjXzAgLy8gMAohPQomJgphc3NlcnQKY2FsbHN1YiBzdGFrZWNhc3Rlcl8xMQppbnRjXzEgLy8gMQpyZXR1cm4KbWFpbl9sMTI6CnR4biBPbkNvbXBsZXRpb24KaW50Y18wIC8vIE5vT3AKPT0KdHhuIEFwcGxpY2F0aW9uSUQKaW50Y18wIC8vIDAKIT0KJiYKYXNzZXJ0CmNhbGxzdWIgc2V0YW5udWFscmF0ZWNhc3Rlcl8xMAppbnRjXzEgLy8gMQpyZXR1cm4KbWFpbl9sMTM6CnR4biBPbkNvbXBsZXRpb24KaW50Y18wIC8vIE5vT3AKPT0KdHhuIEFwcGxpY2F0aW9uSUQKaW50Y18wIC8vIDAKIT0KJiYKYXNzZXJ0CmNhbGxzdWIgc2V0c3Rha2VhbW91bnRzY2FzdGVyXzkKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDE0Ogp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCiE9CiYmCmFzc2VydApjYWxsc3ViIGZ1bmRlc2Nyb3dhZGRyZXNzY2FzdGVyXzgKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDE1Ogp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCiE9CiYmCmFzc2VydApjYWxsc3ViIGJvb3RzdHJhcGNhc3Rlcl83CmludGNfMSAvLyAxCnJldHVybgptYWluX2wxNjoKdHhuIE9uQ29tcGxldGlvbgppbnRjXzAgLy8gTm9PcAo9PQpibnogbWFpbl9sMTgKZXJyCm1haW5fbDE4Ogp0eG4gQXBwbGljYXRpb25JRAppbnRjXzAgLy8gMAo9PQphc3NlcnQKaW50Y18xIC8vIDEKcmV0dXJuCgovLyBib290c3RyYXAKYm9vdHN0cmFwXzA6CnByb3RvIDEgMApieXRlYyA2IC8vICJhZG1pbl9hY2N0IgpieXRlY18wIC8vICIiCmFwcF9nbG9iYWxfcHV0CmJ5dGVjIDUgLy8gImFubnVhbF9yYXRlIgppbnRjXzIgLy8gMTAKYXBwX2dsb2JhbF9wdXQKYnl0ZWNfMSAvLyAiZXNjcm93X2FkZHJlc3MiCmJ5dGVjXzAgLy8gIiIKYXBwX2dsb2JhbF9wdXQKYnl0ZWNfMiAvLyAibWF4X3N0YWtlIgpwdXNoaW50IDIwMDAwIC8vIDIwMDAwCmludGNfMiAvLyAxMAoqCmludGMgNCAvLyAxMDAwMDAwMAoqCmFwcF9nbG9iYWxfcHV0CmJ5dGVjXzMgLy8gIm1pbl9zdGFrZSIKcHVzaGludCAxMDAgLy8gMTAwCmludGNfMiAvLyAxMAoqCmludGMgNCAvLyAxMDAwMDAwMAoqCmFwcF9nbG9iYWxfcHV0CmJ5dGVjIDQgLy8gInZlc3RfZGVjaW1hbHMiCmludGNfMCAvLyAwCmFwcF9nbG9iYWxfcHV0CmJ5dGVjIDYgLy8gImFkbWluX2FjY3QiCmdsb2JhbCBDcmVhdG9yQWRkcmVzcwphcHBfZ2xvYmFsX3B1dApieXRlY18xIC8vICJlc2Nyb3dfYWRkcmVzcyIKZ2xvYmFsIEN1cnJlbnRBcHBsaWNhdGlvbkFkZHJlc3MKYXBwX2dsb2JhbF9wdXQKZnJhbWVfZGlnIC0xCnR4bmFzIEFzc2V0cwphc3NldF9wYXJhbXNfZ2V0IEFzc2V0RGVjaW1hbHMKc3RvcmUgMQpzdG9yZSAwCmxvYWQgMAppbnRjXzAgLy8gMAohPQphc3NlcnQKYnl0ZWMgNCAvLyAidmVzdF9kZWNpbWFscyIKbG9hZCAwCmFwcF9nbG9iYWxfcHV0CmJ5dGVjXzEgLy8gImVzY3Jvd19hZGRyZXNzIgphcHBfZ2xvYmFsX2dldApmcmFtZV9kaWcgLTEKdHhuYXMgQXNzZXRzCmFzc2V0X2hvbGRpbmdfZ2V0IEFzc2V0QmFsYW5jZQpzdG9yZSAyCmludGNfMCAvLyAwCj09CmJ6IGJvb3RzdHJhcF8wX2wyCml0eG5fYmVnaW4KaW50Y18zIC8vIGF4ZmVyCml0eG5fZmllbGQgVHlwZUVudW0KZnJhbWVfZGlnIC0xCnR4bmFzIEFzc2V0cwppdHhuX2ZpZWxkIFhmZXJBc3NldAppbnRjXzAgLy8gMAppdHhuX2ZpZWxkIEFzc2V0QW1vdW50CmJ5dGVjXzEgLy8gImVzY3Jvd19hZGRyZXNzIgphcHBfZ2xvYmFsX2dldAppdHhuX2ZpZWxkIEFzc2V0UmVjZWl2ZXIKaXR4bl9zdWJtaXQKYm9vdHN0cmFwXzBfbDI6CnJldHN1YgoKLy8gZnVuZF9lc2Nyb3dfYWRkcmVzcwpmdW5kZXNjcm93YWRkcmVzc18xOgpwcm90byAxIDAKZnJhbWVfZGlnIC0xCmd0eG5zIEFtb3VudAppbnRjXzAgLy8gMAo+CmFzc2VydApmcmFtZV9kaWcgLTEKZ3R4bnMgUmVjZWl2ZXIKYnl0ZWNfMSAvLyAiZXNjcm93X2FkZHJlc3MiCmFwcF9nbG9iYWxfZ2V0Cj09CmFzc2VydApmcmFtZV9kaWcgLTEKZ3R4bnMgVHlwZUVudW0KaW50Y18xIC8vIHBheQo9PQphc3NlcnQKcmV0c3ViCgovLyBzZXRfc3Rha2VfYW1vdW50cwpzZXRzdGFrZWFtb3VudHNfMjoKcHJvdG8gMiAwCnR4biBTZW5kZXIKZ2xvYmFsIENyZWF0b3JBZGRyZXNzCj09Ci8vIHVuYXV0aG9yaXplZAphc3NlcnQKZnJhbWVfZGlnIC0yCmludGNfMCAvLyAwCj4KYXNzZXJ0CmZyYW1lX2RpZyAtMQppbnRjXzAgLy8gMAo+CmFzc2VydApmcmFtZV9kaWcgLTEKZnJhbWVfZGlnIC0yCj4KYXNzZXJ0CmJ5dGVjXzMgLy8gIm1pbl9zdGFrZSIKZnJhbWVfZGlnIC0yCmludGNfMiAvLyAxMAoqCmJ5dGVjIDQgLy8gInZlc3RfZGVjaW1hbHMiCmFwcF9nbG9iYWxfZ2V0CioKYXBwX2dsb2JhbF9wdXQKYnl0ZWNfMiAvLyAibWF4X3N0YWtlIgpmcmFtZV9kaWcgLTEKaW50Y18yIC8vIDEwCioKYnl0ZWMgNCAvLyAidmVzdF9kZWNpbWFscyIKYXBwX2dsb2JhbF9nZXQKKgphcHBfZ2xvYmFsX3B1dApyZXRzdWIKCi8vIHNldF9hbm51YWxfcmF0ZQpzZXRhbm51YWxyYXRlXzM6CnByb3RvIDEgMAp0eG4gU2VuZGVyCmdsb2JhbCBDcmVhdG9yQWRkcmVzcwo9PQovLyB1bmF1dGhvcml6ZWQKYXNzZXJ0CmJ5dGVjIDUgLy8gImFubnVhbF9yYXRlIgpmcmFtZV9kaWcgLTEKYXBwX2dsb2JhbF9wdXQKcmV0c3ViCgovLyBzdGFrZQpzdGFrZV80Ogpwcm90byAzIDAKYnl0ZWNfMCAvLyAiIgpkdXAKaW50Y18wIC8vIDAKZHVwbiA2CmJ5dGVjXzAgLy8gIiIKZHVwCmZyYW1lX2RpZyAtMQpndHhucyBUeXBlRW51bQppbnRjXzMgLy8gYXhmZXIKPT0KYXNzZXJ0CmZyYW1lX2RpZyAtMQpndHhucyBBc3NldFJlY2VpdmVyCmJ5dGVjXzEgLy8gImVzY3Jvd19hZGRyZXNzIgphcHBfZ2xvYmFsX2dldAo9PQphc3NlcnQKZnJhbWVfZGlnIC0xCmd0eG5zIFhmZXJBc3NldApmcmFtZV9kaWcgLTMKdHhuYXMgQXNzZXRzCj09CmFzc2VydApmcmFtZV9kaWcgLTEKZ3R4bnMgQXNzZXRBbW91bnQKYnl0ZWNfMyAvLyAibWluX3N0YWtlIgphcHBfZ2xvYmFsX2dldAo+PQpmcmFtZV9kaWcgLTEKZ3R4bnMgQXNzZXRBbW91bnQKYnl0ZWNfMiAvLyAibWF4X3N0YWtlIgphcHBfZ2xvYmFsX2dldAo8PQomJgphc3NlcnQKZnJhbWVfZGlnIC0xCmd0eG5zIEFzc2V0QW1vdW50CmJ5dGVjXzMgLy8gIm1pbl9zdGFrZSIKYXBwX2dsb2JhbF9nZXQKPgpmcmFtZV9kaWcgLTEKZ3R4bnMgQXNzZXRBbW91bnQKYnl0ZWNfMiAvLyAibWF4X3N0YWtlIgphcHBfZ2xvYmFsX2dldAo8PQp8fAphc3NlcnQKZnJhbWVfZGlnIC0yCnB1c2hpbnQgMzAwIC8vIDMwMAo9PQpmcmFtZV9kaWcgLTIKcHVzaGludCA3ODg0MDAwIC8vIDc4ODQwMDAKPT0KfHwKZnJhbWVfZGlnIC0yCnB1c2hpbnQgMTU3NjgwMDAgLy8gMTU3NjgwMDAKPT0KfHwKZnJhbWVfZGlnIC0yCmludGMgNSAvLyAzMTUzNjAwMAo9PQp8fAphc3NlcnQKdHhuIFNlbmRlcgpmcmFtZV9idXJ5IDEKZnJhbWVfZGlnIDEKbGVuCnB1c2hpbnQgMzIgLy8gMzIKPT0KYXNzZXJ0CmZyYW1lX2RpZyAtMQpndHhucyBBc3NldEFtb3VudApmcmFtZV9idXJ5IDIKZnJhbWVfZGlnIC0zCnR4bmFzIEFzc2V0cwpmcmFtZV9idXJ5IDMKaW50Y18xIC8vIDEKIQohCmZyYW1lX2J1cnkgNApnbG9iYWwgTGF0ZXN0VGltZXN0YW1wCmZyYW1lX2J1cnkgNQpmcmFtZV9kaWcgNQpmcmFtZV9kaWcgLTIKKwpmcmFtZV9idXJ5IDYKZnJhbWVfZGlnIDEKZnJhbWVfZGlnIDIKaXRvYgpjb25jYXQKZnJhbWVfZGlnIDMKaXRvYgpjb25jYXQKYnl0ZWMgNyAvLyAweDAwCmludGNfMCAvLyAwCmZyYW1lX2RpZyA0CnNldGJpdApjb25jYXQKZnJhbWVfZGlnIDUKaXRvYgpjb25jYXQKZnJhbWVfZGlnIDYKaXRvYgpjb25jYXQKZnJhbWVfYnVyeSAwCmZyYW1lX2RpZyAxCmJveF9kZWwKcG9wCmZyYW1lX2RpZyAxCmZyYW1lX2RpZyAwCmJveF9wdXQKcmV0c3ViCgovLyB1bl9zdGFrZQp1bnN0YWtlXzU6CnByb3RvIDEgMApieXRlY18wIC8vICIiCmR1cAppbnRjXzAgLy8gMApkdXBuIDgKYnl0ZWNfMCAvLyAiIgpkdXAKdHhuIFNlbmRlcgpib3hfbGVuCnN0b3JlIDQKc3RvcmUgMwpsb2FkIDQKYXNzZXJ0CnR4biBTZW5kZXIKYm94X2dldApzdG9yZSA2CnN0b3JlIDUKbG9hZCA2CmFzc2VydApsb2FkIDUKZnJhbWVfYnVyeSAwCmZyYW1lX2RpZyAwCmV4dHJhY3QgMCAzMgpmcmFtZV9idXJ5IDEKZnJhbWVfZGlnIDAKcHVzaGludCAzMiAvLyAzMgpleHRyYWN0X3VpbnQ2NApmcmFtZV9idXJ5IDIKZnJhbWVfZGlnIDAKcHVzaGludCA0MCAvLyA0MApleHRyYWN0X3VpbnQ2NApmcmFtZV9idXJ5IDMKZnJhbWVfZGlnIDAKcHVzaGludCAzODQgLy8gMzg0CmdldGJpdApmcmFtZV9idXJ5IDQKZnJhbWVfZGlnIDAKcHVzaGludCA0OSAvLyA0OQpleHRyYWN0X3VpbnQ2NApmcmFtZV9idXJ5IDUKZnJhbWVfZGlnIDAKcHVzaGludCA1NyAvLyA1NwpleHRyYWN0X3VpbnQ2NApmcmFtZV9idXJ5IDYKZnJhbWVfZGlnIDQKaW50Y18xIC8vIDEKPT0KYXNzZXJ0Cmdsb2JhbCBMYXRlc3RUaW1lc3RhbXAKZnJhbWVfZGlnIDYKPj0KYXNzZXJ0CmZyYW1lX2RpZyAtMQp0eG5hcyBBc3NldHMKZnJhbWVfZGlnIDMKPT0KLy8gaGVyZQphc3NlcnQKZnJhbWVfZGlnIDYKZnJhbWVfZGlnIDUKLQpmcmFtZV9idXJ5IDcKaW50Y18wIC8vIDAKZnJhbWVfYnVyeSA4CmZyYW1lX2RpZyAyCmJ5dGVjIDUgLy8gImFubnVhbF9yYXRlIgphcHBfZ2xvYmFsX2dldAoqCmZyYW1lX2RpZyA3CioKcHVzaGludCAxMDAgLy8gMTAwCmludGMgNSAvLyAzMTUzNjAwMAoqCi8KZnJhbWVfYnVyeSA4Cml0eG5fYmVnaW4KaW50Y18zIC8vIGF4ZmVyCml0eG5fZmllbGQgVHlwZUVudW0KZnJhbWVfZGlnIC0xCnR4bmFzIEFzc2V0cwppdHhuX2ZpZWxkIFhmZXJBc3NldApmcmFtZV9kaWcgMQppdHhuX2ZpZWxkIEFzc2V0UmVjZWl2ZXIKZnJhbWVfZGlnIDgKaXR4bl9maWVsZCBBc3NldEFtb3VudAppdHhuX3N1Ym1pdAppbnRjXzAgLy8gMAohCiEKZnJhbWVfYnVyeSA0CmZyYW1lX2RpZyAxCmZyYW1lX2RpZyAyCml0b2IKY29uY2F0CmZyYW1lX2RpZyAzCml0b2IKY29uY2F0CmJ5dGVjIDcgLy8gMHgwMAppbnRjXzAgLy8gMApmcmFtZV9kaWcgNApzZXRiaXQKY29uY2F0CmZyYW1lX2RpZyA1Cml0b2IKY29uY2F0CmZyYW1lX2RpZyA2Cml0b2IKY29uY2F0CmZyYW1lX2J1cnkgMApmcmFtZV9kaWcgMQpib3hfZGVsCnBvcApyZXRzdWIKCi8vIGdldF9zdGFrZXIKZ2V0c3Rha2VyXzY6CnByb3RvIDEgMQpieXRlY18wIC8vICIiCmZyYW1lX2RpZyAtMQpib3hfZ2V0CnN0b3JlIDgKc3RvcmUgNwpsb2FkIDgKYXNzZXJ0CmxvYWQgNwpmcmFtZV9idXJ5IDAKcmV0c3ViCgovLyBib290c3RyYXBfY2FzdGVyCmJvb3RzdHJhcGNhc3Rlcl83Ogpwcm90byAwIDAKaW50Y18wIC8vIDAKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQppbnRjXzAgLy8gMApnZXRieXRlCmZyYW1lX2J1cnkgMApmcmFtZV9kaWcgMApjYWxsc3ViIGJvb3RzdHJhcF8wCnJldHN1YgoKLy8gZnVuZF9lc2Nyb3dfYWRkcmVzc19jYXN0ZXIKZnVuZGVzY3Jvd2FkZHJlc3NjYXN0ZXJfODoKcHJvdG8gMCAwCmludGNfMCAvLyAwCnR4biBHcm91cEluZGV4CmludGNfMSAvLyAxCi0KZnJhbWVfYnVyeSAwCmZyYW1lX2RpZyAwCmd0eG5zIFR5cGVFbnVtCmludGNfMSAvLyBwYXkKPT0KYXNzZXJ0CmZyYW1lX2RpZyAwCmNhbGxzdWIgZnVuZGVzY3Jvd2FkZHJlc3NfMQpyZXRzdWIKCi8vIHNldF9zdGFrZV9hbW91bnRzX2Nhc3RlcgpzZXRzdGFrZWFtb3VudHNjYXN0ZXJfOToKcHJvdG8gMCAwCmludGNfMCAvLyAwCmR1cAp0eG5hIEFwcGxpY2F0aW9uQXJncyAxCmJ0b2kKZnJhbWVfYnVyeSAwCnR4bmEgQXBwbGljYXRpb25BcmdzIDIKYnRvaQpmcmFtZV9idXJ5IDEKZnJhbWVfZGlnIDAKZnJhbWVfZGlnIDEKY2FsbHN1YiBzZXRzdGFrZWFtb3VudHNfMgpyZXRzdWIKCi8vIHNldF9hbm51YWxfcmF0ZV9jYXN0ZXIKc2V0YW5udWFscmF0ZWNhc3Rlcl8xMDoKcHJvdG8gMCAwCmludGNfMCAvLyAwCnR4bmEgQXBwbGljYXRpb25BcmdzIDEKYnRvaQpmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDAKY2FsbHN1YiBzZXRhbm51YWxyYXRlXzMKcmV0c3ViCgovLyBzdGFrZV9jYXN0ZXIKc3Rha2VjYXN0ZXJfMTE6CnByb3RvIDAgMAppbnRjXzAgLy8gMApkdXBuIDIKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQppbnRjXzAgLy8gMApnZXRieXRlCmZyYW1lX2J1cnkgMAp0eG5hIEFwcGxpY2F0aW9uQXJncyAyCmJ0b2kKZnJhbWVfYnVyeSAxCnR4biBHcm91cEluZGV4CmludGNfMSAvLyAxCi0KZnJhbWVfYnVyeSAyCmZyYW1lX2RpZyAyCmd0eG5zIFR5cGVFbnVtCmludGNfMyAvLyBheGZlcgo9PQphc3NlcnQKZnJhbWVfZGlnIDAKZnJhbWVfZGlnIDEKZnJhbWVfZGlnIDIKY2FsbHN1YiBzdGFrZV80CnJldHN1YgoKLy8gdW5fc3Rha2VfY2FzdGVyCnVuc3Rha2VjYXN0ZXJfMTI6CnByb3RvIDAgMAppbnRjXzAgLy8gMAp0eG5hIEFwcGxpY2F0aW9uQXJncyAxCmludGNfMCAvLyAwCmdldGJ5dGUKZnJhbWVfYnVyeSAwCmZyYW1lX2RpZyAwCmNhbGxzdWIgdW5zdGFrZV81CnJldHN1YgoKLy8gZ2V0X3N0YWtlcl9jYXN0ZXIKZ2V0c3Rha2VyY2FzdGVyXzEzOgpwcm90byAwIDAKYnl0ZWNfMCAvLyAiIgpkdXAKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQpmcmFtZV9idXJ5IDEKZnJhbWVfZGlnIDEKY2FsbHN1YiBnZXRzdGFrZXJfNgpmcmFtZV9idXJ5IDAKcHVzaGJ5dGVzIDB4MTUxZjdjNzUgLy8gMHgxNTFmN2M3NQpmcmFtZV9kaWcgMApjb25jYXQKbG9nCnJldHN1Yg==",
+        "approval": "I3ByYWdtYSB2ZXJzaW9uIDgKaW50Y2Jsb2NrIDAgMSAxMCA0IDEwMDAwMDAwIDMxNTM2MDAwCmJ5dGVjYmxvY2sgMHggMHg2NTczNjM3MjZmNzc1ZjYxNjQ2NDcyNjU3MzczIDB4NzY2NTczNzQ1ZjY0NjU2MzY5NmQ2MTZjNzMgMHg2ZDYxNzg1ZjczNzQ2MTZiNjUgMHg2ZDY5NmU1ZjczNzQ2MTZiNjUgMHg2MTZlNmU3NTYxNmM1ZjcyNjE3NDY1IDB4NjE2NDZkNjk2ZTVmNjE2MzYzNzQgMHg2MTczNzM2NTc0NWY2OTY0IDB4MDAKdHhuIE51bUFwcEFyZ3MKaW50Y18wIC8vIDAKPT0KYm56IG1haW5fbDIwCnR4bmEgQXBwbGljYXRpb25BcmdzIDAKcHVzaGJ5dGVzIDB4MzQ0OTRkODcgLy8gImJvb3RzdHJhcChhc3NldCl2b2lkIgo9PQpibnogbWFpbl9sMTkKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMApwdXNoYnl0ZXMgMHg5NjNhNTk2ZSAvLyAiZnVuZF9lc2Nyb3dfYWRkcmVzcyhwYXkpdm9pZCIKPT0KYm56IG1haW5fbDE4CnR4bmEgQXBwbGljYXRpb25BcmdzIDAKcHVzaGJ5dGVzIDB4MmNhNmFlMDIgLy8gInNldF9zdGFrZV9hbW91bnRzKHVpbnQ2NCx1aW50NjQpdm9pZCIKPT0KYm56IG1haW5fbDE3CnR4bmEgQXBwbGljYXRpb25BcmdzIDAKcHVzaGJ5dGVzIDB4MWMwOTRiNjAgLy8gInNldF9hbm51YWxfcmF0ZSh1aW50NjQpdm9pZCIKPT0KYm56IG1haW5fbDE2CnR4bmEgQXBwbGljYXRpb25BcmdzIDAKcHVzaGJ5dGVzIDB4M2I0NmJlNTggLy8gInNldF9hc3NldF9kZWNpbWFsKHVpbnQ2NCl2b2lkIgo9PQpibnogbWFpbl9sMTUKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMApwdXNoYnl0ZXMgMHhkMTMwYzc0YSAvLyAic2V0X2Fzc2V0X2lkKHVpbnQ2NCl2b2lkIgo9PQpibnogbWFpbl9sMTQKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMApwdXNoYnl0ZXMgMHhhZTRiOWU5MiAvLyAic3Rha2UoYXNzZXQsdWludDY0LGF4ZmVyKXZvaWQiCj09CmJueiBtYWluX2wxMwp0eG5hIEFwcGxpY2F0aW9uQXJncyAwCnB1c2hieXRlcyAweDU3YmFhNWI1IC8vICJ1bl9zdGFrZShhc3NldCl2b2lkIgo9PQpibnogbWFpbl9sMTIKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMApwdXNoYnl0ZXMgMHgyZmUyY2I0ZSAvLyAiZ2V0X3N0YWtlcihhZGRyZXNzKShhZGRyZXNzLHVpbnQ2NCx1aW50NjQsYm9vbCx1aW50NjQsdWludDY0KSIKPT0KYm56IG1haW5fbDExCmVycgptYWluX2wxMToKdHhuIE9uQ29tcGxldGlvbgppbnRjXzAgLy8gTm9PcAo9PQp0eG4gQXBwbGljYXRpb25JRAppbnRjXzAgLy8gMAohPQomJgphc3NlcnQKY2FsbHN1YiBnZXRzdGFrZXJjYXN0ZXJfMTcKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDEyOgp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCiE9CiYmCmFzc2VydApjYWxsc3ViIHVuc3Rha2VjYXN0ZXJfMTYKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDEzOgp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCiE9CiYmCmFzc2VydApjYWxsc3ViIHN0YWtlY2FzdGVyXzE1CmludGNfMSAvLyAxCnJldHVybgptYWluX2wxNDoKdHhuIE9uQ29tcGxldGlvbgppbnRjXzAgLy8gTm9PcAo9PQp0eG4gQXBwbGljYXRpb25JRAppbnRjXzAgLy8gMAohPQomJgphc3NlcnQKY2FsbHN1YiBzZXRhc3NldGlkY2FzdGVyXzE0CmludGNfMSAvLyAxCnJldHVybgptYWluX2wxNToKdHhuIE9uQ29tcGxldGlvbgppbnRjXzAgLy8gTm9PcAo9PQp0eG4gQXBwbGljYXRpb25JRAppbnRjXzAgLy8gMAohPQomJgphc3NlcnQKY2FsbHN1YiBzZXRhc3NldGRlY2ltYWxjYXN0ZXJfMTMKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDE2Ogp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCiE9CiYmCmFzc2VydApjYWxsc3ViIHNldGFubnVhbHJhdGVjYXN0ZXJfMTIKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDE3Ogp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCiE9CiYmCmFzc2VydApjYWxsc3ViIHNldHN0YWtlYW1vdW50c2Nhc3Rlcl8xMQppbnRjXzEgLy8gMQpyZXR1cm4KbWFpbl9sMTg6CnR4biBPbkNvbXBsZXRpb24KaW50Y18wIC8vIE5vT3AKPT0KdHhuIEFwcGxpY2F0aW9uSUQKaW50Y18wIC8vIDAKIT0KJiYKYXNzZXJ0CmNhbGxzdWIgZnVuZGVzY3Jvd2FkZHJlc3NjYXN0ZXJfMTAKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDE5Ogp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCiE9CiYmCmFzc2VydApjYWxsc3ViIGJvb3RzdHJhcGNhc3Rlcl85CmludGNfMSAvLyAxCnJldHVybgptYWluX2wyMDoKdHhuIE9uQ29tcGxldGlvbgppbnRjXzAgLy8gTm9PcAo9PQpibnogbWFpbl9sMjIKZXJyCm1haW5fbDIyOgp0eG4gQXBwbGljYXRpb25JRAppbnRjXzAgLy8gMAo9PQphc3NlcnQKaW50Y18xIC8vIDEKcmV0dXJuCgovLyBib290c3RyYXAKYm9vdHN0cmFwXzA6CnByb3RvIDEgMApieXRlYyA2IC8vICJhZG1pbl9hY2N0IgpieXRlY18wIC8vICIiCmFwcF9nbG9iYWxfcHV0CmJ5dGVjIDUgLy8gImFubnVhbF9yYXRlIgppbnRjXzIgLy8gMTAKYXBwX2dsb2JhbF9wdXQKYnl0ZWMgNyAvLyAiYXNzZXRfaWQiCmludGNfMCAvLyAwCmFwcF9nbG9iYWxfcHV0CmJ5dGVjXzEgLy8gImVzY3Jvd19hZGRyZXNzIgpieXRlY18wIC8vICIiCmFwcF9nbG9iYWxfcHV0CmJ5dGVjXzMgLy8gIm1heF9zdGFrZSIKcHVzaGludCAyMDAwMCAvLyAyMDAwMAppbnRjXzIgLy8gMTAKKgppbnRjIDQgLy8gMTAwMDAwMDAKKgphcHBfZ2xvYmFsX3B1dApieXRlYyA0IC8vICJtaW5fc3Rha2UiCnB1c2hpbnQgMTAwIC8vIDEwMAppbnRjXzIgLy8gMTAKKgppbnRjIDQgLy8gMTAwMDAwMDAKKgphcHBfZ2xvYmFsX3B1dApieXRlY18yIC8vICJ2ZXN0X2RlY2ltYWxzIgppbnRjXzAgLy8gMAphcHBfZ2xvYmFsX3B1dApieXRlYyA2IC8vICJhZG1pbl9hY2N0IgpnbG9iYWwgQ3JlYXRvckFkZHJlc3MKYXBwX2dsb2JhbF9wdXQKYnl0ZWNfMSAvLyAiZXNjcm93X2FkZHJlc3MiCmdsb2JhbCBDdXJyZW50QXBwbGljYXRpb25BZGRyZXNzCmFwcF9nbG9iYWxfcHV0CmZyYW1lX2RpZyAtMQp0eG5hcyBBc3NldHMKYXNzZXRfcGFyYW1zX2dldCBBc3NldERlY2ltYWxzCnN0b3JlIDEKc3RvcmUgMApsb2FkIDAKaW50Y18wIC8vIDAKIT0KYXNzZXJ0CmJ5dGVjXzIgLy8gInZlc3RfZGVjaW1hbHMiCmxvYWQgMAphcHBfZ2xvYmFsX3B1dApieXRlY18xIC8vICJlc2Nyb3dfYWRkcmVzcyIKYXBwX2dsb2JhbF9nZXQKZnJhbWVfZGlnIC0xCnR4bmFzIEFzc2V0cwphc3NldF9ob2xkaW5nX2dldCBBc3NldEJhbGFuY2UKc3RvcmUgMgppbnRjXzAgLy8gMAo9PQpieiBib290c3RyYXBfMF9sMgppdHhuX2JlZ2luCmludGNfMyAvLyBheGZlcgppdHhuX2ZpZWxkIFR5cGVFbnVtCmZyYW1lX2RpZyAtMQp0eG5hcyBBc3NldHMKaXR4bl9maWVsZCBYZmVyQXNzZXQKaW50Y18wIC8vIDAKaXR4bl9maWVsZCBBc3NldEFtb3VudApieXRlY18xIC8vICJlc2Nyb3dfYWRkcmVzcyIKYXBwX2dsb2JhbF9nZXQKaXR4bl9maWVsZCBBc3NldFJlY2VpdmVyCml0eG5fc3VibWl0CmJvb3RzdHJhcF8wX2wyOgpyZXRzdWIKCi8vIGZ1bmRfZXNjcm93X2FkZHJlc3MKZnVuZGVzY3Jvd2FkZHJlc3NfMToKcHJvdG8gMSAwCmZyYW1lX2RpZyAtMQpndHhucyBBbW91bnQKaW50Y18wIC8vIDAKPgphc3NlcnQKZnJhbWVfZGlnIC0xCmd0eG5zIFJlY2VpdmVyCmdsb2JhbCBDdXJyZW50QXBwbGljYXRpb25BZGRyZXNzCj09CmFzc2VydApmcmFtZV9kaWcgLTEKZ3R4bnMgVHlwZUVudW0KaW50Y18xIC8vIHBheQo9PQphc3NlcnQKcmV0c3ViCgovLyBzZXRfc3Rha2VfYW1vdW50cwpzZXRzdGFrZWFtb3VudHNfMjoKcHJvdG8gMiAwCnR4biBTZW5kZXIKZ2xvYmFsIENyZWF0b3JBZGRyZXNzCj09Ci8vIHVuYXV0aG9yaXplZAphc3NlcnQKZnJhbWVfZGlnIC0yCmludGNfMCAvLyAwCj4KYXNzZXJ0CmZyYW1lX2RpZyAtMQppbnRjXzAgLy8gMAo+CmFzc2VydApmcmFtZV9kaWcgLTEKZnJhbWVfZGlnIC0yCj4KYXNzZXJ0CmJ5dGVjIDQgLy8gIm1pbl9zdGFrZSIKZnJhbWVfZGlnIC0yCmludGNfMiAvLyAxMAoqCmJ5dGVjXzIgLy8gInZlc3RfZGVjaW1hbHMiCmFwcF9nbG9iYWxfZ2V0CioKYXBwX2dsb2JhbF9wdXQKYnl0ZWNfMyAvLyAibWF4X3N0YWtlIgpmcmFtZV9kaWcgLTEKaW50Y18yIC8vIDEwCioKYnl0ZWNfMiAvLyAidmVzdF9kZWNpbWFscyIKYXBwX2dsb2JhbF9nZXQKKgphcHBfZ2xvYmFsX3B1dApyZXRzdWIKCi8vIHNldF9hbm51YWxfcmF0ZQpzZXRhbm51YWxyYXRlXzM6CnByb3RvIDEgMAp0eG4gU2VuZGVyCmdsb2JhbCBDcmVhdG9yQWRkcmVzcwo9PQovLyB1bmF1dGhvcml6ZWQKYXNzZXJ0CmJ5dGVjIDUgLy8gImFubnVhbF9yYXRlIgpmcmFtZV9kaWcgLTEKYXBwX2dsb2JhbF9wdXQKcmV0c3ViCgovLyBzZXRfYXNzZXRfZGVjaW1hbApzZXRhc3NldGRlY2ltYWxfNDoKcHJvdG8gMSAwCnR4biBTZW5kZXIKZ2xvYmFsIENyZWF0b3JBZGRyZXNzCj09Ci8vIHVuYXV0aG9yaXplZAphc3NlcnQKYnl0ZWNfMiAvLyAidmVzdF9kZWNpbWFscyIKZnJhbWVfZGlnIC0xCmFwcF9nbG9iYWxfcHV0CnJldHN1YgoKLy8gc2V0X2Fzc2V0X2lkCnNldGFzc2V0aWRfNToKcHJvdG8gMSAwCnR4biBTZW5kZXIKZ2xvYmFsIENyZWF0b3JBZGRyZXNzCj09Ci8vIHVuYXV0aG9yaXplZAphc3NlcnQKYnl0ZWMgNyAvLyAiYXNzZXRfaWQiCmZyYW1lX2RpZyAtMQphcHBfZ2xvYmFsX3B1dApyZXRzdWIKCi8vIHN0YWtlCnN0YWtlXzY6CnByb3RvIDMgMApieXRlY18wIC8vICIiCmR1cAppbnRjXzAgLy8gMApkdXBuIDYKYnl0ZWNfMCAvLyAiIgpkdXAKZnJhbWVfZGlnIC0xCmd0eG5zIFR5cGVFbnVtCmludGNfMyAvLyBheGZlcgo9PQphc3NlcnQKZnJhbWVfZGlnIC0xCmd0eG5zIEFzc2V0UmVjZWl2ZXIKYnl0ZWNfMSAvLyAiZXNjcm93X2FkZHJlc3MiCmFwcF9nbG9iYWxfZ2V0Cj09CmFzc2VydApmcmFtZV9kaWcgLTEKZ3R4bnMgWGZlckFzc2V0CmZyYW1lX2RpZyAtMwp0eG5hcyBBc3NldHMKPT0KYXNzZXJ0CmZyYW1lX2RpZyAtMQpndHhucyBBc3NldEFtb3VudApieXRlYyA0IC8vICJtaW5fc3Rha2UiCmFwcF9nbG9iYWxfZ2V0Cj49CmZyYW1lX2RpZyAtMQpndHhucyBBc3NldEFtb3VudApieXRlY18zIC8vICJtYXhfc3Rha2UiCmFwcF9nbG9iYWxfZ2V0Cjw9CiYmCmFzc2VydApmcmFtZV9kaWcgLTEKZ3R4bnMgQXNzZXRBbW91bnQKYnl0ZWMgNCAvLyAibWluX3N0YWtlIgphcHBfZ2xvYmFsX2dldAo+CmZyYW1lX2RpZyAtMQpndHhucyBBc3NldEFtb3VudApieXRlY18zIC8vICJtYXhfc3Rha2UiCmFwcF9nbG9iYWxfZ2V0Cjw9Cnx8CmFzc2VydApmcmFtZV9kaWcgLTIKcHVzaGludCAzMDAgLy8gMzAwCj09CmZyYW1lX2RpZyAtMgpwdXNoaW50IDc4ODQwMDAgLy8gNzg4NDAwMAo9PQp8fApmcmFtZV9kaWcgLTIKcHVzaGludCAxNTc2ODAwMCAvLyAxNTc2ODAwMAo9PQp8fApmcmFtZV9kaWcgLTIKaW50YyA1IC8vIDMxNTM2MDAwCj09Cnx8CmFzc2VydAp0eG4gU2VuZGVyCmZyYW1lX2J1cnkgMQpmcmFtZV9kaWcgMQpsZW4KcHVzaGludCAzMiAvLyAzMgo9PQphc3NlcnQKZnJhbWVfZGlnIC0xCmd0eG5zIEFzc2V0QW1vdW50CmZyYW1lX2J1cnkgMgpmcmFtZV9kaWcgLTMKdHhuYXMgQXNzZXRzCmZyYW1lX2J1cnkgMwppbnRjXzEgLy8gMQohCiEKZnJhbWVfYnVyeSA0Cmdsb2JhbCBMYXRlc3RUaW1lc3RhbXAKZnJhbWVfYnVyeSA1CmZyYW1lX2RpZyA1CmZyYW1lX2RpZyAtMgorCmZyYW1lX2J1cnkgNgpmcmFtZV9kaWcgMQpmcmFtZV9kaWcgMgppdG9iCmNvbmNhdApmcmFtZV9kaWcgMwppdG9iCmNvbmNhdApieXRlYyA4IC8vIDB4MDAKaW50Y18wIC8vIDAKZnJhbWVfZGlnIDQKc2V0Yml0CmNvbmNhdApmcmFtZV9kaWcgNQppdG9iCmNvbmNhdApmcmFtZV9kaWcgNgppdG9iCmNvbmNhdApmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDEKYm94X2RlbApwb3AKZnJhbWVfZGlnIDEKZnJhbWVfZGlnIDAKYm94X3B1dApyZXRzdWIKCi8vIHVuX3N0YWtlCnVuc3Rha2VfNzoKcHJvdG8gMSAwCmJ5dGVjXzAgLy8gIiIKZHVwCmludGNfMCAvLyAwCmR1cG4gOApieXRlY18wIC8vICIiCmR1cAp0eG4gU2VuZGVyCmJveF9sZW4Kc3RvcmUgNApzdG9yZSAzCmxvYWQgNAphc3NlcnQKdHhuIFNlbmRlcgpib3hfZ2V0CnN0b3JlIDYKc3RvcmUgNQpsb2FkIDYKYXNzZXJ0CmxvYWQgNQpmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDAKZXh0cmFjdCAwIDMyCmZyYW1lX2J1cnkgMQpmcmFtZV9kaWcgMApwdXNoaW50IDMyIC8vIDMyCmV4dHJhY3RfdWludDY0CmZyYW1lX2J1cnkgMgpmcmFtZV9kaWcgMApwdXNoaW50IDQwIC8vIDQwCmV4dHJhY3RfdWludDY0CmZyYW1lX2J1cnkgMwpmcmFtZV9kaWcgMApwdXNoaW50IDM4NCAvLyAzODQKZ2V0Yml0CmZyYW1lX2J1cnkgNApmcmFtZV9kaWcgMApwdXNoaW50IDQ5IC8vIDQ5CmV4dHJhY3RfdWludDY0CmZyYW1lX2J1cnkgNQpmcmFtZV9kaWcgMApwdXNoaW50IDU3IC8vIDU3CmV4dHJhY3RfdWludDY0CmZyYW1lX2J1cnkgNgpmcmFtZV9kaWcgNAppbnRjXzEgLy8gMQo9PQphc3NlcnQKZ2xvYmFsIExhdGVzdFRpbWVzdGFtcApmcmFtZV9kaWcgNgo+PQphc3NlcnQKZnJhbWVfZGlnIC0xCnR4bmFzIEFzc2V0cwpmcmFtZV9kaWcgMwo9PQovLyBoZXJlCmFzc2VydApmcmFtZV9kaWcgNgpmcmFtZV9kaWcgNQotCmZyYW1lX2J1cnkgNwppbnRjXzAgLy8gMApmcmFtZV9idXJ5IDgKZnJhbWVfZGlnIDIKZnJhbWVfZGlnIDIKYnl0ZWMgNSAvLyAiYW5udWFsX3JhdGUiCmFwcF9nbG9iYWxfZ2V0CioKZnJhbWVfZGlnIDcKKgpwdXNoaW50IDEwMCAvLyAxMDAKaW50YyA1IC8vIDMxNTM2MDAwCioKLworCmZyYW1lX2J1cnkgOAppdHhuX2JlZ2luCmludGNfMyAvLyBheGZlcgppdHhuX2ZpZWxkIFR5cGVFbnVtCmZyYW1lX2RpZyAtMQp0eG5hcyBBc3NldHMKaXR4bl9maWVsZCBYZmVyQXNzZXQKZnJhbWVfZGlnIDEKaXR4bl9maWVsZCBBc3NldFJlY2VpdmVyCmZyYW1lX2RpZyA4Cml0eG5fZmllbGQgQXNzZXRBbW91bnQKaXR4bl9zdWJtaXQKaW50Y18wIC8vIDAKIQohCmZyYW1lX2J1cnkgNApmcmFtZV9kaWcgMQpmcmFtZV9kaWcgMgppdG9iCmNvbmNhdApmcmFtZV9kaWcgMwppdG9iCmNvbmNhdApieXRlYyA4IC8vIDB4MDAKaW50Y18wIC8vIDAKZnJhbWVfZGlnIDQKc2V0Yml0CmNvbmNhdApmcmFtZV9kaWcgNQppdG9iCmNvbmNhdApmcmFtZV9kaWcgNgppdG9iCmNvbmNhdApmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDEKYm94X2RlbApwb3AKcmV0c3ViCgovLyBnZXRfc3Rha2VyCmdldHN0YWtlcl84Ogpwcm90byAxIDEKYnl0ZWNfMCAvLyAiIgpmcmFtZV9kaWcgLTEKYm94X2dldApzdG9yZSA4CnN0b3JlIDcKbG9hZCA4CmFzc2VydApsb2FkIDcKZnJhbWVfYnVyeSAwCnJldHN1YgoKLy8gYm9vdHN0cmFwX2Nhc3Rlcgpib290c3RyYXBjYXN0ZXJfOToKcHJvdG8gMCAwCmludGNfMCAvLyAwCnR4bmEgQXBwbGljYXRpb25BcmdzIDEKaW50Y18wIC8vIDAKZ2V0Ynl0ZQpmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDAKY2FsbHN1YiBib290c3RyYXBfMApyZXRzdWIKCi8vIGZ1bmRfZXNjcm93X2FkZHJlc3NfY2FzdGVyCmZ1bmRlc2Nyb3dhZGRyZXNzY2FzdGVyXzEwOgpwcm90byAwIDAKaW50Y18wIC8vIDAKdHhuIEdyb3VwSW5kZXgKaW50Y18xIC8vIDEKLQpmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDAKZ3R4bnMgVHlwZUVudW0KaW50Y18xIC8vIHBheQo9PQphc3NlcnQKZnJhbWVfZGlnIDAKY2FsbHN1YiBmdW5kZXNjcm93YWRkcmVzc18xCnJldHN1YgoKLy8gc2V0X3N0YWtlX2Ftb3VudHNfY2FzdGVyCnNldHN0YWtlYW1vdW50c2Nhc3Rlcl8xMToKcHJvdG8gMCAwCmludGNfMCAvLyAwCmR1cAp0eG5hIEFwcGxpY2F0aW9uQXJncyAxCmJ0b2kKZnJhbWVfYnVyeSAwCnR4bmEgQXBwbGljYXRpb25BcmdzIDIKYnRvaQpmcmFtZV9idXJ5IDEKZnJhbWVfZGlnIDAKZnJhbWVfZGlnIDEKY2FsbHN1YiBzZXRzdGFrZWFtb3VudHNfMgpyZXRzdWIKCi8vIHNldF9hbm51YWxfcmF0ZV9jYXN0ZXIKc2V0YW5udWFscmF0ZWNhc3Rlcl8xMjoKcHJvdG8gMCAwCmludGNfMCAvLyAwCnR4bmEgQXBwbGljYXRpb25BcmdzIDEKYnRvaQpmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDAKY2FsbHN1YiBzZXRhbm51YWxyYXRlXzMKcmV0c3ViCgovLyBzZXRfYXNzZXRfZGVjaW1hbF9jYXN0ZXIKc2V0YXNzZXRkZWNpbWFsY2FzdGVyXzEzOgpwcm90byAwIDAKaW50Y18wIC8vIDAKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQpidG9pCmZyYW1lX2J1cnkgMApmcmFtZV9kaWcgMApjYWxsc3ViIHNldGFzc2V0ZGVjaW1hbF80CnJldHN1YgoKLy8gc2V0X2Fzc2V0X2lkX2Nhc3RlcgpzZXRhc3NldGlkY2FzdGVyXzE0Ogpwcm90byAwIDAKaW50Y18wIC8vIDAKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQpidG9pCmZyYW1lX2J1cnkgMApmcmFtZV9kaWcgMApjYWxsc3ViIHNldGFzc2V0aWRfNQpyZXRzdWIKCi8vIHN0YWtlX2Nhc3RlcgpzdGFrZWNhc3Rlcl8xNToKcHJvdG8gMCAwCmludGNfMCAvLyAwCmR1cG4gMgp0eG5hIEFwcGxpY2F0aW9uQXJncyAxCmludGNfMCAvLyAwCmdldGJ5dGUKZnJhbWVfYnVyeSAwCnR4bmEgQXBwbGljYXRpb25BcmdzIDIKYnRvaQpmcmFtZV9idXJ5IDEKdHhuIEdyb3VwSW5kZXgKaW50Y18xIC8vIDEKLQpmcmFtZV9idXJ5IDIKZnJhbWVfZGlnIDIKZ3R4bnMgVHlwZUVudW0KaW50Y18zIC8vIGF4ZmVyCj09CmFzc2VydApmcmFtZV9kaWcgMApmcmFtZV9kaWcgMQpmcmFtZV9kaWcgMgpjYWxsc3ViIHN0YWtlXzYKcmV0c3ViCgovLyB1bl9zdGFrZV9jYXN0ZXIKdW5zdGFrZWNhc3Rlcl8xNjoKcHJvdG8gMCAwCmludGNfMCAvLyAwCnR4bmEgQXBwbGljYXRpb25BcmdzIDEKaW50Y18wIC8vIDAKZ2V0Ynl0ZQpmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDAKY2FsbHN1YiB1bnN0YWtlXzcKcmV0c3ViCgovLyBnZXRfc3Rha2VyX2Nhc3RlcgpnZXRzdGFrZXJjYXN0ZXJfMTc6CnByb3RvIDAgMApieXRlY18wIC8vICIiCmR1cAp0eG5hIEFwcGxpY2F0aW9uQXJncyAxCmZyYW1lX2J1cnkgMQpmcmFtZV9kaWcgMQpjYWxsc3ViIGdldHN0YWtlcl84CmZyYW1lX2J1cnkgMApwdXNoYnl0ZXMgMHgxNTFmN2M3NSAvLyAweDE1MWY3Yzc1CmZyYW1lX2RpZyAwCmNvbmNhdApsb2cKcmV0c3Vi",
         "clear": "I3ByYWdtYSB2ZXJzaW9uIDgKcHVzaGludCAwIC8vIDAKcmV0dXJu"
     },
     "state": {
         "global": {
             "num_byte_slices": 2,
-            "num_uints": 4
+            "num_uints": 5
         },
         "local": {
             "num_byte_slices": 0,
@@ -114,6 +124,11 @@ _APP_SPEC_JSON = r"""{
                 "annual_rate": {
                     "type": "uint64",
                     "key": "annual_rate",
+                    "descr": ""
+                },
+                "asset_id": {
+                    "type": "uint64",
+                    "key": "asset_id",
                     "descr": ""
                 },
                 "escrow_address": {
@@ -152,12 +167,14 @@ _APP_SPEC_JSON = r"""{
                 "args": [
                     {
                         "type": "asset",
-                        "name": "asset"
+                        "name": "asset",
+                        "desc": "The unique asset ID to be opted into by the escrow address."
                     }
                 ],
                 "returns": {
                     "type": "void"
-                }
+                },
+                "desc": "Initializes Vest Stake application's global state, sets admin account, escrow address, asset decimal, and\nopts into the provided asset."
             },
             {
                 "name": "fund_escrow_address",
@@ -178,60 +195,99 @@ _APP_SPEC_JSON = r"""{
                 "args": [
                     {
                         "type": "uint64",
-                        "name": "min_stake"
+                        "name": "min_stake",
+                        "desc": "The minimum stake amount."
                     },
                     {
                         "type": "uint64",
-                        "name": "max_stake"
+                        "name": "max_stake",
+                        "desc": "The maximum stake amount."
                     }
                 ],
                 "returns": {
                     "type": "void"
-                }
+                },
+                "desc": "Sets the minimum and maximum stake amounts for staking."
             },
             {
                 "name": "set_annual_rate",
                 "args": [
                     {
                         "type": "uint64",
-                        "name": "new_annual_rate"
+                        "name": "annual_rate",
+                        "desc": "The annual rate."
                     }
                 ],
                 "returns": {
                     "type": "void"
-                }
+                },
+                "desc": "Sets the annual rate."
+            },
+            {
+                "name": "set_asset_decimal",
+                "args": [
+                    {
+                        "type": "uint64",
+                        "name": "asset_decimal",
+                        "desc": "The asset decimal."
+                    }
+                ],
+                "returns": {
+                    "type": "void"
+                },
+                "desc": "Sets the asset decimal."
+            },
+            {
+                "name": "set_asset_id",
+                "args": [
+                    {
+                        "type": "uint64",
+                        "name": "asset_id",
+                        "desc": "The unique asset ID."
+                    }
+                ],
+                "returns": {
+                    "type": "void"
+                },
+                "desc": "Sets the asset ID."
             },
             {
                 "name": "stake",
                 "args": [
                     {
                         "type": "asset",
-                        "name": "asset"
+                        "name": "asset",
+                        "desc": "The asset to be staked."
                     },
                     {
                         "type": "uint64",
-                        "name": "stake_duration"
+                        "name": "stake_duration",
+                        "desc": "The duration of the stake."
                     },
                     {
                         "type": "axfer",
-                        "name": "txn"
+                        "name": "txn",
+                        "desc": "The transaction object for the staking operation."
                     }
                 ],
                 "returns": {
                     "type": "void"
-                }
+                },
+                "desc": "Initiates a stake for the specified asset and duration."
             },
             {
                 "name": "un_stake",
                 "args": [
                     {
                         "type": "asset",
-                        "name": "asset"
+                        "name": "asset",
+                        "desc": "The asset to be unstaked."
                     }
                 ],
                 "returns": {
                     "type": "void"
-                }
+                },
+                "desc": "Initiates the unstaking of the specified asset."
             },
             {
                 "name": "get_staker",
@@ -243,7 +299,8 @@ _APP_SPEC_JSON = r"""{
                 ],
                 "returns": {
                     "type": "(address,uint64,uint64,bool,uint64,uint64)"
-                }
+                },
+                "desc": "Retrieves staker information for the specified staker address and stores it in the output."
             }
         ],
         "networks": {}
@@ -291,8 +348,8 @@ def _as_dict(data: typing.Any, *, convert_all: bool = True) -> dict[str, typing.
 
 def _convert_transaction_parameters(
     transaction_parameters: algokit_utils.TransactionParameters | None,
-) -> algokit_utils.CommonCallParametersDict:
-    return typing.cast(algokit_utils.CommonCallParametersDict, _as_dict(transaction_parameters))
+) -> algokit_utils.TransactionParametersDict:
+    return typing.cast(algokit_utils.TransactionParametersDict, _as_dict(transaction_parameters))
 
 
 def _convert_call_transaction_parameters(
@@ -327,7 +384,11 @@ def _convert_deploy_args(
 
 @dataclasses.dataclass(kw_only=True)
 class BootstrapArgs(_ArgsBase[None]):
+    """Initializes Vest Stake application's global state, sets admin account, escrow address, asset decimal, and
+    opts into the provided asset."""
+
     asset: int
+    """The unique asset ID to be opted into by the escrow address."""
 
     @staticmethod
     def method() -> str:
@@ -348,8 +409,12 @@ class FundEscrowAddressArgs(_ArgsBase[None]):
 
 @dataclasses.dataclass(kw_only=True)
 class SetStakeAmountsArgs(_ArgsBase[None]):
+    """Sets the minimum and maximum stake amounts for staking."""
+
     min_stake: int
+    """The minimum stake amount."""
     max_stake: int
+    """The maximum stake amount."""
 
     @staticmethod
     def method() -> str:
@@ -358,7 +423,10 @@ class SetStakeAmountsArgs(_ArgsBase[None]):
 
 @dataclasses.dataclass(kw_only=True)
 class SetAnnualRateArgs(_ArgsBase[None]):
-    new_annual_rate: int
+    """Sets the annual rate."""
+
+    annual_rate: int
+    """The annual rate."""
 
     @staticmethod
     def method() -> str:
@@ -366,10 +434,39 @@ class SetAnnualRateArgs(_ArgsBase[None]):
 
 
 @dataclasses.dataclass(kw_only=True)
+class SetAssetDecimalArgs(_ArgsBase[None]):
+    """Sets the asset decimal."""
+
+    asset_decimal: int
+    """The asset decimal."""
+
+    @staticmethod
+    def method() -> str:
+        return "set_asset_decimal(uint64)void"
+
+
+@dataclasses.dataclass(kw_only=True)
+class SetAssetIdArgs(_ArgsBase[None]):
+    """Sets the asset ID."""
+
+    asset_id: int
+    """The unique asset ID."""
+
+    @staticmethod
+    def method() -> str:
+        return "set_asset_id(uint64)void"
+
+
+@dataclasses.dataclass(kw_only=True)
 class StakeArgs(_ArgsBase[None]):
+    """Initiates a stake for the specified asset and duration."""
+
     asset: int
+    """The asset to be staked."""
     stake_duration: int
+    """The duration of the stake."""
     txn: TransactionWithSigner
+    """The transaction object for the staking operation."""
 
     @staticmethod
     def method() -> str:
@@ -378,7 +475,10 @@ class StakeArgs(_ArgsBase[None]):
 
 @dataclasses.dataclass(kw_only=True)
 class UnStakeArgs(_ArgsBase[None]):
+    """Initiates the unstaking of the specified asset."""
+
     asset: int
+    """The asset to be unstaked."""
 
     @staticmethod
     def method() -> str:
@@ -397,6 +497,8 @@ class Staker:
 
 @dataclasses.dataclass(kw_only=True)
 class GetStakerArgs(_ArgsBase[Staker]):
+    """Retrieves staker information for the specified staker address and stores it in the output."""
+
     staker: str
 
     @staticmethod
@@ -429,6 +531,7 @@ class GlobalState:
     def __init__(self, data: dict[bytes, bytes | int]):
         self.admin_acct = ByteReader(typing.cast(bytes, data.get(b"admin_acct")))
         self.annual_rate = typing.cast(int, data.get(b"annual_rate"))
+        self.asset_id = typing.cast(int, data.get(b"asset_id"))
         self.escrow_address = ByteReader(typing.cast(bytes, data.get(b"escrow_address")))
         self.max_stake = typing.cast(int, data.get(b"max_stake"))
         self.min_stake = typing.cast(int, data.get(b"min_stake"))
@@ -453,9 +556,12 @@ class Composer:
         asset: int,
         transaction_parameters: algokit_utils.TransactionParameters | None = None,
     ) -> "Composer":
-        """Adds a call to `bootstrap(asset)void` ABI method
+        """Initializes Vest Stake application's global state, sets admin account, escrow address, asset decimal, and
+        opts into the provided asset.
         
-        :param int asset: The `asset` ABI parameter
+        Adds a call to `bootstrap(asset)void` ABI method
+        
+        :param int asset: The unique asset ID to be opted into by the escrow address.
         :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
         :returns Composer: This Composer instance"""
 
@@ -502,10 +608,12 @@ class Composer:
         max_stake: int,
         transaction_parameters: algokit_utils.TransactionParameters | None = None,
     ) -> "Composer":
-        """Adds a call to `set_stake_amounts(uint64,uint64)void` ABI method
+        """Sets the minimum and maximum stake amounts for staking.
         
-        :param int min_stake: The `min_stake` ABI parameter
-        :param int max_stake: The `max_stake` ABI parameter
+        Adds a call to `set_stake_amounts(uint64,uint64)void` ABI method
+        
+        :param int min_stake: The minimum stake amount.
+        :param int max_stake: The maximum stake amount.
         :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
         :returns Composer: This Composer instance"""
 
@@ -524,17 +632,69 @@ class Composer:
     def set_annual_rate(
         self,
         *,
-        new_annual_rate: int,
+        annual_rate: int,
         transaction_parameters: algokit_utils.TransactionParameters | None = None,
     ) -> "Composer":
-        """Adds a call to `set_annual_rate(uint64)void` ABI method
+        """Sets the annual rate.
         
-        :param int new_annual_rate: The `new_annual_rate` ABI parameter
+        Adds a call to `set_annual_rate(uint64)void` ABI method
+        
+        :param int annual_rate: The annual rate.
         :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
         :returns Composer: This Composer instance"""
 
         args = SetAnnualRateArgs(
-            new_annual_rate=new_annual_rate,
+            annual_rate=annual_rate,
+        )
+        self.app_client.compose_call(
+            self.atc,
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return self
+
+    def set_asset_decimal(
+        self,
+        *,
+        asset_decimal: int,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> "Composer":
+        """Sets the asset decimal.
+        
+        Adds a call to `set_asset_decimal(uint64)void` ABI method
+        
+        :param int asset_decimal: The asset decimal.
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns Composer: This Composer instance"""
+
+        args = SetAssetDecimalArgs(
+            asset_decimal=asset_decimal,
+        )
+        self.app_client.compose_call(
+            self.atc,
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return self
+
+    def set_asset_id(
+        self,
+        *,
+        asset_id: int,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> "Composer":
+        """Sets the asset ID.
+        
+        Adds a call to `set_asset_id(uint64)void` ABI method
+        
+        :param int asset_id: The unique asset ID.
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns Composer: This Composer instance"""
+
+        args = SetAssetIdArgs(
+            asset_id=asset_id,
         )
         self.app_client.compose_call(
             self.atc,
@@ -552,11 +712,13 @@ class Composer:
         txn: TransactionWithSigner,
         transaction_parameters: algokit_utils.TransactionParameters | None = None,
     ) -> "Composer":
-        """Adds a call to `stake(asset,uint64,axfer)void` ABI method
+        """Initiates a stake for the specified asset and duration.
         
-        :param int asset: The `asset` ABI parameter
-        :param int stake_duration: The `stake_duration` ABI parameter
-        :param TransactionWithSigner txn: The `txn` ABI parameter
+        Adds a call to `stake(asset,uint64,axfer)void` ABI method
+        
+        :param int asset: The asset to be staked.
+        :param int stake_duration: The duration of the stake.
+        :param TransactionWithSigner txn: The transaction object for the staking operation.
         :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
         :returns Composer: This Composer instance"""
 
@@ -579,9 +741,11 @@ class Composer:
         asset: int,
         transaction_parameters: algokit_utils.TransactionParameters | None = None,
     ) -> "Composer":
-        """Adds a call to `un_stake(asset)void` ABI method
+        """Initiates the unstaking of the specified asset.
         
-        :param int asset: The `asset` ABI parameter
+        Adds a call to `un_stake(asset)void` ABI method
+        
+        :param int asset: The asset to be unstaked.
         :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
         :returns Composer: This Composer instance"""
 
@@ -602,7 +766,9 @@ class Composer:
         staker: str,
         transaction_parameters: algokit_utils.TransactionParameters | None = None,
     ) -> "Composer":
-        """Adds a call to `get_staker(address)(address,uint64,uint64,bool,uint64,uint64)` ABI method
+        """Retrieves staker information for the specified staker address and stores it in the output.
+        
+        Adds a call to `get_staker(address)(address,uint64,uint64,bool,uint64,uint64)` ABI method
         
         :param str staker: The `staker` ABI parameter
         :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
@@ -790,9 +956,12 @@ class VestStakeClient:
         asset: int,
         transaction_parameters: algokit_utils.TransactionParameters | None = None,
     ) -> algokit_utils.ABITransactionResponse[None]:
-        """Calls `bootstrap(asset)void` ABI method
+        """Initializes Vest Stake application's global state, sets admin account, escrow address, asset decimal, and
+        opts into the provided asset.
         
-        :param int asset: The `asset` ABI parameter
+        Calls `bootstrap(asset)void` ABI method
+        
+        :param int asset: The unique asset ID to be opted into by the escrow address.
         :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
         :returns algokit_utils.ABITransactionResponse[None]: The result of the transaction"""
 
@@ -837,10 +1006,12 @@ class VestStakeClient:
         max_stake: int,
         transaction_parameters: algokit_utils.TransactionParameters | None = None,
     ) -> algokit_utils.ABITransactionResponse[None]:
-        """Calls `set_stake_amounts(uint64,uint64)void` ABI method
+        """Sets the minimum and maximum stake amounts for staking.
         
-        :param int min_stake: The `min_stake` ABI parameter
-        :param int max_stake: The `max_stake` ABI parameter
+        Calls `set_stake_amounts(uint64,uint64)void` ABI method
+        
+        :param int min_stake: The minimum stake amount.
+        :param int max_stake: The maximum stake amount.
         :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
         :returns algokit_utils.ABITransactionResponse[None]: The result of the transaction"""
 
@@ -858,17 +1029,67 @@ class VestStakeClient:
     def set_annual_rate(
         self,
         *,
-        new_annual_rate: int,
+        annual_rate: int,
         transaction_parameters: algokit_utils.TransactionParameters | None = None,
     ) -> algokit_utils.ABITransactionResponse[None]:
-        """Calls `set_annual_rate(uint64)void` ABI method
+        """Sets the annual rate.
         
-        :param int new_annual_rate: The `new_annual_rate` ABI parameter
+        Calls `set_annual_rate(uint64)void` ABI method
+        
+        :param int annual_rate: The annual rate.
         :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
         :returns algokit_utils.ABITransactionResponse[None]: The result of the transaction"""
 
         args = SetAnnualRateArgs(
-            new_annual_rate=new_annual_rate,
+            annual_rate=annual_rate,
+        )
+        result = self.app_client.call(
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return result
+
+    def set_asset_decimal(
+        self,
+        *,
+        asset_decimal: int,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> algokit_utils.ABITransactionResponse[None]:
+        """Sets the asset decimal.
+        
+        Calls `set_asset_decimal(uint64)void` ABI method
+        
+        :param int asset_decimal: The asset decimal.
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns algokit_utils.ABITransactionResponse[None]: The result of the transaction"""
+
+        args = SetAssetDecimalArgs(
+            asset_decimal=asset_decimal,
+        )
+        result = self.app_client.call(
+            call_abi_method=args.method(),
+            transaction_parameters=_convert_call_transaction_parameters(transaction_parameters),
+            **_as_dict(args, convert_all=True),
+        )
+        return result
+
+    def set_asset_id(
+        self,
+        *,
+        asset_id: int,
+        transaction_parameters: algokit_utils.TransactionParameters | None = None,
+    ) -> algokit_utils.ABITransactionResponse[None]:
+        """Sets the asset ID.
+        
+        Calls `set_asset_id(uint64)void` ABI method
+        
+        :param int asset_id: The unique asset ID.
+        :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
+        :returns algokit_utils.ABITransactionResponse[None]: The result of the transaction"""
+
+        args = SetAssetIdArgs(
+            asset_id=asset_id,
         )
         result = self.app_client.call(
             call_abi_method=args.method(),
@@ -885,11 +1106,13 @@ class VestStakeClient:
         txn: TransactionWithSigner,
         transaction_parameters: algokit_utils.TransactionParameters | None = None,
     ) -> algokit_utils.ABITransactionResponse[None]:
-        """Calls `stake(asset,uint64,axfer)void` ABI method
+        """Initiates a stake for the specified asset and duration.
         
-        :param int asset: The `asset` ABI parameter
-        :param int stake_duration: The `stake_duration` ABI parameter
-        :param TransactionWithSigner txn: The `txn` ABI parameter
+        Calls `stake(asset,uint64,axfer)void` ABI method
+        
+        :param int asset: The asset to be staked.
+        :param int stake_duration: The duration of the stake.
+        :param TransactionWithSigner txn: The transaction object for the staking operation.
         :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
         :returns algokit_utils.ABITransactionResponse[None]: The result of the transaction"""
 
@@ -911,9 +1134,11 @@ class VestStakeClient:
         asset: int,
         transaction_parameters: algokit_utils.TransactionParameters | None = None,
     ) -> algokit_utils.ABITransactionResponse[None]:
-        """Calls `un_stake(asset)void` ABI method
+        """Initiates the unstaking of the specified asset.
         
-        :param int asset: The `asset` ABI parameter
+        Calls `un_stake(asset)void` ABI method
+        
+        :param int asset: The asset to be unstaked.
         :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters
         :returns algokit_utils.ABITransactionResponse[None]: The result of the transaction"""
 
@@ -933,7 +1158,9 @@ class VestStakeClient:
         staker: str,
         transaction_parameters: algokit_utils.TransactionParameters | None = None,
     ) -> algokit_utils.ABITransactionResponse[Staker]:
-        """Calls `get_staker(address)(address,uint64,uint64,bool,uint64,uint64)` ABI method
+        """Retrieves staker information for the specified staker address and stores it in the output.
+        
+        Calls `get_staker(address)(address,uint64,uint64,bool,uint64,uint64)` ABI method
         
         :param str staker: The `staker` ABI parameter
         :param algokit_utils.TransactionParameters transaction_parameters: (optional) Additional transaction parameters

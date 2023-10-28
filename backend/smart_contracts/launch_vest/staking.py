@@ -16,6 +16,17 @@ SECONDS_IN_A_YEAR = pt.Int(31_536_000)
 
 
 class Staker(pt.abi.NamedTuple):
+    """
+
+    Represents a staker with the following instance variables:
+
+    :ivar pt.abi.Address address: The staker's Algorand address.
+    :ivar pt.abi.Uint64 amount: The amount staked.
+    :ivar pt.abi.Uint64 asset_id: The ID of the asset being staked.
+    :ivar pt.abi.Bool is_staking: A boolean indicating if the staker is actively staking.
+    :ivar pt.abi.Uint64 start_timestamp: The timestamp when staking started.
+    :ivar pt.abi.Uint64 end_timestamp: The timestamp when their staking ends.
+    """
     address: pt.abi.Field[pt.abi.Address]
     amount: pt.abi.Field[pt.abi.Uint64]
     asset_id: pt.abi.Field[pt.abi.Uint64]
@@ -25,13 +36,26 @@ class Staker(pt.abi.NamedTuple):
 
 
 class State:
+    """
+    Defines Vest Stake states:
+
+    :ivar bk.GlobalStateValue(bytes) admin_acct: The admin account's address.
+    :ivar bk.GlobalStateValue(uint64) asset_id: The unique identifier for the asset.
+    :ivar bk.GlobalStateValue(bytes) escrow_address: The address of the escrow account.
+    :ivar bk.GlobalStateValue(uint64) min_stake: The minimum staking amount.
+    :ivar bk.GlobalStateValue(uint64) max_stake: The maximum staking amount.
+    :ivar bk.GlobalStateValue(uint64) annual_rate: The annual staking rate.
+    :ivar bk.GlobalStateValue(uint64) vest_decimals: The number of decimal places for $VEST.
+    :ivar BoxMapping(abi.Address, Staker) staker_to_stake: A mapping with key of type ``Address``
+     and value of type ``Stake``.
+    """
     admin_acct = bk.GlobalStateValue(
         stack_type=pt.TealType.bytes,
         default=pt.Bytes("")
     )
     asset_id = bk.GlobalStateValue(
         stack_type=pt.TealType.uint64
-    ),
+    )
     escrow_address = bk.GlobalStateValue(
         stack_type=pt.TealType.bytes,
         default=pt.Bytes("")
@@ -67,16 +91,32 @@ def calculate_stake_reward(
     *,
     output: pt.abi.Uint64
 ) -> pt.Expr:
+    """
+    Calculates the stake reward based on the stake amount and duration.
+
+    :param pt.abi.Uint64 stake_amount: The amount of the stake.
+    :param pt.abi.Uint64 stake_duration: The duration of the stake.
+    :param pt.abi.Uint64 output: The object where the stake_reward result will be stored.
+
+    :rtype pt.Expr:
+    """
     return output.set(
-        (stake_amount.get() * app.state.annual_rate * stake_duration.get()) / (pt.Int(100) * SECONDS_IN_A_YEAR)
+        (stake_amount.get() + (
+            (stake_amount.get() * app.state.annual_rate * stake_duration.get()) / (pt.Int(100) * SECONDS_IN_A_YEAR))
+         )
     )
 
 
 # noinspection PyTypeChecker
 @app.external
-def bootstrap(
-    asset: pt.abi.Asset
-) -> pt.Expr:
+def bootstrap(asset: pt.abi.Asset) -> pt.Expr:
+    """
+    Initializes Vest Stake application's global state, sets admin account, escrow address, asset decimal, and
+    opts into the provided asset.
+
+    :param asset: The unique asset ID to be opted into by the escrow address.
+    :rtype: pt.Expr.
+    """
     return pt.Seq(
         app.initialize_global_state(),
         app.state.admin_acct.set(pt.Global.creator_address()),
@@ -90,6 +130,12 @@ def bootstrap(
 
 
 def escrow_asset_opt_in(asset: pt.abi.Asset) -> pt.Expr:
+    """
+    Executes Vest Stake escrow (application) address asset opt in.
+
+    :param pt.abi.Asset asset: The asset to opt be into.
+    :rtype pt.Expr:
+    """
     return pt.Seq(
         pt.InnerTxnBuilder.Execute({
             pt.TxnField.type_enum: pt.TxnType.AssetTransfer,
@@ -114,7 +160,7 @@ def fund_escrow_address(
     return pt.Seq(
         pt.Assert(
             txn.get().amount() > pt.Int(0),
-            txn.get().receiver() == app.state.escrow_address,
+            txn.get().receiver() == pt.Global.current_application_address(),
             txn.get().type_enum() == pt.TxnType.Payment,
         )
     )
@@ -126,6 +172,13 @@ def set_stake_amounts(
     min_stake: pt.abi.Uint64,
     max_stake: pt.abi.Uint64
 ) -> pt.Expr:
+    """
+    Sets the minimum and maximum stake amounts for staking.
+
+    :param pt.abi.Uint64 min_stake: The minimum stake amount.
+    :param pt.abi.Uint64 max_stake: The maximum stake amount.
+    :rtype pt.Expr:.
+    """
     return pt.Seq(
         pt.Assert(
             min_stake.get() > pt.Int(0),
@@ -138,8 +191,36 @@ def set_stake_amounts(
 
 
 @app.external(authorize=bk.Authorize.only_creator())
-def set_annual_rate(new_annual_rate: pt.abi.Uint64) -> pt.Expr:
-    return app.state.annual_rate.set(new_annual_rate.get())
+def set_annual_rate(annual_rate: pt.abi.Uint64) -> pt.Expr:
+    """
+    Sets the annual rate.
+
+    :param pt.abi.Uint64 annual_rate: The annual rate.
+    :rtype pt.Expr.:
+    """
+    return app.state.annual_rate.set(annual_rate.get())
+
+
+@app.external(authorize=bk.Authorize.only_creator())
+def set_asset_decimal(asset_decimal: pt.abi.Uint64) -> pt.Expr:
+    """
+    Sets the asset decimal.
+
+    :param pt.abi.Uint64 asset_decimal: The asset decimal.
+    :rtype pt.Expr.:
+    """
+    return app.state.vest_decimals.set(asset_decimal.get())
+
+
+@app.external(authorize=bk.Authorize.only_creator())
+def set_asset_id(asset_id: pt.abi.Uint64) -> pt.Expr:
+    """
+    Sets the asset ID.
+
+    :param pt.abi.Uint64 asset_id: The unique asset ID.
+    :rtype pt.Expr.:
+    """
+    return app.state.asset_id.set(asset_id.get())
 
 
 # noinspection PyTypeChecker
@@ -149,6 +230,14 @@ def stake(
     stake_duration: pt.abi.Uint64,
     txn: pt.abi.AssetTransferTransaction
 ) -> pt.Expr:
+    """
+    Initiates a stake for the specified asset and duration.
+
+    :param pt.abi.Asset asset: The asset to be staked.
+    :param pt.abi.Uint64 stake_duration: The duration of the stake.
+    :param pt.abi.AssetTransferTransaction txn: The transaction object for the staking operation.
+    :rtype pt.Expr.:
+    """
     staker = Staker()
     return pt.Seq(
         pt.Assert(
@@ -172,7 +261,6 @@ def stake(
             pt.Or(
                 txn.get().asset_amount() > app.state.min_stake,
                 txn.get().asset_amount() <= app.state.max_stake,
-                # 500_000_000_00 <= 20_000*(10^decimals)
             )
         ),
         pt.Assert(
@@ -205,6 +293,12 @@ def stake(
 # noinspection PyTypeChecker
 @app.external
 def un_stake(asset: pt.abi.Asset) -> pt.Expr:
+    """
+    Initiates the unstaking of the specified asset.
+
+    :param asset: The asset to be unstaked.
+    :rtype pt.Expr:
+    """
     return pt.Seq(
         pt.Assert(app.state.staker_to_stake[pt.Txn.sender()].exists()),
         (staker := Staker()).decode(app.state.staker_to_stake[pt.Txn.sender()].get()),
@@ -253,4 +347,10 @@ def get_staker(
     *,
     output: Staker
 ) -> pt.Expr:
+    """
+    Retrieves staker information for the specified staker address and stores it in the output.
+
+    :param Staker output: The object where staker information will be stored.
+    :rtype: pt.Expr.
+    """
     return app.state.staker_to_stake[staker].store_into(output)

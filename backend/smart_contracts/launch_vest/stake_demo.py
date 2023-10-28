@@ -71,35 +71,39 @@ app_client.call(
     asset=VEST_AID
 )
 
-app_client.call(
-    set_stake_amounts,
-    min_stake=5,
-    max_stake=10
-)
-
-app_client.call(
-    set_annual_rate,
-    new_annual_rate=10
-)
+# app_client.call(
+#     set_stake_amounts,
+#     min_stake=5,
+#     max_stake=10
+# )
+#
+# app_client.call(
+#     set_annual_rate,
+#     new_annual_rate=10
+# )
 
 txn = TransactionWithSigner(
     txn=AssetTransferTxn(
         sender=admin_acct.address,
         receiver=app_addr,
-        amt=8,
+        amt=200_000_000_00,
         index=VEST_AID,
         sp=algod_client.suggested_params()
     ),
     signer=admin_acct.signer
 )
 
-app_client.call(
+stake_txn = app_client.call(
     stake,
-    asset=457333973,
+    asset=VEST_AID,
     stake_duration=FIVE_MINS_STAKING_PERIOD,
     txn=txn,
     boxes=[(app_id, encoding.decode_address(admin_acct.address))]
 )
+tx_info = stake_txn.tx_info['logs']
+for info in tx_info:
+    print(info)
+
 result = app_client.call(
     get_staker,
     staker=admin_acct.address,
@@ -109,6 +113,6 @@ print(result.return_value)
 
 app_client.call(
     un_stake,
-    asset=457333973,
+    asset=VEST_AID,
     boxes=[(app_id, encoding.decode_address(admin_acct.address))]
 )
