@@ -37,11 +37,8 @@ const Projects = () => {
 
     let projectsArr = []
     for (let _box of await launchVestClient.appClient.getBoxNames()) {
-      let result = await launchVestClient.appClient.getBoxValue(_box.name)
-      let key = _box.nameRaw;
-      console.log(key)
-      console.log(result)
-
+      let result = await launchVestClient.appClient.getBoxValue(_box)
+ 
       const resultCodec = algosdk.ABIType.from('(address,uint64,uint64,uint64,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64)')
       const tokenList = resultCodec.decode(result)
       console.log(tokenList)

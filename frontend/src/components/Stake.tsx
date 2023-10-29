@@ -21,6 +21,8 @@ const Stake = () => {
   const _1year = useRef()
   const dispatch = useDispatch()
   const [amount, setAmount] = useState<bigint>(0n)
+  const [stakeState, setStakeState] = useState<bigint>(0n)
+  const [latestTimeStamp, setLatestTimeStamp] = useState<bigint>(0n)
   const [stakeDuration, setStakeDuration] = useState<bigint>(300n)
 
   const { enqueueSnackbar } = useSnackbar()
@@ -38,39 +40,68 @@ const Stake = () => {
   const vestStakeClient = new VestStakeClient(
     {
       resolveBy: 'id',
-      id: 460442958,
+      id: 460473489,
       sender,
     },
     algodClient,
   )
-
-  const txn = async () => {
+  // 100,000,000,000
+  const stakeTxn = async () => {
     const decimals = (await algodClient.getAssetByID(ASSET_ID).do()).params.decimals
-    const stakeAmount = BigInt(amount) * BigInt(10 ** decimals)
+    // const stakeAmount = 200_000_000_000
+    const stakeAmount = BigInt(amount) * BigInt(10 ** (decimals + 1))
     // stake
     console.log(stakeAmount)
     console.log(stakeDuration)
 
-    const appAddress = (await vestStakeClient.appClient.getAppReference()).appAddress;
-    // const txn = algokit.transferAsset({
-    //   from: sender,
-    //   to: appAddress,
-    //   amount: BigInt(stakeAmount),
-    //   assetId: ASSET_ID
-    // }, algodClient);
+    const appAddress = (await vestStakeClient.appClient.getAppReference()).appAddress
 
-    
     const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
       from: String(activeAddress),
       to: appAddress,
       amount: BigInt(stakeAmount),
       assetIndex: ASSET_ID,
       suggestedParams: await algodClient.getTransactionParams().do(),
-    });
+    })
 
-    const tx = await vestStakeClient.stake({ asset: BigInt(ASSET_ID), stake_duration: BigInt(stakeDuration), txn }, { boxes: [algosdk.decodeAddress(activeAddress).publicKey] })
+    const tx = await vestStakeClient.stake(
+      { asset: BigInt(ASSET_ID), stake_duration: BigInt(stakeDuration), txn },
+      { boxes: [algosdk.decodeAddress(activeAddress).publicKey] },
+    )
     console.log(tx)
   }
+
+  const unstakeTxn = async () => {
+    console.log('unstaking')
+    const tx = await vestStakeClient.unStake({ asset: BigInt(ASSET_ID) }, { boxes: [algosdk.decodeAddress(activeAddress).publicKey] })
+    console.log(tx);
+  }
+
+  const getLatestTimeStamp = async () => {
+    const status_ = await algodClient.status().do()
+    const latestTimeStamp_ = await algodClient.block(status_['last-round']).do()
+    setLatestTimeStamp(latestTimeStamp_['block']['ts'])
+  }
+  const checkIsStaking = async () => {
+    await getLatestTimeStamp()
+    for (let _box of await vestStakeClient.appClient.getBoxNames()) {
+      let result = await vestStakeClient.appClient.getBoxValue(_box)
+
+      const resultCodec = algosdk.ABIType.from('(address,uint64,uint64,bool,uint64,uint64)')
+      const stakingList = resultCodec.decode(result)
+      console.log(stakingList[0])
+      if (String(stakingList[0]) === activeAddress) {
+        console.log('stakingList: ', stakingList[5])
+        setStakeState(stakingList[5])
+
+        console.log('latesttimestamp:', latestTimeStamp)
+      }
+    }
+  }
+
+  useEffect(() => {
+    checkIsStaking()
+  }, [])
 
   return (
     <div className="max-w-[60%] w-[100%] mx-auto">
@@ -168,30 +199,68 @@ const Stake = () => {
         <button
           type="submit"
           className="w-[100%] h-[60px] capitalize border-2 outline-0 rounded-full bg-[#000000] text-[26px] text-[#ffffff] font-bold shadow-lg shadow-indigo-500/40"
-          onClick={() => {
-            dispatch(showConfirmModal())
-            // make sure stake duration is either of the 3 durations
-            console.log(stakeDuration)
-          }}
+          onClick={
+            Number(latestTimeStamp) > Number(stakeState)
+              ? () => {
+                  dispatch(showConfirmModal())
+                }
+              : () => {
+                  dispatch(showConfirmModal())
+                  // make sure stake duration is either of the 3 durations
+                  // console.log(stakeDuration)
+                }
+          }
         >
-          Stake
+          {Number(latestTimeStamp) > Number(stakeState) ? 'unstake' : 'stake'}
         </button>
       </div>
       {/* CONFIRM MODAL */}
 
-      <ConfirmModal
-        text={`Stake ${amount} vest for ${stakeDuration === QUATERLY ? '3 months' : stakeDuration === HALF_A_YEAR ? '6 months' : '1 year'}`}
-        txn={txn}
-      />
+      {/* <ConfirmModal {Number(latestTimeStamp) > Number(stakeState) ? text={`Stake ${amount} vest for ${stakeDuration === QUATERLY ? '3 months' : stakeDuration === HALF_A_YEAR ? '6 months' : '1 year'}`} : text="hello"}
+txn={txn}
+      /> */}
+      {Number(latestTimeStamp) > Number(stakeState) ? (
+        <ConfirmModal text={`Unstake vest`} txn={unstakeTxn} />
+      ) : (
+        <ConfirmModal
+          text={`Stake ${amount} vest for ${
+            stakeDuration === QUATERLY ? '3 months' : stakeDuration === HALF_A_YEAR ? '6 months' : '1 year'
+          }`}
+          txn={stakeTxn}
+        />
+      )}
 
       <button
         onClick={async () => {
-          await vestStakeClient.create.bare()
-          const vestStakeAppId = (await vestStakeClient.appClient.getAppReference()).appId
-          await vestStakeClient.appClient.fundAppAccount(algokit.microAlgos(300_000))
-          await vestStakeClient.bootstrap({ asset: BigInt(ASSET_ID) })
+          // await vestStakeClient.create.bare()
+          // const vestStakeAppId = (await vestStakeClient.appClient.getAppReference()).appId
+          // await vestStakeClient.appClient.fundAppAccount(algokit.microAlgos(300_000))
+          // await vestStakeClient.bootstrap({ asset: BigInt(ASSET_ID) })
 
-          console.log(vestStakeAppId)
+          // console.log(vestStakeAppId)
+
+          // read box
+          // let StakersArr = []
+          for (let _box of await vestStakeClient.appClient.getBoxNames()) {
+            let result = await vestStakeClient.appClient.getBoxValue(_box)
+
+            const resultCodec = algosdk.ABIType.from('(address,uint64,uint64,bool,uint64,uint64)')
+            const stakingList = resultCodec.decode(result)
+            console.log('stakingList: ', stakingList[5])
+            // let obj = {
+            //   address: stakingList[0],
+            //   amount: Number(stakingList[1]),
+            //   assetId: Number(stakingList[2]),
+            //   isStaking: stakingList[3],
+            //   startTimestamp: Number(stakingList[4]),
+            //   endTimestamp: Number(stakingList[5]),
+            // }
+            // StakersArr.push(obj)
+          }
+          // console.log(StakersArr)
+          // return StakersArr
+
+          // if currentTimestamp > endTimestamp (show unstake) else show stake
         }}
       >
         create staking app
