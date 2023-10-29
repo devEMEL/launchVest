@@ -100,9 +100,9 @@ stake_txn = app_client.call(
     txn=txn,
     boxes=[(app_id, encoding.decode_address(admin_acct.address))]
 )
-tx_info = stake_txn.tx_info['logs']
-for info in tx_info:
-    print(info)
+# tx_info = stake_txn.tx_info['logs']
+# for info in tx_info:
+#     print(info)
 
 result = app_client.call(
     get_staker,
@@ -112,7 +112,22 @@ result = app_client.call(
 print(result.return_value)
 
 app_client.call(
-    un_stake,
+    stake,
     asset=VEST_AID,
+    stake_duration=FIVE_MINS_STAKING_PERIOD,
+    txn=txn,
     boxes=[(app_id, encoding.decode_address(admin_acct.address))]
 )
+
+result = app_client.call(
+    get_staker,
+    staker=admin_acct.address,
+    boxes=[(app_id, encoding.decode_address(admin_acct.address))]
+)
+print(result.return_value)
+
+# app_client.call(
+#     un_stake,
+#     asset=VEST_AID,
+#     boxes=[(app_id, encoding.decode_address(admin_acct.address))]
+# )
