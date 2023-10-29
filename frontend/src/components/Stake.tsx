@@ -40,7 +40,7 @@ const Stake = () => {
   const vestStakeClient = new VestStakeClient(
     {
       resolveBy: 'id',
-      id: 460930743,
+      id: 462048462,
       sender,
     },
     algodClient,
@@ -49,7 +49,7 @@ const Stake = () => {
   const stakeTxn = async () => {
     const decimals = (await algodClient.getAssetByID(ASSET_ID).do()).params.decimals
     // const stakeAmount = 200_000_000_000
-    const stakeAmount = BigInt(amount) * BigInt(10 ** (decimals))
+    const stakeAmount = BigInt(amount) * BigInt(10 ** decimals)
     // stake
     console.log(stakeAmount)
     console.log(stakeDuration)
@@ -69,12 +69,28 @@ const Stake = () => {
       { boxes: [algosdk.decodeAddress(activeAddress).publicKey] },
     )
     console.log(tx)
+    return tx
   }
 
   const unstakeTxn = async () => {
     console.log('unstaking')
     const tx = await vestStakeClient.unStake({ asset: BigInt(ASSET_ID) }, { boxes: [algosdk.decodeAddress(activeAddress).publicKey] })
     console.log(tx)
+    return tx
+  }
+
+  const stakeTxnAction = async () => {
+    // on error alert ('Error staking! Ensure you have enough funds or are not currently staking')
+    await stakeTxn()
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err))
+  }
+
+  const unstakeTxnAction = async () => {
+    // on error alert ('Error staking! Ensure you have enough funds or are not currently staking')
+    await unstakeTxn()
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err))
   }
 
   return (
@@ -174,9 +190,9 @@ const Stake = () => {
           type="submit"
           className="w-[100%] h-[60px] capitalize border-2 outline-0 rounded-full bg-[#000000] text-[26px] text-[#ffffff] font-bold shadow-lg shadow-indigo-500/40"
           onClick={
-            Number(stakeDuration) == 0
+            Number(amount) == 0 || Number(stakeDuration) == 0
               ? () => {
-                // alert error
+                  // alert error
                   console.log('no duration selected')
                   return
                 }
@@ -211,10 +227,10 @@ const Stake = () => {
               ? '1 year'
               : 'invalid duration'
           }`}
-          txn={stakeTxn}
+          txn={stakeTxnAction}
         />
       ) : (
-        <ConfirmModal text={`Unstake vest`} txn={unstakeTxn} />
+        <ConfirmModal text={`Unstake vest`} txn={unstakeTxnAction} />
       )}
 
       <button
