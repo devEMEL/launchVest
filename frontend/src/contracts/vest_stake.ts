@@ -46,6 +46,16 @@ export const APP_SPEC: AppSpec = {
         "no_op": "CALL"
       }
     },
+    "set_asset_decimal(uint64)void": {
+      "call_config": {
+        "no_op": "CALL"
+      }
+    },
+    "set_asset_id(uint64)void": {
+      "call_config": {
+        "no_op": "CALL"
+      }
+    },
     "stake(asset,uint64,axfer)void": {
       "call_config": {
         "no_op": "CALL"
@@ -95,13 +105,13 @@ export const APP_SPEC: AppSpec = {
     }
   },
   "source": {
-    "approval": "I3ByYWdtYSB2ZXJzaW9uIDgKaW50Y2Jsb2NrIDAgMSA0IDEwMDAwMDAwMDAgMzE1MzYwMDAKYnl0ZWNibG9jayAweCAweDY1NzM2MzcyNmY3NzVmNjE2NDY0NzI2NTczNzMgMHg2MTczNzM2NTc0NWY2NDY1NjM2OTZkNjE2YyAweDYxNmU2ZTc1NjE2YzVmNzI2MTc0NjUgMHg2ZDYxNzg1ZjczNzQ2MTZiNjUgMHg2ZDY5NmU1ZjczNzQ2MTZiNjUgMHg2MTY0NmQ2OTZlNWY2MTYzNjM3NCAweDAwCnR4biBOdW1BcHBBcmdzCmludGNfMCAvLyAwCj09CmJueiBtYWluX2wxNgp0eG5hIEFwcGxpY2F0aW9uQXJncyAwCnB1c2hieXRlcyAweDM0NDk0ZDg3IC8vICJib290c3RyYXAoYXNzZXQpdm9pZCIKPT0KYm56IG1haW5fbDE1CnR4bmEgQXBwbGljYXRpb25BcmdzIDAKcHVzaGJ5dGVzIDB4OTYzYTU5NmUgLy8gImZ1bmRfZXNjcm93X2FkZHJlc3MocGF5KXZvaWQiCj09CmJueiBtYWluX2wxNAp0eG5hIEFwcGxpY2F0aW9uQXJncyAwCnB1c2hieXRlcyAweDJjYTZhZTAyIC8vICJzZXRfc3Rha2VfYW1vdW50cyh1aW50NjQsdWludDY0KXZvaWQiCj09CmJueiBtYWluX2wxMwp0eG5hIEFwcGxpY2F0aW9uQXJncyAwCnB1c2hieXRlcyAweDFjMDk0YjYwIC8vICJzZXRfYW5udWFsX3JhdGUodWludDY0KXZvaWQiCj09CmJueiBtYWluX2wxMgp0eG5hIEFwcGxpY2F0aW9uQXJncyAwCnB1c2hieXRlcyAweGFlNGI5ZTkyIC8vICJzdGFrZShhc3NldCx1aW50NjQsYXhmZXIpdm9pZCIKPT0KYm56IG1haW5fbDExCnR4bmEgQXBwbGljYXRpb25BcmdzIDAKcHVzaGJ5dGVzIDB4NTdiYWE1YjUgLy8gInVuX3N0YWtlKGFzc2V0KXZvaWQiCj09CmJueiBtYWluX2wxMAp0eG5hIEFwcGxpY2F0aW9uQXJncyAwCnB1c2hieXRlcyAweDJmZTJjYjRlIC8vICJnZXRfc3Rha2VyKGFkZHJlc3MpKGFkZHJlc3MsdWludDY0LHVpbnQ2NCxib29sLHVpbnQ2NCx1aW50NjQpIgo9PQpibnogbWFpbl9sOQplcnIKbWFpbl9sOToKdHhuIE9uQ29tcGxldGlvbgppbnRjXzAgLy8gTm9PcAo9PQp0eG4gQXBwbGljYXRpb25JRAppbnRjXzAgLy8gMAohPQomJgphc3NlcnQKY2FsbHN1YiBnZXRzdGFrZXJjYXN0ZXJfMTMKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDEwOgp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCiE9CiYmCmFzc2VydApjYWxsc3ViIHVuc3Rha2VjYXN0ZXJfMTIKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDExOgp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCiE9CiYmCmFzc2VydApjYWxsc3ViIHN0YWtlY2FzdGVyXzExCmludGNfMSAvLyAxCnJldHVybgptYWluX2wxMjoKdHhuIE9uQ29tcGxldGlvbgppbnRjXzAgLy8gTm9PcAo9PQp0eG4gQXBwbGljYXRpb25JRAppbnRjXzAgLy8gMAohPQomJgphc3NlcnQKY2FsbHN1YiBzZXRhbm51YWxyYXRlY2FzdGVyXzEwCmludGNfMSAvLyAxCnJldHVybgptYWluX2wxMzoKdHhuIE9uQ29tcGxldGlvbgppbnRjXzAgLy8gTm9PcAo9PQp0eG4gQXBwbGljYXRpb25JRAppbnRjXzAgLy8gMAohPQomJgphc3NlcnQKY2FsbHN1YiBzZXRzdGFrZWFtb3VudHNjYXN0ZXJfOQppbnRjXzEgLy8gMQpyZXR1cm4KbWFpbl9sMTQ6CnR4biBPbkNvbXBsZXRpb24KaW50Y18wIC8vIE5vT3AKPT0KdHhuIEFwcGxpY2F0aW9uSUQKaW50Y18wIC8vIDAKIT0KJiYKYXNzZXJ0CmNhbGxzdWIgZnVuZGVzY3Jvd2FkZHJlc3NjYXN0ZXJfOAppbnRjXzEgLy8gMQpyZXR1cm4KbWFpbl9sMTU6CnR4biBPbkNvbXBsZXRpb24KaW50Y18wIC8vIE5vT3AKPT0KdHhuIEFwcGxpY2F0aW9uSUQKaW50Y18wIC8vIDAKIT0KJiYKYXNzZXJ0CmNhbGxzdWIgYm9vdHN0cmFwY2FzdGVyXzcKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDE2Ogp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CmJueiBtYWluX2wxOAplcnIKbWFpbl9sMTg6CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCj09CmFzc2VydAppbnRjXzEgLy8gMQpyZXR1cm4KCi8vIGJvb3RzdHJhcApib290c3RyYXBfMDoKcHJvdG8gMSAwCmJ5dGVjIDYgLy8gImFkbWluX2FjY3QiCmJ5dGVjXzAgLy8gIiIKYXBwX2dsb2JhbF9wdXQKYnl0ZWNfMyAvLyAiYW5udWFsX3JhdGUiCnB1c2hpbnQgMTAgLy8gMTAKYXBwX2dsb2JhbF9wdXQKYnl0ZWNfMiAvLyAiYXNzZXRfZGVjaW1hbCIKaW50Y18wIC8vIDAKYXBwX2dsb2JhbF9wdXQKYnl0ZWNfMSAvLyAiZXNjcm93X2FkZHJlc3MiCmJ5dGVjXzAgLy8gIiIKYXBwX2dsb2JhbF9wdXQKYnl0ZWMgNCAvLyAibWF4X3N0YWtlIgpwdXNoaW50IDIwMDAwIC8vIDIwMDAwCmludGNfMyAvLyAxMDAwMDAwMDAwCioKYXBwX2dsb2JhbF9wdXQKYnl0ZWMgNSAvLyAibWluX3N0YWtlIgpwdXNoaW50IDEwMCAvLyAxMDAKaW50Y18zIC8vIDEwMDAwMDAwMDAKKgphcHBfZ2xvYmFsX3B1dApieXRlYyA2IC8vICJhZG1pbl9hY2N0IgpnbG9iYWwgQ3JlYXRvckFkZHJlc3MKYXBwX2dsb2JhbF9wdXQKYnl0ZWNfMSAvLyAiZXNjcm93X2FkZHJlc3MiCmdsb2JhbCBDdXJyZW50QXBwbGljYXRpb25BZGRyZXNzCmFwcF9nbG9iYWxfcHV0CmZyYW1lX2RpZyAtMQp0eG5hcyBBc3NldHMKYXNzZXRfcGFyYW1zX2dldCBBc3NldERlY2ltYWxzCnN0b3JlIDEKc3RvcmUgMApsb2FkIDAKaW50Y18wIC8vIDAKIT0KYXNzZXJ0CmJ5dGVjXzIgLy8gImFzc2V0X2RlY2ltYWwiCmxvYWQgMAphcHBfZ2xvYmFsX3B1dApieXRlY18xIC8vICJlc2Nyb3dfYWRkcmVzcyIKYXBwX2dsb2JhbF9nZXQKZnJhbWVfZGlnIC0xCnR4bmFzIEFzc2V0cwphc3NldF9ob2xkaW5nX2dldCBBc3NldEJhbGFuY2UKc3RvcmUgMgppbnRjXzAgLy8gMAo9PQpieiBib290c3RyYXBfMF9sMgppdHhuX2JlZ2luCmludGNfMiAvLyBheGZlcgppdHhuX2ZpZWxkIFR5cGVFbnVtCmZyYW1lX2RpZyAtMQp0eG5hcyBBc3NldHMKaXR4bl9maWVsZCBYZmVyQXNzZXQKaW50Y18wIC8vIDAKaXR4bl9maWVsZCBBc3NldEFtb3VudApieXRlY18xIC8vICJlc2Nyb3dfYWRkcmVzcyIKYXBwX2dsb2JhbF9nZXQKaXR4bl9maWVsZCBBc3NldFJlY2VpdmVyCml0eG5fc3VibWl0CmJvb3RzdHJhcF8wX2wyOgpyZXRzdWIKCi8vIGZ1bmRfZXNjcm93X2FkZHJlc3MKZnVuZGVzY3Jvd2FkZHJlc3NfMToKcHJvdG8gMSAwCmZyYW1lX2RpZyAtMQpndHhucyBBbW91bnQKaW50Y18wIC8vIDAKPgphc3NlcnQKZnJhbWVfZGlnIC0xCmd0eG5zIFJlY2VpdmVyCmJ5dGVjXzEgLy8gImVzY3Jvd19hZGRyZXNzIgphcHBfZ2xvYmFsX2dldAo9PQphc3NlcnQKZnJhbWVfZGlnIC0xCmd0eG5zIFR5cGVFbnVtCmludGNfMSAvLyBwYXkKPT0KYXNzZXJ0CnJldHN1YgoKLy8gc2V0X3N0YWtlX2Ftb3VudHMKc2V0c3Rha2VhbW91bnRzXzI6CnByb3RvIDIgMAp0eG4gU2VuZGVyCmdsb2JhbCBDcmVhdG9yQWRkcmVzcwo9PQovLyB1bmF1dGhvcml6ZWQKYXNzZXJ0CmZyYW1lX2RpZyAtMgppbnRjXzAgLy8gMAo+CmFzc2VydApmcmFtZV9kaWcgLTEKaW50Y18wIC8vIDAKPgphc3NlcnQKZnJhbWVfZGlnIC0xCmZyYW1lX2RpZyAtMgo+CmFzc2VydApieXRlYyA1IC8vICJtaW5fc3Rha2UiCmZyYW1lX2RpZyAtMgpieXRlY18yIC8vICJhc3NldF9kZWNpbWFsIgphcHBfZ2xvYmFsX2dldAoqCmFwcF9nbG9iYWxfcHV0CmJ5dGVjIDQgLy8gIm1heF9zdGFrZSIKZnJhbWVfZGlnIC0xCmJ5dGVjXzIgLy8gImFzc2V0X2RlY2ltYWwiCmFwcF9nbG9iYWxfZ2V0CioKYXBwX2dsb2JhbF9wdXQKcmV0c3ViCgovLyBzZXRfYW5udWFsX3JhdGUKc2V0YW5udWFscmF0ZV8zOgpwcm90byAxIDAKdHhuIFNlbmRlcgpnbG9iYWwgQ3JlYXRvckFkZHJlc3MKPT0KLy8gdW5hdXRob3JpemVkCmFzc2VydApieXRlY18zIC8vICJhbm51YWxfcmF0ZSIKZnJhbWVfZGlnIC0xCmFwcF9nbG9iYWxfcHV0CnJldHN1YgoKLy8gc3Rha2UKc3Rha2VfNDoKcHJvdG8gMyAwCmJ5dGVjXzAgLy8gIiIKZHVwCmludGNfMCAvLyAwCmR1cG4gNgpieXRlY18wIC8vICIiCmR1cApmcmFtZV9kaWcgLTEKZ3R4bnMgVHlwZUVudW0KaW50Y18yIC8vIGF4ZmVyCj09CmFzc2VydApmcmFtZV9kaWcgLTEKZ3R4bnMgQXNzZXRSZWNlaXZlcgpieXRlY18xIC8vICJlc2Nyb3dfYWRkcmVzcyIKYXBwX2dsb2JhbF9nZXQKPT0KYXNzZXJ0CmZyYW1lX2RpZyAtMQpndHhucyBYZmVyQXNzZXQKZnJhbWVfZGlnIC0zCnR4bmFzIEFzc2V0cwo9PQphc3NlcnQKZnJhbWVfZGlnIC0xCmd0eG5zIEFzc2V0QW1vdW50CmJ5dGVjIDUgLy8gIm1pbl9zdGFrZSIKYXBwX2dsb2JhbF9nZXQKPj0KZnJhbWVfZGlnIC0xCmd0eG5zIEFzc2V0QW1vdW50CmJ5dGVjIDQgLy8gIm1heF9zdGFrZSIKYXBwX2dsb2JhbF9nZXQKPD0KJiYKYXNzZXJ0CmZyYW1lX2RpZyAtMgpwdXNoaW50IDMwMCAvLyAzMDAKPT0KZnJhbWVfZGlnIC0yCnB1c2hpbnQgNzg4NDAwMCAvLyA3ODg0MDAwCj09Cnx8CmZyYW1lX2RpZyAtMgpwdXNoaW50IDE1NzY4MDAwIC8vIDE1NzY4MDAwCj09Cnx8CmZyYW1lX2RpZyAtMgppbnRjIDQgLy8gMzE1MzYwMDAKPT0KfHwKYXNzZXJ0CnR4biBTZW5kZXIKZnJhbWVfYnVyeSAxCmZyYW1lX2RpZyAxCmxlbgpwdXNoaW50IDMyIC8vIDMyCj09CmFzc2VydApmcmFtZV9kaWcgLTEKZ3R4bnMgQXNzZXRBbW91bnQKZnJhbWVfYnVyeSAyCmZyYW1lX2RpZyAtMwp0eG5hcyBBc3NldHMKZnJhbWVfYnVyeSAzCmludGNfMSAvLyAxCiEKIQpmcmFtZV9idXJ5IDQKZ2xvYmFsIExhdGVzdFRpbWVzdGFtcApmcmFtZV9idXJ5IDUKZnJhbWVfZGlnIDUKZnJhbWVfZGlnIC0yCisKZnJhbWVfYnVyeSA2CmZyYW1lX2RpZyAxCmZyYW1lX2RpZyAyCml0b2IKY29uY2F0CmZyYW1lX2RpZyAzCml0b2IKY29uY2F0CmJ5dGVjIDcgLy8gMHgwMAppbnRjXzAgLy8gMApmcmFtZV9kaWcgNApzZXRiaXQKY29uY2F0CmZyYW1lX2RpZyA1Cml0b2IKY29uY2F0CmZyYW1lX2RpZyA2Cml0b2IKY29uY2F0CmZyYW1lX2J1cnkgMApmcmFtZV9kaWcgMQpib3hfZGVsCnBvcApmcmFtZV9kaWcgMQpmcmFtZV9kaWcgMApib3hfcHV0CnJldHN1YgoKLy8gdW5fc3Rha2UKdW5zdGFrZV81Ogpwcm90byAxIDAKYnl0ZWNfMCAvLyAiIgpkdXAKaW50Y18wIC8vIDAKZHVwbiA4CmJ5dGVjXzAgLy8gIiIKZHVwCnR4biBTZW5kZXIKYm94X2xlbgpzdG9yZSA0CnN0b3JlIDMKbG9hZCA0CmFzc2VydAp0eG4gU2VuZGVyCmJveF9nZXQKc3RvcmUgNgpzdG9yZSA1CmxvYWQgNgphc3NlcnQKbG9hZCA1CmZyYW1lX2J1cnkgMApmcmFtZV9kaWcgMApleHRyYWN0IDAgMzIKZnJhbWVfYnVyeSAxCmZyYW1lX2RpZyAwCnB1c2hpbnQgMzIgLy8gMzIKZXh0cmFjdF91aW50NjQKZnJhbWVfYnVyeSAyCmZyYW1lX2RpZyAwCnB1c2hpbnQgNDAgLy8gNDAKZXh0cmFjdF91aW50NjQKZnJhbWVfYnVyeSAzCmZyYW1lX2RpZyAwCnB1c2hpbnQgMzg0IC8vIDM4NApnZXRiaXQKZnJhbWVfYnVyeSA0CmZyYW1lX2RpZyAwCnB1c2hpbnQgNDkgLy8gNDkKZXh0cmFjdF91aW50NjQKZnJhbWVfYnVyeSA1CmZyYW1lX2RpZyAwCnB1c2hpbnQgNTcgLy8gNTcKZXh0cmFjdF91aW50NjQKZnJhbWVfYnVyeSA2CmZyYW1lX2RpZyA0CmludGNfMSAvLyAxCj09CmFzc2VydApnbG9iYWwgTGF0ZXN0VGltZXN0YW1wCmZyYW1lX2RpZyA2Cj49CmFzc2VydApmcmFtZV9kaWcgLTEKdHhuYXMgQXNzZXRzCmZyYW1lX2RpZyAzCj09Ci8vIGhlcmUKYXNzZXJ0CmZyYW1lX2RpZyA2CmZyYW1lX2RpZyA1Ci0KZnJhbWVfYnVyeSA3CmludGNfMCAvLyAwCmZyYW1lX2J1cnkgOApmcmFtZV9kaWcgMgpieXRlY18zIC8vICJhbm51YWxfcmF0ZSIKYXBwX2dsb2JhbF9nZXQKKgpmcmFtZV9kaWcgNwoqCnB1c2hpbnQgMTAwIC8vIDEwMAppbnRjIDQgLy8gMzE1MzYwMDAKKgovCmZyYW1lX2J1cnkgOAppdHhuX2JlZ2luCmludGNfMiAvLyBheGZlcgppdHhuX2ZpZWxkIFR5cGVFbnVtCmZyYW1lX2RpZyAtMQp0eG5hcyBBc3NldHMKaXR4bl9maWVsZCBYZmVyQXNzZXQKZnJhbWVfZGlnIDEKaXR4bl9maWVsZCBBc3NldFJlY2VpdmVyCmZyYW1lX2RpZyA4Cml0eG5fZmllbGQgQXNzZXRBbW91bnQKaXR4bl9zdWJtaXQKaW50Y18wIC8vIDAKIQohCmZyYW1lX2J1cnkgNApmcmFtZV9kaWcgMQpmcmFtZV9kaWcgMgppdG9iCmNvbmNhdApmcmFtZV9kaWcgMwppdG9iCmNvbmNhdApieXRlYyA3IC8vIDB4MDAKaW50Y18wIC8vIDAKZnJhbWVfZGlnIDQKc2V0Yml0CmNvbmNhdApmcmFtZV9kaWcgNQppdG9iCmNvbmNhdApmcmFtZV9kaWcgNgppdG9iCmNvbmNhdApmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDEKYm94X2RlbApwb3AKcmV0c3ViCgovLyBnZXRfc3Rha2VyCmdldHN0YWtlcl82Ogpwcm90byAxIDEKYnl0ZWNfMCAvLyAiIgpmcmFtZV9kaWcgLTEKYm94X2dldApzdG9yZSA4CnN0b3JlIDcKbG9hZCA4CmFzc2VydApsb2FkIDcKZnJhbWVfYnVyeSAwCnJldHN1YgoKLy8gYm9vdHN0cmFwX2Nhc3Rlcgpib290c3RyYXBjYXN0ZXJfNzoKcHJvdG8gMCAwCmludGNfMCAvLyAwCnR4bmEgQXBwbGljYXRpb25BcmdzIDEKaW50Y18wIC8vIDAKZ2V0Ynl0ZQpmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDAKY2FsbHN1YiBib290c3RyYXBfMApyZXRzdWIKCi8vIGZ1bmRfZXNjcm93X2FkZHJlc3NfY2FzdGVyCmZ1bmRlc2Nyb3dhZGRyZXNzY2FzdGVyXzg6CnByb3RvIDAgMAppbnRjXzAgLy8gMAp0eG4gR3JvdXBJbmRleAppbnRjXzEgLy8gMQotCmZyYW1lX2J1cnkgMApmcmFtZV9kaWcgMApndHhucyBUeXBlRW51bQppbnRjXzEgLy8gcGF5Cj09CmFzc2VydApmcmFtZV9kaWcgMApjYWxsc3ViIGZ1bmRlc2Nyb3dhZGRyZXNzXzEKcmV0c3ViCgovLyBzZXRfc3Rha2VfYW1vdW50c19jYXN0ZXIKc2V0c3Rha2VhbW91bnRzY2FzdGVyXzk6CnByb3RvIDAgMAppbnRjXzAgLy8gMApkdXAKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQpidG9pCmZyYW1lX2J1cnkgMAp0eG5hIEFwcGxpY2F0aW9uQXJncyAyCmJ0b2kKZnJhbWVfYnVyeSAxCmZyYW1lX2RpZyAwCmZyYW1lX2RpZyAxCmNhbGxzdWIgc2V0c3Rha2VhbW91bnRzXzIKcmV0c3ViCgovLyBzZXRfYW5udWFsX3JhdGVfY2FzdGVyCnNldGFubnVhbHJhdGVjYXN0ZXJfMTA6CnByb3RvIDAgMAppbnRjXzAgLy8gMAp0eG5hIEFwcGxpY2F0aW9uQXJncyAxCmJ0b2kKZnJhbWVfYnVyeSAwCmZyYW1lX2RpZyAwCmNhbGxzdWIgc2V0YW5udWFscmF0ZV8zCnJldHN1YgoKLy8gc3Rha2VfY2FzdGVyCnN0YWtlY2FzdGVyXzExOgpwcm90byAwIDAKaW50Y18wIC8vIDAKZHVwbiAyCnR4bmEgQXBwbGljYXRpb25BcmdzIDEKaW50Y18wIC8vIDAKZ2V0Ynl0ZQpmcmFtZV9idXJ5IDAKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMgpidG9pCmZyYW1lX2J1cnkgMQp0eG4gR3JvdXBJbmRleAppbnRjXzEgLy8gMQotCmZyYW1lX2J1cnkgMgpmcmFtZV9kaWcgMgpndHhucyBUeXBlRW51bQppbnRjXzIgLy8gYXhmZXIKPT0KYXNzZXJ0CmZyYW1lX2RpZyAwCmZyYW1lX2RpZyAxCmZyYW1lX2RpZyAyCmNhbGxzdWIgc3Rha2VfNApyZXRzdWIKCi8vIHVuX3N0YWtlX2Nhc3Rlcgp1bnN0YWtlY2FzdGVyXzEyOgpwcm90byAwIDAKaW50Y18wIC8vIDAKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQppbnRjXzAgLy8gMApnZXRieXRlCmZyYW1lX2J1cnkgMApmcmFtZV9kaWcgMApjYWxsc3ViIHVuc3Rha2VfNQpyZXRzdWIKCi8vIGdldF9zdGFrZXJfY2FzdGVyCmdldHN0YWtlcmNhc3Rlcl8xMzoKcHJvdG8gMCAwCmJ5dGVjXzAgLy8gIiIKZHVwCnR4bmEgQXBwbGljYXRpb25BcmdzIDEKZnJhbWVfYnVyeSAxCmZyYW1lX2RpZyAxCmNhbGxzdWIgZ2V0c3Rha2VyXzYKZnJhbWVfYnVyeSAwCnB1c2hieXRlcyAweDE1MWY3Yzc1IC8vIDB4MTUxZjdjNzUKZnJhbWVfZGlnIDAKY29uY2F0CmxvZwpyZXRzdWI=",
+    "approval": "I3ByYWdtYSB2ZXJzaW9uIDgKaW50Y2Jsb2NrIDAgMSAxMCA0IDEwMDAwMDAwIDMxNTM2MDAwCmJ5dGVjYmxvY2sgMHggMHg2NTczNjM3MjZmNzc1ZjYxNjQ2NDcyNjU3MzczIDB4NzY2NTczNzQ1ZjY0NjU2MzY5NmQ2MTZjNzMgMHg2ZDYxNzg1ZjczNzQ2MTZiNjUgMHg2ZDY5NmU1ZjczNzQ2MTZiNjUgMHg2MTZlNmU3NTYxNmM1ZjcyNjE3NDY1IDB4NjE2NDZkNjk2ZTVmNjE2MzYzNzQgMHg2MTczNzM2NTc0NWY2OTY0IDB4MDAKdHhuIE51bUFwcEFyZ3MKaW50Y18wIC8vIDAKPT0KYm56IG1haW5fbDIwCnR4bmEgQXBwbGljYXRpb25BcmdzIDAKcHVzaGJ5dGVzIDB4MzQ0OTRkODcgLy8gImJvb3RzdHJhcChhc3NldCl2b2lkIgo9PQpibnogbWFpbl9sMTkKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMApwdXNoYnl0ZXMgMHg5NjNhNTk2ZSAvLyAiZnVuZF9lc2Nyb3dfYWRkcmVzcyhwYXkpdm9pZCIKPT0KYm56IG1haW5fbDE4CnR4bmEgQXBwbGljYXRpb25BcmdzIDAKcHVzaGJ5dGVzIDB4MmNhNmFlMDIgLy8gInNldF9zdGFrZV9hbW91bnRzKHVpbnQ2NCx1aW50NjQpdm9pZCIKPT0KYm56IG1haW5fbDE3CnR4bmEgQXBwbGljYXRpb25BcmdzIDAKcHVzaGJ5dGVzIDB4MWMwOTRiNjAgLy8gInNldF9hbm51YWxfcmF0ZSh1aW50NjQpdm9pZCIKPT0KYm56IG1haW5fbDE2CnR4bmEgQXBwbGljYXRpb25BcmdzIDAKcHVzaGJ5dGVzIDB4M2I0NmJlNTggLy8gInNldF9hc3NldF9kZWNpbWFsKHVpbnQ2NCl2b2lkIgo9PQpibnogbWFpbl9sMTUKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMApwdXNoYnl0ZXMgMHhkMTMwYzc0YSAvLyAic2V0X2Fzc2V0X2lkKHVpbnQ2NCl2b2lkIgo9PQpibnogbWFpbl9sMTQKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMApwdXNoYnl0ZXMgMHhhZTRiOWU5MiAvLyAic3Rha2UoYXNzZXQsdWludDY0LGF4ZmVyKXZvaWQiCj09CmJueiBtYWluX2wxMwp0eG5hIEFwcGxpY2F0aW9uQXJncyAwCnB1c2hieXRlcyAweDU3YmFhNWI1IC8vICJ1bl9zdGFrZShhc3NldCl2b2lkIgo9PQpibnogbWFpbl9sMTIKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMApwdXNoYnl0ZXMgMHgyZmUyY2I0ZSAvLyAiZ2V0X3N0YWtlcihhZGRyZXNzKShhZGRyZXNzLHVpbnQ2NCx1aW50NjQsYm9vbCx1aW50NjQsdWludDY0KSIKPT0KYm56IG1haW5fbDExCmVycgptYWluX2wxMToKdHhuIE9uQ29tcGxldGlvbgppbnRjXzAgLy8gTm9PcAo9PQp0eG4gQXBwbGljYXRpb25JRAppbnRjXzAgLy8gMAohPQomJgphc3NlcnQKY2FsbHN1YiBnZXRzdGFrZXJjYXN0ZXJfMTcKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDEyOgp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCiE9CiYmCmFzc2VydApjYWxsc3ViIHVuc3Rha2VjYXN0ZXJfMTYKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDEzOgp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCiE9CiYmCmFzc2VydApjYWxsc3ViIHN0YWtlY2FzdGVyXzE1CmludGNfMSAvLyAxCnJldHVybgptYWluX2wxNDoKdHhuIE9uQ29tcGxldGlvbgppbnRjXzAgLy8gTm9PcAo9PQp0eG4gQXBwbGljYXRpb25JRAppbnRjXzAgLy8gMAohPQomJgphc3NlcnQKY2FsbHN1YiBzZXRhc3NldGlkY2FzdGVyXzE0CmludGNfMSAvLyAxCnJldHVybgptYWluX2wxNToKdHhuIE9uQ29tcGxldGlvbgppbnRjXzAgLy8gTm9PcAo9PQp0eG4gQXBwbGljYXRpb25JRAppbnRjXzAgLy8gMAohPQomJgphc3NlcnQKY2FsbHN1YiBzZXRhc3NldGRlY2ltYWxjYXN0ZXJfMTMKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDE2Ogp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCiE9CiYmCmFzc2VydApjYWxsc3ViIHNldGFubnVhbHJhdGVjYXN0ZXJfMTIKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDE3Ogp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCiE9CiYmCmFzc2VydApjYWxsc3ViIHNldHN0YWtlYW1vdW50c2Nhc3Rlcl8xMQppbnRjXzEgLy8gMQpyZXR1cm4KbWFpbl9sMTg6CnR4biBPbkNvbXBsZXRpb24KaW50Y18wIC8vIE5vT3AKPT0KdHhuIEFwcGxpY2F0aW9uSUQKaW50Y18wIC8vIDAKIT0KJiYKYXNzZXJ0CmNhbGxzdWIgZnVuZGVzY3Jvd2FkZHJlc3NjYXN0ZXJfMTAKaW50Y18xIC8vIDEKcmV0dXJuCm1haW5fbDE5Ogp0eG4gT25Db21wbGV0aW9uCmludGNfMCAvLyBOb09wCj09CnR4biBBcHBsaWNhdGlvbklECmludGNfMCAvLyAwCiE9CiYmCmFzc2VydApjYWxsc3ViIGJvb3RzdHJhcGNhc3Rlcl85CmludGNfMSAvLyAxCnJldHVybgptYWluX2wyMDoKdHhuIE9uQ29tcGxldGlvbgppbnRjXzAgLy8gTm9PcAo9PQpibnogbWFpbl9sMjIKZXJyCm1haW5fbDIyOgp0eG4gQXBwbGljYXRpb25JRAppbnRjXzAgLy8gMAo9PQphc3NlcnQKaW50Y18xIC8vIDEKcmV0dXJuCgovLyBib290c3RyYXAKYm9vdHN0cmFwXzA6CnByb3RvIDEgMApieXRlYyA2IC8vICJhZG1pbl9hY2N0IgpieXRlY18wIC8vICIiCmFwcF9nbG9iYWxfcHV0CmJ5dGVjIDUgLy8gImFubnVhbF9yYXRlIgppbnRjXzIgLy8gMTAKYXBwX2dsb2JhbF9wdXQKYnl0ZWMgNyAvLyAiYXNzZXRfaWQiCmludGNfMCAvLyAwCmFwcF9nbG9iYWxfcHV0CmJ5dGVjXzEgLy8gImVzY3Jvd19hZGRyZXNzIgpieXRlY18wIC8vICIiCmFwcF9nbG9iYWxfcHV0CmJ5dGVjXzMgLy8gIm1heF9zdGFrZSIKcHVzaGludCAyMDAwMCAvLyAyMDAwMAppbnRjXzIgLy8gMTAKKgppbnRjIDQgLy8gMTAwMDAwMDAKKgphcHBfZ2xvYmFsX3B1dApieXRlYyA0IC8vICJtaW5fc3Rha2UiCnB1c2hpbnQgMTAwIC8vIDEwMAppbnRjXzIgLy8gMTAKKgppbnRjIDQgLy8gMTAwMDAwMDAKKgphcHBfZ2xvYmFsX3B1dApieXRlY18yIC8vICJ2ZXN0X2RlY2ltYWxzIgppbnRjXzAgLy8gMAphcHBfZ2xvYmFsX3B1dApieXRlYyA2IC8vICJhZG1pbl9hY2N0IgpnbG9iYWwgQ3JlYXRvckFkZHJlc3MKYXBwX2dsb2JhbF9wdXQKYnl0ZWNfMSAvLyAiZXNjcm93X2FkZHJlc3MiCmdsb2JhbCBDdXJyZW50QXBwbGljYXRpb25BZGRyZXNzCmFwcF9nbG9iYWxfcHV0CmZyYW1lX2RpZyAtMQp0eG5hcyBBc3NldHMKYXNzZXRfcGFyYW1zX2dldCBBc3NldERlY2ltYWxzCnN0b3JlIDEKc3RvcmUgMApsb2FkIDAKaW50Y18wIC8vIDAKIT0KYXNzZXJ0CmJ5dGVjXzIgLy8gInZlc3RfZGVjaW1hbHMiCmxvYWQgMAphcHBfZ2xvYmFsX3B1dApieXRlY18xIC8vICJlc2Nyb3dfYWRkcmVzcyIKYXBwX2dsb2JhbF9nZXQKZnJhbWVfZGlnIC0xCnR4bmFzIEFzc2V0cwphc3NldF9ob2xkaW5nX2dldCBBc3NldEJhbGFuY2UKc3RvcmUgMgppbnRjXzAgLy8gMAo9PQpieiBib290c3RyYXBfMF9sMgppdHhuX2JlZ2luCmludGNfMyAvLyBheGZlcgppdHhuX2ZpZWxkIFR5cGVFbnVtCmZyYW1lX2RpZyAtMQp0eG5hcyBBc3NldHMKaXR4bl9maWVsZCBYZmVyQXNzZXQKaW50Y18wIC8vIDAKaXR4bl9maWVsZCBBc3NldEFtb3VudApieXRlY18xIC8vICJlc2Nyb3dfYWRkcmVzcyIKYXBwX2dsb2JhbF9nZXQKaXR4bl9maWVsZCBBc3NldFJlY2VpdmVyCml0eG5fc3VibWl0CmJvb3RzdHJhcF8wX2wyOgpyZXRzdWIKCi8vIGZ1bmRfZXNjcm93X2FkZHJlc3MKZnVuZGVzY3Jvd2FkZHJlc3NfMToKcHJvdG8gMSAwCmZyYW1lX2RpZyAtMQpndHhucyBBbW91bnQKaW50Y18wIC8vIDAKPgphc3NlcnQKZnJhbWVfZGlnIC0xCmd0eG5zIFJlY2VpdmVyCmdsb2JhbCBDdXJyZW50QXBwbGljYXRpb25BZGRyZXNzCj09CmFzc2VydApmcmFtZV9kaWcgLTEKZ3R4bnMgVHlwZUVudW0KaW50Y18xIC8vIHBheQo9PQphc3NlcnQKcmV0c3ViCgovLyBzZXRfc3Rha2VfYW1vdW50cwpzZXRzdGFrZWFtb3VudHNfMjoKcHJvdG8gMiAwCnR4biBTZW5kZXIKZ2xvYmFsIENyZWF0b3JBZGRyZXNzCj09Ci8vIHVuYXV0aG9yaXplZAphc3NlcnQKZnJhbWVfZGlnIC0yCmludGNfMCAvLyAwCj4KYXNzZXJ0CmZyYW1lX2RpZyAtMQppbnRjXzAgLy8gMAo+CmFzc2VydApmcmFtZV9kaWcgLTEKZnJhbWVfZGlnIC0yCj4KYXNzZXJ0CmJ5dGVjIDQgLy8gIm1pbl9zdGFrZSIKZnJhbWVfZGlnIC0yCmludGNfMiAvLyAxMAoqCmJ5dGVjXzIgLy8gInZlc3RfZGVjaW1hbHMiCmFwcF9nbG9iYWxfZ2V0CioKYXBwX2dsb2JhbF9wdXQKYnl0ZWNfMyAvLyAibWF4X3N0YWtlIgpmcmFtZV9kaWcgLTEKaW50Y18yIC8vIDEwCioKYnl0ZWNfMiAvLyAidmVzdF9kZWNpbWFscyIKYXBwX2dsb2JhbF9nZXQKKgphcHBfZ2xvYmFsX3B1dApyZXRzdWIKCi8vIHNldF9hbm51YWxfcmF0ZQpzZXRhbm51YWxyYXRlXzM6CnByb3RvIDEgMAp0eG4gU2VuZGVyCmdsb2JhbCBDcmVhdG9yQWRkcmVzcwo9PQovLyB1bmF1dGhvcml6ZWQKYXNzZXJ0CmJ5dGVjIDUgLy8gImFubnVhbF9yYXRlIgpmcmFtZV9kaWcgLTEKYXBwX2dsb2JhbF9wdXQKcmV0c3ViCgovLyBzZXRfYXNzZXRfZGVjaW1hbApzZXRhc3NldGRlY2ltYWxfNDoKcHJvdG8gMSAwCnR4biBTZW5kZXIKZ2xvYmFsIENyZWF0b3JBZGRyZXNzCj09Ci8vIHVuYXV0aG9yaXplZAphc3NlcnQKYnl0ZWNfMiAvLyAidmVzdF9kZWNpbWFscyIKZnJhbWVfZGlnIC0xCmFwcF9nbG9iYWxfcHV0CnJldHN1YgoKLy8gc2V0X2Fzc2V0X2lkCnNldGFzc2V0aWRfNToKcHJvdG8gMSAwCnR4biBTZW5kZXIKZ2xvYmFsIENyZWF0b3JBZGRyZXNzCj09Ci8vIHVuYXV0aG9yaXplZAphc3NlcnQKYnl0ZWMgNyAvLyAiYXNzZXRfaWQiCmZyYW1lX2RpZyAtMQphcHBfZ2xvYmFsX3B1dApyZXRzdWIKCi8vIHN0YWtlCnN0YWtlXzY6CnByb3RvIDMgMApieXRlY18wIC8vICIiCmR1cAppbnRjXzAgLy8gMApkdXBuIDYKYnl0ZWNfMCAvLyAiIgpkdXAKZnJhbWVfZGlnIC0xCmd0eG5zIFR5cGVFbnVtCmludGNfMyAvLyBheGZlcgo9PQphc3NlcnQKZnJhbWVfZGlnIC0xCmd0eG5zIEFzc2V0UmVjZWl2ZXIKYnl0ZWNfMSAvLyAiZXNjcm93X2FkZHJlc3MiCmFwcF9nbG9iYWxfZ2V0Cj09CmFzc2VydApmcmFtZV9kaWcgLTEKZ3R4bnMgWGZlckFzc2V0CmZyYW1lX2RpZyAtMwp0eG5hcyBBc3NldHMKPT0KYXNzZXJ0CmZyYW1lX2RpZyAtMQpndHhucyBBc3NldEFtb3VudApieXRlYyA0IC8vICJtaW5fc3Rha2UiCmFwcF9nbG9iYWxfZ2V0Cj49CmZyYW1lX2RpZyAtMQpndHhucyBBc3NldEFtb3VudApieXRlY18zIC8vICJtYXhfc3Rha2UiCmFwcF9nbG9iYWxfZ2V0Cjw9CiYmCmFzc2VydApmcmFtZV9kaWcgLTEKZ3R4bnMgQXNzZXRBbW91bnQKYnl0ZWMgNCAvLyAibWluX3N0YWtlIgphcHBfZ2xvYmFsX2dldAo+CmZyYW1lX2RpZyAtMQpndHhucyBBc3NldEFtb3VudApieXRlY18zIC8vICJtYXhfc3Rha2UiCmFwcF9nbG9iYWxfZ2V0Cjw9Cnx8CmFzc2VydApmcmFtZV9kaWcgLTIKcHVzaGludCAzMDAgLy8gMzAwCj09CmZyYW1lX2RpZyAtMgpwdXNoaW50IDc4ODQwMDAgLy8gNzg4NDAwMAo9PQp8fApmcmFtZV9kaWcgLTIKcHVzaGludCAxNTc2ODAwMCAvLyAxNTc2ODAwMAo9PQp8fApmcmFtZV9kaWcgLTIKaW50YyA1IC8vIDMxNTM2MDAwCj09Cnx8CmFzc2VydAp0eG4gU2VuZGVyCmZyYW1lX2J1cnkgMQpmcmFtZV9kaWcgMQpsZW4KcHVzaGludCAzMiAvLyAzMgo9PQphc3NlcnQKZnJhbWVfZGlnIC0xCmd0eG5zIEFzc2V0QW1vdW50CmZyYW1lX2J1cnkgMgpmcmFtZV9kaWcgLTMKdHhuYXMgQXNzZXRzCmZyYW1lX2J1cnkgMwppbnRjXzEgLy8gMQohCiEKZnJhbWVfYnVyeSA0Cmdsb2JhbCBMYXRlc3RUaW1lc3RhbXAKZnJhbWVfYnVyeSA1CmZyYW1lX2RpZyA1CmZyYW1lX2RpZyAtMgorCmZyYW1lX2J1cnkgNgpmcmFtZV9kaWcgMQpmcmFtZV9kaWcgMgppdG9iCmNvbmNhdApmcmFtZV9kaWcgMwppdG9iCmNvbmNhdApieXRlYyA4IC8vIDB4MDAKaW50Y18wIC8vIDAKZnJhbWVfZGlnIDQKc2V0Yml0CmNvbmNhdApmcmFtZV9kaWcgNQppdG9iCmNvbmNhdApmcmFtZV9kaWcgNgppdG9iCmNvbmNhdApmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDEKYm94X2RlbApwb3AKZnJhbWVfZGlnIDEKZnJhbWVfZGlnIDAKYm94X3B1dApyZXRzdWIKCi8vIHVuX3N0YWtlCnVuc3Rha2VfNzoKcHJvdG8gMSAwCmJ5dGVjXzAgLy8gIiIKZHVwCmludGNfMCAvLyAwCmR1cG4gOApieXRlY18wIC8vICIiCmR1cAp0eG4gU2VuZGVyCmJveF9sZW4Kc3RvcmUgNApzdG9yZSAzCmxvYWQgNAphc3NlcnQKdHhuIFNlbmRlcgpib3hfZ2V0CnN0b3JlIDYKc3RvcmUgNQpsb2FkIDYKYXNzZXJ0CmxvYWQgNQpmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDAKZXh0cmFjdCAwIDMyCmZyYW1lX2J1cnkgMQpmcmFtZV9kaWcgMApwdXNoaW50IDMyIC8vIDMyCmV4dHJhY3RfdWludDY0CmZyYW1lX2J1cnkgMgpmcmFtZV9kaWcgMApwdXNoaW50IDQwIC8vIDQwCmV4dHJhY3RfdWludDY0CmZyYW1lX2J1cnkgMwpmcmFtZV9kaWcgMApwdXNoaW50IDM4NCAvLyAzODQKZ2V0Yml0CmZyYW1lX2J1cnkgNApmcmFtZV9kaWcgMApwdXNoaW50IDQ5IC8vIDQ5CmV4dHJhY3RfdWludDY0CmZyYW1lX2J1cnkgNQpmcmFtZV9kaWcgMApwdXNoaW50IDU3IC8vIDU3CmV4dHJhY3RfdWludDY0CmZyYW1lX2J1cnkgNgpmcmFtZV9kaWcgNAppbnRjXzEgLy8gMQo9PQphc3NlcnQKZ2xvYmFsIExhdGVzdFRpbWVzdGFtcApmcmFtZV9kaWcgNgo+PQphc3NlcnQKZnJhbWVfZGlnIC0xCnR4bmFzIEFzc2V0cwpmcmFtZV9kaWcgMwo9PQovLyBoZXJlCmFzc2VydApmcmFtZV9kaWcgNgpmcmFtZV9kaWcgNQotCmZyYW1lX2J1cnkgNwppbnRjXzAgLy8gMApmcmFtZV9idXJ5IDgKZnJhbWVfZGlnIDIKZnJhbWVfZGlnIDIKYnl0ZWMgNSAvLyAiYW5udWFsX3JhdGUiCmFwcF9nbG9iYWxfZ2V0CioKZnJhbWVfZGlnIDcKKgpwdXNoaW50IDEwMCAvLyAxMDAKaW50YyA1IC8vIDMxNTM2MDAwCioKLworCmZyYW1lX2J1cnkgOAppdHhuX2JlZ2luCmludGNfMyAvLyBheGZlcgppdHhuX2ZpZWxkIFR5cGVFbnVtCmZyYW1lX2RpZyAtMQp0eG5hcyBBc3NldHMKaXR4bl9maWVsZCBYZmVyQXNzZXQKZnJhbWVfZGlnIDEKaXR4bl9maWVsZCBBc3NldFJlY2VpdmVyCmZyYW1lX2RpZyA4Cml0eG5fZmllbGQgQXNzZXRBbW91bnQKaXR4bl9zdWJtaXQKaW50Y18wIC8vIDAKIQohCmZyYW1lX2J1cnkgNApmcmFtZV9kaWcgMQpmcmFtZV9kaWcgMgppdG9iCmNvbmNhdApmcmFtZV9kaWcgMwppdG9iCmNvbmNhdApieXRlYyA4IC8vIDB4MDAKaW50Y18wIC8vIDAKZnJhbWVfZGlnIDQKc2V0Yml0CmNvbmNhdApmcmFtZV9kaWcgNQppdG9iCmNvbmNhdApmcmFtZV9kaWcgNgppdG9iCmNvbmNhdApmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDEKYm94X2RlbApwb3AKcmV0c3ViCgovLyBnZXRfc3Rha2VyCmdldHN0YWtlcl84Ogpwcm90byAxIDEKYnl0ZWNfMCAvLyAiIgpmcmFtZV9kaWcgLTEKYm94X2dldApzdG9yZSA4CnN0b3JlIDcKbG9hZCA4CmFzc2VydApsb2FkIDcKZnJhbWVfYnVyeSAwCnJldHN1YgoKLy8gYm9vdHN0cmFwX2Nhc3Rlcgpib290c3RyYXBjYXN0ZXJfOToKcHJvdG8gMCAwCmludGNfMCAvLyAwCnR4bmEgQXBwbGljYXRpb25BcmdzIDEKaW50Y18wIC8vIDAKZ2V0Ynl0ZQpmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDAKY2FsbHN1YiBib290c3RyYXBfMApyZXRzdWIKCi8vIGZ1bmRfZXNjcm93X2FkZHJlc3NfY2FzdGVyCmZ1bmRlc2Nyb3dhZGRyZXNzY2FzdGVyXzEwOgpwcm90byAwIDAKaW50Y18wIC8vIDAKdHhuIEdyb3VwSW5kZXgKaW50Y18xIC8vIDEKLQpmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDAKZ3R4bnMgVHlwZUVudW0KaW50Y18xIC8vIHBheQo9PQphc3NlcnQKZnJhbWVfZGlnIDAKY2FsbHN1YiBmdW5kZXNjcm93YWRkcmVzc18xCnJldHN1YgoKLy8gc2V0X3N0YWtlX2Ftb3VudHNfY2FzdGVyCnNldHN0YWtlYW1vdW50c2Nhc3Rlcl8xMToKcHJvdG8gMCAwCmludGNfMCAvLyAwCmR1cAp0eG5hIEFwcGxpY2F0aW9uQXJncyAxCmJ0b2kKZnJhbWVfYnVyeSAwCnR4bmEgQXBwbGljYXRpb25BcmdzIDIKYnRvaQpmcmFtZV9idXJ5IDEKZnJhbWVfZGlnIDAKZnJhbWVfZGlnIDEKY2FsbHN1YiBzZXRzdGFrZWFtb3VudHNfMgpyZXRzdWIKCi8vIHNldF9hbm51YWxfcmF0ZV9jYXN0ZXIKc2V0YW5udWFscmF0ZWNhc3Rlcl8xMjoKcHJvdG8gMCAwCmludGNfMCAvLyAwCnR4bmEgQXBwbGljYXRpb25BcmdzIDEKYnRvaQpmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDAKY2FsbHN1YiBzZXRhbm51YWxyYXRlXzMKcmV0c3ViCgovLyBzZXRfYXNzZXRfZGVjaW1hbF9jYXN0ZXIKc2V0YXNzZXRkZWNpbWFsY2FzdGVyXzEzOgpwcm90byAwIDAKaW50Y18wIC8vIDAKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQpidG9pCmZyYW1lX2J1cnkgMApmcmFtZV9kaWcgMApjYWxsc3ViIHNldGFzc2V0ZGVjaW1hbF80CnJldHN1YgoKLy8gc2V0X2Fzc2V0X2lkX2Nhc3RlcgpzZXRhc3NldGlkY2FzdGVyXzE0Ogpwcm90byAwIDAKaW50Y18wIC8vIDAKdHhuYSBBcHBsaWNhdGlvbkFyZ3MgMQpidG9pCmZyYW1lX2J1cnkgMApmcmFtZV9kaWcgMApjYWxsc3ViIHNldGFzc2V0aWRfNQpyZXRzdWIKCi8vIHN0YWtlX2Nhc3RlcgpzdGFrZWNhc3Rlcl8xNToKcHJvdG8gMCAwCmludGNfMCAvLyAwCmR1cG4gMgp0eG5hIEFwcGxpY2F0aW9uQXJncyAxCmludGNfMCAvLyAwCmdldGJ5dGUKZnJhbWVfYnVyeSAwCnR4bmEgQXBwbGljYXRpb25BcmdzIDIKYnRvaQpmcmFtZV9idXJ5IDEKdHhuIEdyb3VwSW5kZXgKaW50Y18xIC8vIDEKLQpmcmFtZV9idXJ5IDIKZnJhbWVfZGlnIDIKZ3R4bnMgVHlwZUVudW0KaW50Y18zIC8vIGF4ZmVyCj09CmFzc2VydApmcmFtZV9kaWcgMApmcmFtZV9kaWcgMQpmcmFtZV9kaWcgMgpjYWxsc3ViIHN0YWtlXzYKcmV0c3ViCgovLyB1bl9zdGFrZV9jYXN0ZXIKdW5zdGFrZWNhc3Rlcl8xNjoKcHJvdG8gMCAwCmludGNfMCAvLyAwCnR4bmEgQXBwbGljYXRpb25BcmdzIDEKaW50Y18wIC8vIDAKZ2V0Ynl0ZQpmcmFtZV9idXJ5IDAKZnJhbWVfZGlnIDAKY2FsbHN1YiB1bnN0YWtlXzcKcmV0c3ViCgovLyBnZXRfc3Rha2VyX2Nhc3RlcgpnZXRzdGFrZXJjYXN0ZXJfMTc6CnByb3RvIDAgMApieXRlY18wIC8vICIiCmR1cAp0eG5hIEFwcGxpY2F0aW9uQXJncyAxCmZyYW1lX2J1cnkgMQpmcmFtZV9kaWcgMQpjYWxsc3ViIGdldHN0YWtlcl84CmZyYW1lX2J1cnkgMApwdXNoYnl0ZXMgMHgxNTFmN2M3NSAvLyAweDE1MWY3Yzc1CmZyYW1lX2RpZyAwCmNvbmNhdApsb2cKcmV0c3Vi",
     "clear": "I3ByYWdtYSB2ZXJzaW9uIDgKcHVzaGludCAwIC8vIDAKcmV0dXJu"
   },
   "state": {
     "global": {
       "num_byte_slices": 2,
-      "num_uints": 4
+      "num_uints": 5
     },
     "local": {
       "num_byte_slices": 0,
@@ -121,9 +131,9 @@ export const APP_SPEC: AppSpec = {
           "key": "annual_rate",
           "descr": ""
         },
-        "asset_decimal": {
+        "asset_id": {
           "type": "uint64",
-          "key": "asset_decimal",
+          "key": "asset_id",
           "descr": ""
         },
         "escrow_address": {
@@ -139,6 +149,11 @@ export const APP_SPEC: AppSpec = {
         "min_stake": {
           "type": "uint64",
           "key": "min_stake",
+          "descr": ""
+        },
+        "vest_decimals": {
+          "type": "uint64",
+          "key": "vest_decimals",
           "descr": ""
         }
       },
@@ -157,12 +172,14 @@ export const APP_SPEC: AppSpec = {
         "args": [
           {
             "type": "asset",
-            "name": "asset"
+            "name": "asset",
+            "desc": "The unique asset ID to be opted into by the escrow address."
           }
         ],
         "returns": {
           "type": "void"
-        }
+        },
+        "desc": "Initializes Vest Stake application's global state, sets admin account, escrow address, asset decimal, and\nopts into the provided asset."
       },
       {
         "name": "fund_escrow_address",
@@ -183,60 +200,99 @@ export const APP_SPEC: AppSpec = {
         "args": [
           {
             "type": "uint64",
-            "name": "min_stake"
+            "name": "min_stake",
+            "desc": "The minimum stake amount."
           },
           {
             "type": "uint64",
-            "name": "max_stake"
+            "name": "max_stake",
+            "desc": "The maximum stake amount."
           }
         ],
         "returns": {
           "type": "void"
-        }
+        },
+        "desc": "Sets the minimum and maximum stake amounts for staking."
       },
       {
         "name": "set_annual_rate",
         "args": [
           {
             "type": "uint64",
-            "name": "new_annual_rate"
+            "name": "annual_rate",
+            "desc": "The annual rate."
           }
         ],
         "returns": {
           "type": "void"
-        }
+        },
+        "desc": "Sets the annual rate."
+      },
+      {
+        "name": "set_asset_decimal",
+        "args": [
+          {
+            "type": "uint64",
+            "name": "asset_decimal",
+            "desc": "The asset decimal."
+          }
+        ],
+        "returns": {
+          "type": "void"
+        },
+        "desc": "Sets the asset decimal."
+      },
+      {
+        "name": "set_asset_id",
+        "args": [
+          {
+            "type": "uint64",
+            "name": "asset_id",
+            "desc": "The unique asset ID."
+          }
+        ],
+        "returns": {
+          "type": "void"
+        },
+        "desc": "Sets the asset ID."
       },
       {
         "name": "stake",
         "args": [
           {
             "type": "asset",
-            "name": "asset"
+            "name": "asset",
+            "desc": "The asset to be staked."
           },
           {
             "type": "uint64",
-            "name": "stake_duration"
+            "name": "stake_duration",
+            "desc": "The duration of the stake."
           },
           {
             "type": "axfer",
-            "name": "txn"
+            "name": "txn",
+            "desc": "The transaction object for the staking operation."
           }
         ],
         "returns": {
           "type": "void"
-        }
+        },
+        "desc": "Initiates a stake for the specified asset and duration."
       },
       {
         "name": "un_stake",
         "args": [
           {
             "type": "asset",
-            "name": "asset"
+            "name": "asset",
+            "desc": "The asset to be unstaked."
           }
         ],
         "returns": {
           "type": "void"
-        }
+        },
+        "desc": "Initiates the unstaking of the specified asset."
       },
       {
         "name": "get_staker",
@@ -248,7 +304,8 @@ export const APP_SPEC: AppSpec = {
         ],
         "returns": {
           "type": "(address,uint64,uint64,bool,uint64,uint64)"
-        }
+        },
+        "desc": "Retrieves staker information for the specified staker address and stores it in the output."
       }
     ],
     "networks": {}
@@ -315,6 +372,9 @@ export type VestStake = {
   methods:
     & Record<'bootstrap(asset)void' | 'bootstrap', {
       argsObj: {
+        /**
+         * The unique asset ID to be opted into by the escrow address.
+         */
         asset: number | bigint
       }
       argsTuple: [asset: number | bigint]
@@ -332,7 +392,13 @@ export type VestStake = {
     }>
     & Record<'set_stake_amounts(uint64,uint64)void' | 'set_stake_amounts', {
       argsObj: {
+        /**
+         * The minimum stake amount.
+         */
         min_stake: bigint | number
+        /**
+         * The maximum stake amount.
+         */
         max_stake: bigint | number
       }
       argsTuple: [min_stake: bigint | number, max_stake: bigint | number]
@@ -340,15 +406,47 @@ export type VestStake = {
     }>
     & Record<'set_annual_rate(uint64)void' | 'set_annual_rate', {
       argsObj: {
-        new_annual_rate: bigint | number
+        /**
+         * The annual rate.
+         */
+        annual_rate: bigint | number
       }
-      argsTuple: [new_annual_rate: bigint | number]
+      argsTuple: [annual_rate: bigint | number]
+      returns: void
+    }>
+    & Record<'set_asset_decimal(uint64)void' | 'set_asset_decimal', {
+      argsObj: {
+        /**
+         * The asset decimal.
+         */
+        asset_decimal: bigint | number
+      }
+      argsTuple: [asset_decimal: bigint | number]
+      returns: void
+    }>
+    & Record<'set_asset_id(uint64)void' | 'set_asset_id', {
+      argsObj: {
+        /**
+         * The unique asset ID.
+         */
+        asset_id: bigint | number
+      }
+      argsTuple: [asset_id: bigint | number]
       returns: void
     }>
     & Record<'stake(asset,uint64,axfer)void' | 'stake', {
       argsObj: {
+        /**
+         * The asset to be staked.
+         */
         asset: number | bigint
+        /**
+         * The duration of the stake.
+         */
         stake_duration: bigint | number
+        /**
+         * The transaction object for the staking operation.
+         */
         txn: TransactionToSign | Transaction | Promise<SendTransactionResult>
       }
       argsTuple: [asset: number | bigint, stake_duration: bigint | number, txn: TransactionToSign | Transaction | Promise<SendTransactionResult>]
@@ -356,6 +454,9 @@ export type VestStake = {
     }>
     & Record<'un_stake(asset)void' | 'un_stake', {
       argsObj: {
+        /**
+         * The asset to be unstaked.
+         */
         asset: number | bigint
       }
       argsTuple: [asset: number | bigint]
@@ -375,10 +476,11 @@ export type VestStake = {
     global: {
       'admin_acct'?: BinaryState
       'annual_rate'?: IntegerState
-      'asset_decimal'?: IntegerState
+      'asset_id'?: IntegerState
       'escrow_address'?: BinaryState
       'max_stake'?: IntegerState
       'min_stake'?: IntegerState
+      'vest_decimals'?: IntegerState
     }
   }
 }
@@ -479,6 +581,9 @@ export abstract class VestStakeCallFactory {
   /**
    * Constructs a no op call for the bootstrap(asset)void ABI method
    *
+   * Initializes Vest Stake application's global state, sets admin account, escrow address, asset decimal, and
+opts into the provided asset.
+   *
    * @param args Any args for the contract call
    * @param params Any additional parameters for the call
    * @returns A TypedCallParams object for the call
@@ -509,6 +614,8 @@ export abstract class VestStakeCallFactory {
   /**
    * Constructs a no op call for the set_stake_amounts(uint64,uint64)void ABI method
    *
+   * Sets the minimum and maximum stake amounts for staking.
+   *
    * @param args Any args for the contract call
    * @param params Any additional parameters for the call
    * @returns A TypedCallParams object for the call
@@ -523,6 +630,8 @@ export abstract class VestStakeCallFactory {
   /**
    * Constructs a no op call for the set_annual_rate(uint64)void ABI method
    *
+   * Sets the annual rate.
+   *
    * @param args Any args for the contract call
    * @param params Any additional parameters for the call
    * @returns A TypedCallParams object for the call
@@ -530,12 +639,46 @@ export abstract class VestStakeCallFactory {
   static setAnnualRate(args: MethodArgs<'set_annual_rate(uint64)void'>, params: AppClientCallCoreParams & CoreAppCallArgs) {
     return {
       method: 'set_annual_rate(uint64)void' as const,
-      methodArgs: Array.isArray(args) ? args : [args.new_annual_rate],
+      methodArgs: Array.isArray(args) ? args : [args.annual_rate],
+      ...params,
+    }
+  }
+  /**
+   * Constructs a no op call for the set_asset_decimal(uint64)void ABI method
+   *
+   * Sets the asset decimal.
+   *
+   * @param args Any args for the contract call
+   * @param params Any additional parameters for the call
+   * @returns A TypedCallParams object for the call
+   */
+  static setAssetDecimal(args: MethodArgs<'set_asset_decimal(uint64)void'>, params: AppClientCallCoreParams & CoreAppCallArgs) {
+    return {
+      method: 'set_asset_decimal(uint64)void' as const,
+      methodArgs: Array.isArray(args) ? args : [args.asset_decimal],
+      ...params,
+    }
+  }
+  /**
+   * Constructs a no op call for the set_asset_id(uint64)void ABI method
+   *
+   * Sets the asset ID.
+   *
+   * @param args Any args for the contract call
+   * @param params Any additional parameters for the call
+   * @returns A TypedCallParams object for the call
+   */
+  static setAssetId(args: MethodArgs<'set_asset_id(uint64)void'>, params: AppClientCallCoreParams & CoreAppCallArgs) {
+    return {
+      method: 'set_asset_id(uint64)void' as const,
+      methodArgs: Array.isArray(args) ? args : [args.asset_id],
       ...params,
     }
   }
   /**
    * Constructs a no op call for the stake(asset,uint64,axfer)void ABI method
+   *
+   * Initiates a stake for the specified asset and duration.
    *
    * @param args Any args for the contract call
    * @param params Any additional parameters for the call
@@ -551,6 +694,8 @@ export abstract class VestStakeCallFactory {
   /**
    * Constructs a no op call for the un_stake(asset)void ABI method
    *
+   * Initiates the unstaking of the specified asset.
+   *
    * @param args Any args for the contract call
    * @param params Any additional parameters for the call
    * @returns A TypedCallParams object for the call
@@ -564,6 +709,8 @@ export abstract class VestStakeCallFactory {
   }
   /**
    * Constructs a no op call for the get_staker(address)(address,uint64,uint64,bool,uint64,uint64) ABI method
+   *
+   * Retrieves staker information for the specified staker address and stores it in the output.
    *
    * @param args Any args for the contract call
    * @param params Any additional parameters for the call
@@ -677,6 +824,9 @@ export class VestStakeClient {
   /**
    * Calls the bootstrap(asset)void ABI method.
    *
+   * Initializes Vest Stake application's global state, sets admin account, escrow address, asset decimal, and
+opts into the provided asset.
+   *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call
    * @returns The result of the call
@@ -701,6 +851,8 @@ export class VestStakeClient {
   /**
    * Calls the set_stake_amounts(uint64,uint64)void ABI method.
    *
+   * Sets the minimum and maximum stake amounts for staking.
+   *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call
    * @returns The result of the call
@@ -712,6 +864,8 @@ export class VestStakeClient {
   /**
    * Calls the set_annual_rate(uint64)void ABI method.
    *
+   * Sets the annual rate.
+   *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call
    * @returns The result of the call
@@ -721,7 +875,35 @@ export class VestStakeClient {
   }
 
   /**
+   * Calls the set_asset_decimal(uint64)void ABI method.
+   *
+   * Sets the asset decimal.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The result of the call
+   */
+  public setAssetDecimal(args: MethodArgs<'set_asset_decimal(uint64)void'>, params: AppClientCallCoreParams & CoreAppCallArgs = {}) {
+    return this.call(VestStakeCallFactory.setAssetDecimal(args, params))
+  }
+
+  /**
+   * Calls the set_asset_id(uint64)void ABI method.
+   *
+   * Sets the asset ID.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The result of the call
+   */
+  public setAssetId(args: MethodArgs<'set_asset_id(uint64)void'>, params: AppClientCallCoreParams & CoreAppCallArgs = {}) {
+    return this.call(VestStakeCallFactory.setAssetId(args, params))
+  }
+
+  /**
    * Calls the stake(asset,uint64,axfer)void ABI method.
+   *
+   * Initiates a stake for the specified asset and duration.
    *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call
@@ -734,6 +916,8 @@ export class VestStakeClient {
   /**
    * Calls the un_stake(asset)void ABI method.
    *
+   * Initiates the unstaking of the specified asset.
+   *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call
    * @returns The result of the call
@@ -744,6 +928,8 @@ export class VestStakeClient {
 
   /**
    * Calls the get_staker(address)(address,uint64,uint64,bool,uint64,uint64) ABI method.
+   *
+   * Retrieves staker information for the specified staker address and stores it in the output.
    *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call
@@ -809,8 +995,8 @@ export class VestStakeClient {
       get annual_rate() {
         return VestStakeClient.getIntegerState(state, 'annual_rate')
       },
-      get asset_decimal() {
-        return VestStakeClient.getIntegerState(state, 'asset_decimal')
+      get asset_id() {
+        return VestStakeClient.getIntegerState(state, 'asset_id')
       },
       get escrow_address() {
         return VestStakeClient.getBinaryState(state, 'escrow_address')
@@ -820,6 +1006,9 @@ export class VestStakeClient {
       },
       get min_stake() {
         return VestStakeClient.getIntegerState(state, 'min_stake')
+      },
+      get vest_decimals() {
+        return VestStakeClient.getIntegerState(state, 'vest_decimals')
       },
     }
   }
@@ -847,6 +1036,16 @@ export class VestStakeClient {
       },
       setAnnualRate(args: MethodArgs<'set_annual_rate(uint64)void'>, params?: AppClientCallCoreParams & CoreAppCallArgs) {
         promiseChain = promiseChain.then(() => client.setAnnualRate(args, {...params, sendParams: {...params?.sendParams, skipSending: true, atc}}))
+        resultMappers.push(undefined)
+        return this
+      },
+      setAssetDecimal(args: MethodArgs<'set_asset_decimal(uint64)void'>, params?: AppClientCallCoreParams & CoreAppCallArgs) {
+        promiseChain = promiseChain.then(() => client.setAssetDecimal(args, {...params, sendParams: {...params?.sendParams, skipSending: true, atc}}))
+        resultMappers.push(undefined)
+        return this
+      },
+      setAssetId(args: MethodArgs<'set_asset_id(uint64)void'>, params?: AppClientCallCoreParams & CoreAppCallArgs) {
+        promiseChain = promiseChain.then(() => client.setAssetId(args, {...params, sendParams: {...params?.sendParams, skipSending: true, atc}}))
         resultMappers.push(undefined)
         return this
       },
@@ -893,6 +1092,9 @@ export type VestStakeComposer<TReturns extends [...any[]] = []> = {
   /**
    * Calls the bootstrap(asset)void ABI method.
    *
+   * Initializes Vest Stake application's global state, sets admin account, escrow address, asset decimal, and
+opts into the provided asset.
+   *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call
    * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
@@ -913,6 +1115,8 @@ export type VestStakeComposer<TReturns extends [...any[]] = []> = {
   /**
    * Calls the set_stake_amounts(uint64,uint64)void ABI method.
    *
+   * Sets the minimum and maximum stake amounts for staking.
+   *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call
    * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
@@ -922,6 +1126,8 @@ export type VestStakeComposer<TReturns extends [...any[]] = []> = {
   /**
    * Calls the set_annual_rate(uint64)void ABI method.
    *
+   * Sets the annual rate.
+   *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call
    * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
@@ -929,7 +1135,31 @@ export type VestStakeComposer<TReturns extends [...any[]] = []> = {
   setAnnualRate(args: MethodArgs<'set_annual_rate(uint64)void'>, params?: AppClientCallCoreParams & CoreAppCallArgs): VestStakeComposer<[...TReturns, MethodReturn<'set_annual_rate(uint64)void'>]>
 
   /**
+   * Calls the set_asset_decimal(uint64)void ABI method.
+   *
+   * Sets the asset decimal.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
+   */
+  setAssetDecimal(args: MethodArgs<'set_asset_decimal(uint64)void'>, params?: AppClientCallCoreParams & CoreAppCallArgs): VestStakeComposer<[...TReturns, MethodReturn<'set_asset_decimal(uint64)void'>]>
+
+  /**
+   * Calls the set_asset_id(uint64)void ABI method.
+   *
+   * Sets the asset ID.
+   *
+   * @param args The arguments for the contract call
+   * @param params Any additional parameters for the call
+   * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
+   */
+  setAssetId(args: MethodArgs<'set_asset_id(uint64)void'>, params?: AppClientCallCoreParams & CoreAppCallArgs): VestStakeComposer<[...TReturns, MethodReturn<'set_asset_id(uint64)void'>]>
+
+  /**
    * Calls the stake(asset,uint64,axfer)void ABI method.
+   *
+   * Initiates a stake for the specified asset and duration.
    *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call
@@ -940,6 +1170,8 @@ export type VestStakeComposer<TReturns extends [...any[]] = []> = {
   /**
    * Calls the un_stake(asset)void ABI method.
    *
+   * Initiates the unstaking of the specified asset.
+   *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call
    * @returns The typed transaction composer so you can fluently chain multiple calls or call execute to execute all queued up transactions
@@ -948,6 +1180,8 @@ export type VestStakeComposer<TReturns extends [...any[]] = []> = {
 
   /**
    * Calls the get_staker(address)(address,uint64,uint64,bool,uint64,uint64) ABI method.
+   *
+   * Retrieves staker information for the specified staker address and stores it in the output.
    *
    * @param args The arguments for the contract call
    * @param params Any additional parameters for the call

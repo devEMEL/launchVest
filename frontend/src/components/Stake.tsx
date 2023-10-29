@@ -7,7 +7,7 @@ import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClien
 import * as algokit from '@algorandfoundation/algokit-utils'
 import { useWallet } from '@txnlab/use-wallet'
 import { useSnackbar } from 'notistack'
-import algosdk, { Transaction } from 'algosdk'
+import algosdk from 'algosdk'
 
 const QUATERLY = 7_884_000n
 const HALF_A_YEAR = 15_768_000n
@@ -21,12 +21,12 @@ const Stake = () => {
   const _1year = useRef()
   const dispatch = useDispatch()
   const [amount, setAmount] = useState<bigint>(0n)
-  const [stakeState, setStakeState] = useState<bigint>(0n)
-  const [latestTimeStamp, setLatestTimeStamp] = useState<bigint>(0n)
-  const [stakeDuration, setStakeDuration] = useState<bigint>(300n)
+  const [stakeType, setStakeType] = useState<number>(0)
+
+  const [stakeDuration, setStakeDuration] = useState<bigint>(0n)
 
   const { enqueueSnackbar } = useSnackbar()
-  const { signer, activeAddress, activeAccount } = useWallet()
+  const { signer, activeAddress } = useWallet()
   const algodConfig = getAlgodConfigFromViteEnvironment()
   const algodClient = algokit.getAlgoClient({
     server: algodConfig.server,
@@ -40,7 +40,7 @@ const Stake = () => {
   const vestStakeClient = new VestStakeClient(
     {
       resolveBy: 'id',
-      id: 460473489,
+      id: 460930743,
       sender,
     },
     algodClient,
@@ -49,7 +49,7 @@ const Stake = () => {
   const stakeTxn = async () => {
     const decimals = (await algodClient.getAssetByID(ASSET_ID).do()).params.decimals
     // const stakeAmount = 200_000_000_000
-    const stakeAmount = BigInt(amount) * BigInt(10 ** (decimals + 1))
+    const stakeAmount = BigInt(amount) * BigInt(10 ** (decimals))
     // stake
     console.log(stakeAmount)
     console.log(stakeDuration)
@@ -74,34 +74,8 @@ const Stake = () => {
   const unstakeTxn = async () => {
     console.log('unstaking')
     const tx = await vestStakeClient.unStake({ asset: BigInt(ASSET_ID) }, { boxes: [algosdk.decodeAddress(activeAddress).publicKey] })
-    console.log(tx);
+    console.log(tx)
   }
-
-  const getLatestTimeStamp = async () => {
-    const status_ = await algodClient.status().do()
-    const latestTimeStamp_ = await algodClient.block(status_['last-round']).do()
-    setLatestTimeStamp(latestTimeStamp_['block']['ts'])
-  }
-  const checkIsStaking = async () => {
-    await getLatestTimeStamp()
-    for (let _box of await vestStakeClient.appClient.getBoxNames()) {
-      let result = await vestStakeClient.appClient.getBoxValue(_box)
-
-      const resultCodec = algosdk.ABIType.from('(address,uint64,uint64,bool,uint64,uint64)')
-      const stakingList = resultCodec.decode(result)
-      console.log(stakingList[0])
-      if (String(stakingList[0]) === activeAddress) {
-        console.log('stakingList: ', stakingList[5])
-        setStakeState(stakingList[5])
-
-        console.log('latesttimestamp:', latestTimeStamp)
-      }
-    }
-  }
-
-  useEffect(() => {
-    checkIsStaking()
-  }, [])
 
   return (
     <div className="max-w-[60%] w-[100%] mx-auto">
@@ -200,63 +174,80 @@ const Stake = () => {
           type="submit"
           className="w-[100%] h-[60px] capitalize border-2 outline-0 rounded-full bg-[#000000] text-[26px] text-[#ffffff] font-bold shadow-lg shadow-indigo-500/40"
           onClick={
-            Number(latestTimeStamp) > Number(stakeState)
+            Number(stakeDuration) == 0
               ? () => {
-                  dispatch(showConfirmModal())
+                // alert error
+                  console.log('no duration selected')
+                  return
                 }
               : () => {
                   dispatch(showConfirmModal())
-                  // make sure stake duration is either of the 3 durations
-                  // console.log(stakeDuration)
+                  setStakeType(1)
                 }
           }
         >
-          {Number(latestTimeStamp) > Number(stakeState) ? 'unstake' : 'stake'}
+          stake
+        </button>
+        <button
+          type="submit"
+          className="w-[100%] h-[60px] capitalize border-2 outline-0 rounded-full bg-[#000000] text-[26px] text-[#ffffff] font-bold shadow-lg shadow-indigo-500/40"
+          onClick={() => {
+            dispatch(showConfirmModal())
+            setStakeType(0)
+          }}
+        >
+          unstake
         </button>
       </div>
       {/* CONFIRM MODAL */}
-
-      {/* <ConfirmModal {Number(latestTimeStamp) > Number(stakeState) ? text={`Stake ${amount} vest for ${stakeDuration === QUATERLY ? '3 months' : stakeDuration === HALF_A_YEAR ? '6 months' : '1 year'}`} : text="hello"}
-txn={txn}
-      /> */}
-      {Number(latestTimeStamp) > Number(stakeState) ? (
-        <ConfirmModal text={`Unstake vest`} txn={unstakeTxn} />
-      ) : (
+      {stakeType == 1 ? (
         <ConfirmModal
           text={`Stake ${amount} vest for ${
-            stakeDuration === QUATERLY ? '3 months' : stakeDuration === HALF_A_YEAR ? '6 months' : '1 year'
+            stakeDuration === QUATERLY
+              ? '3 months'
+              : stakeDuration === HALF_A_YEAR
+              ? '6 months'
+              : stakeDuration === YEARLY
+              ? '1 year'
+              : 'invalid duration'
           }`}
           txn={stakeTxn}
         />
+      ) : (
+        <ConfirmModal text={`Unstake vest`} txn={unstakeTxn} />
       )}
 
       <button
         onClick={async () => {
-          // await vestStakeClient.create.bare()
-          // const vestStakeAppId = (await vestStakeClient.appClient.getAppReference()).appId
-          // await vestStakeClient.appClient.fundAppAccount(algokit.microAlgos(300_000))
-          // await vestStakeClient.bootstrap({ asset: BigInt(ASSET_ID) })
+          await vestStakeClient.create.bare()
+          const vestStakeAppId = (await vestStakeClient.appClient.getAppReference()).appId
+          await vestStakeClient.appClient.fundAppAccount(algokit.microAlgos(300_000))
+          await vestStakeClient.bootstrap({ asset: BigInt(ASSET_ID) })
 
-          // console.log(vestStakeAppId)
+          console.log(vestStakeAppId)
 
           // read box
           // let StakersArr = []
-          for (let _box of await vestStakeClient.appClient.getBoxNames()) {
-            let result = await vestStakeClient.appClient.getBoxValue(_box)
+          //this below
+          // for (let _box of await vestStakeClient.appClient.getBoxNames()) {
+          //   let result = await vestStakeClient.appClient.getBoxValue(_box)
 
-            const resultCodec = algosdk.ABIType.from('(address,uint64,uint64,bool,uint64,uint64)')
-            const stakingList = resultCodec.decode(result)
-            console.log('stakingList: ', stakingList[5])
-            // let obj = {
-            //   address: stakingList[0],
-            //   amount: Number(stakingList[1]),
-            //   assetId: Number(stakingList[2]),
-            //   isStaking: stakingList[3],
-            //   startTimestamp: Number(stakingList[4]),
-            //   endTimestamp: Number(stakingList[5]),
-            // }
-            // StakersArr.push(obj)
-          }
+          //   const resultCodec = algosdk.ABIType.from('(address,uint64,uint64,bool,uint64,uint64)')
+          //   const stakingList = resultCodec.decode(result)
+          //   console.log('stakingList: ', stakingList[5])
+          //this above
+          // let obj = {
+          //   address: stakingList[0],
+          //   amount: Number(stakingList[1]),
+          //   assetId: Number(stakingList[2]),
+          //   isStaking: stakingList[3],
+          //   startTimestamp: Number(stakingList[4]),
+          //   endTimestamp: Number(stakingList[5]),
+          // }
+          // StakersArr.push(obj)
+          //this below
+          // }
+          //this above
           // console.log(StakersArr)
           // return StakersArr
 

@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom'
 import { DeflyWalletConnect } from '@blockshake/defly-connect'
 import { DaffiWalletConnect } from '@daffiwallet/connect'
 import { PeraWalletConnect } from '@perawallet/connect'
-import { PROVIDER_ID, ProvidersArray, WalletProvider, useInitializeProviders, useWallet } from '@txnlab/use-wallet'
+import { PROVIDER_ID, ProvidersArray, WalletProvider, reconnectProviders, useInitializeProviders, useWallet } from '@txnlab/use-wallet'
 import algosdk from 'algosdk'
 import { SnackbarProvider } from 'notistack'
 import Footer from './components/Footer'
@@ -12,6 +12,7 @@ import { getAlgodConfigFromViteEnvironment } from './utils/network/getAlgoClient
 import ListToken from './components/ListToken'
 import Projects from './components/Projects'
 import Stake from './components/Stake'
+import { useEffect } from 'react'
 
 let providersArray: ProvidersArray
 
@@ -23,7 +24,7 @@ providersArray = [
 ]
 
 export default function App() {
-  const { activeAddress } = useWallet()
+  const { activeAddress, connectedAccounts } = useWallet()
 
   const algodConfig = getAlgodConfigFromViteEnvironment()
 
@@ -37,6 +38,10 @@ export default function App() {
     },
     algosdkStatic: algosdk,
   })
+
+  // useEffect(() => {
+  //   reconnectProviders(walletProviders)
+  // }, [])
 
   return (
     <SnackbarProvider maxSnack={3}>
