@@ -344,6 +344,14 @@ intc_0 // 0
 dupn 6
 bytec_0 // ""
 dup
+txn Sender
+box_len
+store 4
+store 3
+load 4
+!
+// Staker already staking
+assert
 frame_dig -1
 gtxns TypeEnum
 intc_3 // axfer
@@ -462,17 +470,17 @@ bytec_0 // ""
 dup
 txn Sender
 box_len
-store 4
-store 3
-load 4
-assert
-txn Sender
-box_get
 store 6
 store 5
 load 6
 assert
-load 5
+txn Sender
+box_get
+store 8
+store 7
+load 8
+assert
+load 7
 frame_bury 0
 frame_dig 0
 extract 0 32
@@ -575,11 +583,11 @@ proto 1 1
 bytec_0 // ""
 frame_dig -1
 box_get
-store 8
-store 7
-load 8
+store 10
+store 9
+load 10
 assert
-load 7
+load 9
 frame_bury 0
 retsub
 
