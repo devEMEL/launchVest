@@ -53,6 +53,3 @@ def calculate_staking_reward(
 ):
     assert (staking_duration == QUARTER_STAKING_PERIOD) or (staking_duration == HALF_YEAR_STAKING_PERIOD) or (staking_duration == ANNUAL_STAKING_PERIOD)
     return (stake_amount * RATE * staking_duration) / (100 * SECONDS_IN_A_YEAR)
-
-
-print(calculate_staking_reward(10, QUARTER_STAKING_PERIOD))

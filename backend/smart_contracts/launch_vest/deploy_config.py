@@ -42,8 +42,8 @@ dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), DOTENV_TES
 load_dotenv(dotenv_path)
 
 TESTNET_ASSET_ID_T = 444276289
-TESTNET_ASSET_ID_Z = 454954862
-ASSET_PRICE = 0.093685
+NEW_TEST_ASSET = 463610258
+ASSET_PRICE = 1
 ASSET_DECIMAL = 6
 MIN_BUY = 1
 MAX_BUY = 5
@@ -109,8 +109,6 @@ def deploy(
     app_id = app_client.app_id
     app_addr = app_client.app_address
 
-    print(algod_client.asset_info(0))
-
     # # Bootstrap app
     app_client.bootstrap()
 
@@ -138,9 +136,10 @@ def deploy(
 
     current_time = int(time.time())
     print(f"Current local timestamp: {current_time}")
-    project_start_timestamp = current_time + 5
-    project_end_timestamp = project_start_timestamp + 30
-    claim_timestamp = project_end_timestamp + 50
+    project_start_timestamp = current_time - 30  # Subtracting 40sec. so my time can match the
+    # pt.Global.latest_timestamp()
+    project_end_timestamp = project_start_timestamp + 40
+    claim_timestamp = project_end_timestamp + 20
 
     # # List project
     project_owner_client = LaunchVestClient(
@@ -149,6 +148,131 @@ def deploy(
         signer=project_owner_account,
         indexer_client=indexer_client
     )
+
+    project_owner_client.list_project(
+        asset_id=project_asset_id,
+        start_timestamp=project_start_timestamp,
+        end_timestamp=project_end_timestamp,
+        claim_timestamp=claim_timestamp,
+        price_per_asset=int(asset_price_with_decimals(ASSET_PRICE, ASSET_DECIMAL)),
+        min_investment_per_investor=algos_to_microalgos(MIN_BUY),
+        max_investment_per_investor=algos_to_microalgos(MAX_BUY),
+        vesting_schedule=2_592_000,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+
+    response = project_owner_client.get_project(
+        project_id=project_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+    print(response.return_value)
+
+    # # Deposit IDO tokens
+    project_owner_client.deposit_ido_assets(
+        txn=deposit_ido_assets(
+            sender=project_owner_account,
+            receiver=app_addr,
+            amt=int(asset_price_with_decimals(ASSET_PRICE, ASSET_DECIMAL)),
+            asset_id=project_asset_id,
+            sp=algod_client.suggested_params()
+        ),
+        asset=project_asset_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+
+    response = project_owner_client.get_project(
+        project_id=project_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+    print(response.return_value)
+
+    # # Invest in project
+    time.sleep(15)
+    investor1_account = Account(private_key=mnemonic.to_private_key(os.getenv("INVESTOR_MNEMONIC")))
+
+    investor1_account_client = LaunchVestClient(
+        algod_client,
+        app_id=app_id,
+        signer=investor1_account.signer,
+        indexer_client=indexer_client
+    )
+    investor1_account_client.invest(
+        is_staking=True,
+        project=project_id,
+        txn=TransactionWithSigner(
+            txn=PaymentTxn(
+                sender=investor1_account.address,
+                sp=algod_client.suggested_params(),
+                receiver=app_addr,
+                amt=algos_to_microalgos(MIN_BUY)
+            ),
+            signer=investor1_account.signer
+        ),
+        transaction_parameters=TransactionParameters(
+            boxes=[
+                (app_id, project_id.to_bytes(8, "big")),
+                (app_id, encoding.decode_address(investor1_account.address)),
+            ],
+        )
+    )
+
+    response = investor1_account_client.get_investor(
+        investor=investor1_account.address,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, encoding.decode_address(investor1_account.address))]
+        )
+    )
+    print(response.return_value)
+
+    response = project_owner_client.get_project(
+        project_id=project_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+    print(response.return_value)
+
+    time.sleep(70)
+    investor1_account_client.claim_ido_asset(
+        is_staking=True,
+        project=project_asset_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[
+                (app_id, project_id.to_bytes(8, "big")),
+                (app_id, encoding.decode_address(investor1_account.address)),
+            ]
+        )
+    )
+    response = investor1_account_client.get_investor(
+        investor=investor1_account.address,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, encoding.decode_address(investor1_account.address))]
+        )
+    )
+    print(response.return_value)
+
+    project_owner_client.withdraw_amount_raised(
+        project_id=project_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+
+    response = project_owner_client.get_project(
+        project_id=project_id,
+        transaction_parameters=TransactionParameters(
+            boxes=[(app_id, project_id.to_bytes(8, "big"))]
+        )
+    )
+    print(response.return_value)
 
     # project_owner_client.list_project(
     #     asset_id=project_asset_id,
@@ -435,7 +559,7 @@ def execute_deployment(network: str = "localnet") -> None:
 
     if os.path.exists(artifacts_path):
         shutil.rmtree(artifacts_path)
-    build(Path(f"{artifacts_path}/{vest_stake.name}"), vest_stake)
+    # build(Path(f"{artifacts_path}/{vest_stake.name}"), vest_stake)
     build(Path(f"{artifacts_path}/{launch_vest.name}"), launch_vest)
 
     if network == "localnet":
@@ -451,12 +575,12 @@ def execute_deployment(network: str = "localnet") -> None:
         )
         deployer = Account(private_key=mnemonic.to_private_key(os.getenv("DEPLOYER_MNEMONIC")))
 
-    deploy(
-        algod_client=algod_client,
-        indexer_client=indexer_client,
-        app_spec=vest_stake.build(),
-        deployer=deployer
-    )
+    # deploy(
+    #     algod_client=algod_client,
+    #     indexer_client=indexer_client,
+    #     app_spec=vest_stake.build(),
+    #     deployer=deployer
+    # )
     deploy(
         algod_client=algod_client,
         indexer_client=indexer_client,
