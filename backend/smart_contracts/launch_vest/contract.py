@@ -240,9 +240,6 @@ def list_project(
             claim_timestamp.get() > end_timestamp.get(),
             comment="Claim time must be greater than start and end time",
         ),
-        (start_timestamp.set(start_timestamp.get() + pt.Global.latest_timestamp())),
-        (end_timestamp.set(end_timestamp.get() + pt.Global.latest_timestamp())),
-        (claim_timestamp.set(claim_timestamp.get() + pt.Global.latest_timestamp())),
         pt.Assert(
             pt.Or(
                 vesting_schedule.get() == QUARTERLY_VESTING_PERIOD,
@@ -261,6 +258,7 @@ def list_project(
         (project_total_assets_sold := pt.abi.Uint64()).set(pt.Int(0)),
         (project_total_amount_raised := pt.abi.Uint64()).set(pt.Int(0)),
         (project_amount_withdrawn := pt.abi.Uint64()).set(pt.Int(0)),
+        (project_vesting_schedule := pt.abi.Uint64()).set(pt.Global.latest_timestamp() + vesting_schedule.get()),
 
         project.set(
             project_owner_address,
@@ -280,7 +278,7 @@ def list_project(
             project_total_assets_sold,
             project_total_amount_raised,
             project_amount_withdrawn,
-            vesting_schedule
+            project_vesting_schedule
         ),
         app.state.pid_to_project[project_id_in_bytes].set(project),
     )
