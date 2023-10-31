@@ -1,0 +1,242 @@
+{
+    "name": "launch_vest",
+    "methods": [
+        {
+            "name": "bootstrap",
+            "args": [],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Initializes Launch Vest application's global state, sets the admin account, and sets the escrow address."
+        },
+        {
+            "name": "fund_escrow_address",
+            "args": [
+                {
+                    "type": "pay",
+                    "name": "txn",
+                    "desc": "The payment transaction to fund the escrow address."
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Fund escrow address with Algos."
+        },
+        {
+            "name": "list_project",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset_id",
+                    "desc": "The unique identifier of the asset."
+                },
+                {
+                    "type": "string",
+                    "name": "image_url"
+                },
+                {
+                    "type": "uint64",
+                    "name": "start_timestamp",
+                    "desc": "The timestamp when the project starts."
+                },
+                {
+                    "type": "uint64",
+                    "name": "end_timestamp",
+                    "desc": "The timestamp when the project ends."
+                },
+                {
+                    "type": "uint64",
+                    "name": "claim_timestamp",
+                    "desc": "The timestamp for asset claiming."
+                },
+                {
+                    "type": "uint64",
+                    "name": "price_per_asset",
+                    "desc": "The price of each asset."
+                },
+                {
+                    "type": "uint64",
+                    "name": "min_investment_per_investor",
+                    "desc": "The minimum investment per user."
+                },
+                {
+                    "type": "uint64",
+                    "name": "max_investment_per_investor",
+                    "desc": "The maximum investment per user."
+                },
+                {
+                    "type": "uint64",
+                    "name": "vesting_schedule"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Lists a new IDO Project on LaunchVest."
+        },
+        {
+            "name": "deposit_ido_assets",
+            "args": [
+                {
+                    "type": "axfer",
+                    "name": "txn",
+                    "desc": "The asset transfer transaction for the deposit."
+                },
+                {
+                    "type": "asset",
+                    "name": "asset",
+                    "desc": "The asset to be deposited."
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Allows depositing IDO assets using the provided transaction and asset."
+        },
+        {
+            "name": "invest",
+            "args": [
+                {
+                    "type": "bool",
+                    "name": "is_staking",
+                    "desc": "Indicates whether the investor is staking $VEST"
+                },
+                {
+                    "type": "asset",
+                    "name": "project",
+                    "desc": "The project (asset) ID to invest in."
+                },
+                {
+                    "type": "pay",
+                    "name": "txn",
+                    "desc": "The payment transaction for the investment."
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Allows investors invest in a Project."
+        },
+        {
+            "name": "claim_ido_asset",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "project",
+                    "desc": "Project (asset) ID to be claimed."
+                },
+                {
+                    "type": "bool",
+                    "name": "is_staking"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Allows users to claim a specific IDO Project asset."
+        },
+        {
+            "name": "reclaim_investment",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "project",
+                    "desc": "Project (asset) ID to be claimed."
+                },
+                {
+                    "type": "bool",
+                    "name": "is_staking"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Allows investors to reclaim their investment."
+        },
+        {
+            "name": "withdraw_amount_raised",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "project_id"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            }
+        },
+        {
+            "name": "pause_project",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "project_id",
+                    "desc": "The unique identifier of the project to be paused."
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Allows pausing a project with the specified project ID."
+        },
+        {
+            "name": "unpause_project",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "project_id",
+                    "desc": "The unique identifier of the project to be un-paused."
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Allows un-pausing a project with the specified project ID."
+        },
+        {
+            "name": "change_launchpad_admin",
+            "args": [
+                {
+                    "type": "address",
+                    "name": "new_admin_acct",
+                    "desc": "The new admin account address."
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Allows changing the admin account for the launchpad."
+        },
+        {
+            "name": "get_project",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "project_id",
+                    "desc": "The unique identifier of the project to retrieve."
+                }
+            ],
+            "returns": {
+                "type": "(address,uint64,uint64,uint64,uint64,uint64,string,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64,uint64,uint64)"
+            },
+            "desc": "Retrieves project information for the specified project ID and stores it in the output."
+        },
+        {
+            "name": "get_investor",
+            "args": [
+                {
+                    "type": "address",
+                    "name": "investor",
+                    "desc": "The Algorand address of the investor to retrieve."
+                }
+            ],
+            "returns": {
+                "type": "(address,uint64,uint64,uint64,uint64,bool,bool)"
+            },
+            "desc": "Retrieves investor information for the specified investor address and stores it in the output."
+        }
+    ],
+    "networks": {},
+    "desc": "LaunchVest Application"
+}
