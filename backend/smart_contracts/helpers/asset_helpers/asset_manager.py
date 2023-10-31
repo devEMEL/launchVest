@@ -1,13 +1,15 @@
 import json
 import os
 
+import algokit_utils
 from algosdk.transaction import (
     wait_for_confirmation,
     AssetConfigTxn,
     AssetTransferTxn,
 )
 from algosdk.v2client.algod import AlgodClient
-from algokit_utils import get_algod_client, Account
+from algokit_utils import get_algod_client, get_algonode_config, Account
+from algosdk import mnemonic
 from backend.smart_contracts.helpers.asset_helpers.asset_info import asset_holding_info
 from backend.smart_contracts.helpers.account_helpers.account import generate_algo_funded_account
 
@@ -17,7 +19,7 @@ from dotenv import load_dotenv
 DOTENV_LOCALNET_PATH = "../../../.env.localnet"
 DOTENV_TESTNET_PATH = "../../../.env.testnet"
 
-dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), DOTENV_LOCALNET_PATH))
+dotenv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), DOTENV_TESTNET_PATH))
 load_dotenv(dotenv_path)
 
 
@@ -128,13 +130,16 @@ def transfer_asset(
 
 
 if __name__ == "__main__":
-    algod_client = get_algod_client()
+    algod_client = get_algod_client(
+        config=algokit_utils.get_algonode_config(network="testnet", config="algod", token="")
+    )
 
-    owner_acct = generate_algo_funded_account(amount=100, client=algod_client)
+    # owner_acct = generate_algo_funded_account(amount=100, client=algod_client)
+    owner_acct = Account(private_key=mnemonic.to_private_key(os.getenv("DEPLOYER_MNEMONIC")))
     asset_id = create_asset(
         account=owner_acct,
-        unit_name="TOKENZA",
-        asset_name="TOKENZA",
+        unit_name="XEBA",
+        asset_name="XEBA",
         total=20_000_000_000_000_000,
         decimals=8,
         client=algod_client

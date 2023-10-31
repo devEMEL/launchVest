@@ -57,20 +57,42 @@ def calculate_proceeds_after_fee_deduction(
     )
 
 
-def asset_amount_in_decimals(
-    asset_price: pt.abi.Uint64,
-    asset_decimals: pt.abi.Uint64,
-    asset_amount: pt.abi.Uint64,
+# noinspection PyTypeChecker
+def calculate_disbursement(
+    total_amount: pt.abi.Uint64,
+    percentage: pt.abi.Uint64,
     *,
     output: pt.abi.Uint64
 ) -> pt.Expr:
-    return output.set((asset_amount.get() / asset_price.get()) * BASE_VALUE ** asset_decimals.get())
+    return pt.Seq(
+        pt.Assert(percentage.get() > pt.Int(0), percentage.get() <= pt.Int(100)),
+        output.set((percentage.get() / pt.Int(100)) * total_amount.get())
+    )
 
 
-def asset_amount_in_whole_number(
-    asset_amount: pt.abi.Uint64,
-    asset_decimals: pt.abi.Uint64,
+def amount_in_decimals(
+    amount: pt.abi.Uint64,
+    asset_decimal: pt.abi.Uint64,
     *,
     output: pt.abi.Uint64
 ) -> pt.Expr:
-    return output.set(asset_amount.get() / (BASE_VALUE ** asset_decimals))
+    return output.set(amount.get() * BASE_VALUE ** asset_decimal.get())
+
+
+# def asset_amount_in_decimals(
+#     asset_price: pt.abi.Uint64,
+#     asset_decimals: pt.abi.Uint64,
+#     asset_amount: pt.abi.Uint64,
+#     *,
+#     output: pt.abi.Uint64
+# ) -> pt.Expr:
+#     return output.set((asset_amount.get() / asset_price.get()) * BASE_VALUE ** asset_decimals.get())
+#
+#
+# def asset_amount_in_whole_number(
+#     asset_amount: pt.abi.Uint64,
+#     asset_decimals: pt.abi.Uint64,
+#     *,
+#     output: pt.abi.Uint64
+# ) -> pt.Expr:
+#     return output.set(asset_amount.get() / (BASE_VALUE ** asset_decimals))

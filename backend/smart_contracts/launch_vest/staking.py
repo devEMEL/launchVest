@@ -98,7 +98,7 @@ def calculate_stake_reward(
     :param pt.abi.Uint64 stake_duration: The duration of the stake.
     :param pt.abi.Uint64 output: The object where the stake_reward result will be stored.
 
-    :rtype pt.Expr:
+    :rtype: pt.Expr
     """
     return output.set(
         (stake_amount.get() + (
@@ -134,7 +134,7 @@ def escrow_asset_opt_in(asset: pt.abi.Asset) -> pt.Expr:
     Executes Vest Stake escrow (application) address asset opt in.
 
     :param pt.abi.Asset asset: The asset to opt be into.
-    :rtype pt.Expr:
+    :rtype: pt.Expr
     """
     return pt.Seq(
         pt.InnerTxnBuilder.Execute({
@@ -177,7 +177,7 @@ def set_stake_amounts(
 
     :param pt.abi.Uint64 min_stake: The minimum stake amount.
     :param pt.abi.Uint64 max_stake: The maximum stake amount.
-    :rtype pt.Expr:.
+    :rtype: pt.Expr.
     """
     return pt.Seq(
         pt.Assert(
@@ -196,7 +196,7 @@ def set_annual_rate(annual_rate: pt.abi.Uint64) -> pt.Expr:
     Sets the annual rate.
 
     :param pt.abi.Uint64 annual_rate: The annual rate.
-    :rtype pt.Expr.:
+    :rtype: pt.Expr.
     """
     return app.state.annual_rate.set(annual_rate.get())
 
@@ -218,7 +218,7 @@ def set_asset_id(asset_id: pt.abi.Uint64) -> pt.Expr:
     Sets the asset ID.
 
     :param pt.abi.Uint64 asset_id: The unique asset ID.
-    :rtype pt.Expr.:
+    :rtype: pt.Expr.
     """
     return app.state.asset_id.set(asset_id.get())
 
@@ -236,7 +236,7 @@ def stake(
     :param pt.abi.Asset asset: The asset to be staked.
     :param pt.abi.Uint64 stake_duration: The duration of the stake.
     :param pt.abi.AssetTransferTransaction txn: The transaction object for the staking operation.
-    :rtype pt.Expr.:
+    :rtype: pt.Expr.
     """
     staker = Staker()
     return pt.Seq(
@@ -252,13 +252,7 @@ def stake(
         pt.Assert(
             pt.And(
                 txn.get().asset_amount() >= app.state.min_stake,
-                # 200,000,000,00 >= 100,000,000,00
-                # 1200,000,000,00 >= 100,000,000,00
-                # 100,000,000,000 >= 100,000,000,00
                 txn.get().asset_amount() <= app.state.max_stake,
-                # 200,000,000,00 <= 20,000,000,000,00
-                # 1200,000,000,00 <= 20,000,000,000,00
-               
             ),
         ),
         pt.Assert(
@@ -301,7 +295,7 @@ def un_stake(asset: pt.abi.Asset) -> pt.Expr:
     Initiates the unstaking of the specified asset.
 
     :param asset: The asset to be unstaked.
-    :rtype pt.Expr:
+    :rtype: pt.Expr
     """
     return pt.Seq(
         pt.Assert(app.state.staker_to_stake[pt.Txn.sender()].exists()),
