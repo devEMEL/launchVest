@@ -5,11 +5,52 @@ import * as algokit from '@algorandfoundation/algokit-utils'
 import { useWallet } from '@txnlab/use-wallet'
 import { useSnackbar } from 'notistack'
 import algosdk from 'algosdk'
+import Project from './Project'
 
+const projects_ = [
+  {
+    'asset id': 5,
+    'asset price': 890,
+    'start timestamp': 2345,
+    'end timestamp': 456,
+    'claim timestamp': 4567,
+    'min buy': 1,
+    'max buy': 6,
+    'max cap': 456,
+    'amount raised': 345,
+    'assets for sale': 1234567,
+    'assets sold': 4567889900,
+  },{
+    'asset id': 5,
+    'asset price': 890,
+    'start timestamp': 2345,
+    'end timestamp': 456,
+    'claim timestamp': 4567,
+    'min buy': 1,
+    'max buy': 6,
+    'max cap': 456,
+    'amount raised': 345,
+    'assets for sale': 1234567,
+    'assets sold': 4567889900,
+  },
+  {
+    'asset id': 5,
+    'asset price': 890,
+    'start timestamp': 2345,
+    'end timestamp': 456,
+    'claim timestamp': 4567,
+    'min buy': 1,
+    'max buy': 6,
+    'max cap': 456,
+    'amount raised': 345,
+    'assets for sale': 1234567,
+    'assets sold': 4567889900,
+  },
+]
 
 const Projects = () => {
   const [appId, setAppId] = useState<number>(455380620)
-  const [projects, setProjects] = useState<Array<object>>([]);
+  const [projects, setProjects] = useState<Array<object>>([])
   const { enqueueSnackbar } = useSnackbar()
   const { signer, activeAddress } = useWallet()
   const algodConfig = getAlgodConfigFromViteEnvironment()
@@ -31,26 +72,34 @@ const Projects = () => {
     algodClient,
   )
 
-
   const handleShowProjects = async () => {
     console.log('handleShowProjects')
 
     let projectsArr = []
     for (let _box of await launchVestClient.appClient.getBoxNames()) {
       let result = await launchVestClient.appClient.getBoxValue(_box)
- 
+
       const resultCodec = algosdk.ABIType.from('(address,uint64,uint64,uint64,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64)')
       const tokenList = resultCodec.decode(result)
       console.log(tokenList)
       let project = {
-        tokenPrice: Number(tokenList[4]),
-        minimumBuy: Number(tokenList[5]),
-        maximumBuy: Number(tokenList[6]),
-        startTime: Number(tokenList[1]),
-        endTime: Number(tokenList[2]),
-        claimTime: Number(tokenList[3]),
-        AmountRaised: Number(tokenList[12]),
-        TotalTokenSold: Number(tokenList[11]),
+        'owner address': String(tokenList[0]),
+        'start timestamp': Number(tokenList[1]),
+        'end timestamp': Number(tokenList[2]),
+        'claim timestamp': Number(tokenList[3]),
+        'asset id': Number(tokenList[4]),
+        'asset decimal': Number(tokenList[5]),
+        'asset price': Number(tokenList[6]),
+        'min buy': Number(tokenList[7]),
+        'max buy': Number(tokenList[8]),
+        'max cap': Number(tokenList[9]),
+        'assets for sale': Number(tokenList[10]),
+        ispaused: tokenList[11],
+        'initiated withdrawal': tokenList[12],
+        'proceeds withdrawn': tokenList[13],
+        'assets sold': Number(tokenList[14]),
+        'amount raised': Number(tokenList[15]),
+        'vesting schedule': Number(tokenList[16]),
       }
       projectsArr.push(project)
     }
@@ -65,20 +114,31 @@ const Projects = () => {
   }
 
   useEffect(() => {
-    handleShowProjectsAction()
+    // handleShowProjectsAction()
+    setProjects(projects_)
   }, [])
+
   return (
-    <div>
-      {/* {!!projects && projects.map(project => (
-        <div key={project.assetId}>
-
-        </div>
-      ))} */}
-      hello people
-
+    <div className="max-w-[90%] w-[100%] m-auto">
+      <div className="flex flex-wrap">
+        {!!projects &&
+          projects.map((project) => (
+            <div className='basis-[33.3%] p-1 mb-5'>
+              {/* DISPLAY ASSET NAME FROM ASSETINFO */}
+              
+              <Project project={project} key={project['asset id']} />
+            </div>
+          ))}
+      </div>
+      <button
+        onClick={() => {
+          handleShowProjectsAction()
+        }}
+      >
+        handleShowProjectsAction
+      </button>
     </div>
-
   )
 }
 
-export default Projects;
+export default Projects

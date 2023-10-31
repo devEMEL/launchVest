@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useEffect, useState, useRef } from 'react'
 import { LaunchVestClient } from '../contracts/launch_vest'
 import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClientConfigs'
 import * as algokit from '@algorandfoundation/algokit-utils'
@@ -12,6 +12,10 @@ import algosdk from 'algosdk'
 // 1698275123
 // 1698277123
 
+const QUATERLY = 7_884_000n
+const HALF_A_YEAR = 15_768_000n
+const YEARLY = 31_536_000n
+
 const PER_BOX_MBR = 0.0025e6
 const PER_BYTE_MBR = 0.0004e6
 
@@ -24,6 +28,12 @@ const ListToken = () => {
   const [assetPrice, setAssetPrice] = useState<bigint>(0n)
   const [minimumBuy, setMinimumBuy] = useState<bigint>(0n)
   const [maximumBuy, setMaximumBuy] = useState<bigint>(0n)
+  const [imageURL, setImageURL] = useState<string>('')
+  const [vestingSchedule, setVestingSchedule] = useState<bigint>(QUATERLY)
+
+  const _3months = useRef()
+  const _6months = useRef()
+  const _1year = useRef()
 
   const { enqueueSnackbar } = useSnackbar()
   const { signer, activeAddress } = useWallet()
@@ -57,7 +67,7 @@ const ListToken = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!(assetId && startTimestamp && endTimestamp && claimTimestamp && assetPrice && minimumBuy && maximumBuy)) return
+    if (!(assetId && startTimestamp && endTimestamp && claimTimestamp && assetPrice && minimumBuy && maximumBuy && imageURL)) return
     // const tokenKey = algosdk.bigIntToBytes(Number(assetId), 8)
     const tokenKey = algosdk.encodeUint64(BigInt(assetId))
     const tupleType = algosdk.ABIType.from('(uint64,uint64,uint64,uint64,uint64,uint64,uint64)')
@@ -72,7 +82,7 @@ const ListToken = () => {
     ])
     const costTokenBox = PER_BOX_MBR + PER_BYTE_MBR * (8 + encodedTuple.byteLength * 2)
     console.log(costTokenBox)
-    await launchVestClient.appClient.fundAppAccount(algokit.microAlgos(costTokenBox + 300_000))
+    await launchVestClient.appClient.fundAppAccount(algokit.microAlgos(costTokenBox + 400_000))
 
     const listToken = await launchVestClient.listProject(
       {
@@ -83,6 +93,7 @@ const ListToken = () => {
         price_per_asset: BigInt(assetPrice),
         max_investment_per_investor: BigInt(maximumBuy),
         min_investment_per_investor: BigInt(minimumBuy),
+        
       },
       {
         boxes: [tokenKey],
@@ -97,7 +108,7 @@ const ListToken = () => {
       <div className="border-2 border-black-100 rounded-[50px] p-10 mb-10">
         <form onSubmit={(e) => handleSubmit(e)}>
           <div className="mb-5">
-            <label htmlFor="asset_id" className="text-2xl">
+            <label htmlFor="asset_id" className="text-2xl capitalize">
               Asset ID
             </label>
             <div className="mt-3">
@@ -114,7 +125,7 @@ const ListToken = () => {
           </div>
 
           <div className="mb-5">
-            <label htmlFor="start__timestamp" className="text-2xl">
+            <label htmlFor="start__timestamp" className="text-2xl capitalize">
               Start Timestamp
             </label>
             <div className="mt-3">
@@ -131,7 +142,7 @@ const ListToken = () => {
           </div>
 
           <div className="mb-5">
-            <label htmlFor="end__timestamp" className="text-2xl">
+            <label htmlFor="end__timestamp" className="text-2xl capitalize">
               End Timestamp
             </label>
             <div className="mt-3">
@@ -148,7 +159,7 @@ const ListToken = () => {
           </div>
 
           <div className="mb-5">
-            <label htmlFor="claim__timestamp" className="text-2xl">
+            <label htmlFor="claim__timestamp" className="text-2xl capitalize">
               Claim Timestamp
             </label>
             <div className="mt-3">
@@ -165,7 +176,7 @@ const ListToken = () => {
           </div>
 
           <div className="mb-5">
-            <label htmlFor="asset__price" className="text-2xl">
+            <label htmlFor="asset__price" className="text-2xl capitalize">
               Asset Price ($)
             </label>
             <div className="mt-3">
@@ -182,7 +193,7 @@ const ListToken = () => {
           </div>
 
           <div className="mb-5">
-            <label htmlFor="minimum__buy" className="text-2xl">
+            <label htmlFor="minimum__buy" className="text-2xl capitalize">
               Minimum Buy
             </label>
             <div className="mt-3">
@@ -199,7 +210,7 @@ const ListToken = () => {
           </div>
 
           <div className="mb-5">
-            <label htmlFor="maximum__buy" className="text-2xl">
+            <label htmlFor="maximum__buy" className="text-2xl capitalize">
               Maximum Buy
             </label>
             <div className="mt-3">
@@ -213,6 +224,89 @@ const ListToken = () => {
                 }}
               />
             </div>
+          </div>
+
+          <div className="mb-5">
+            <label htmlFor="image_url" className="text-2xl capitalize">
+              Image URL
+            </label>
+            <div className="mt-3">
+              <input
+                type="text"
+                name="image_url"
+                id="image_url"
+                className="w-[100%] h-[50px] text-[16px] p-5 border-2 outline-0 bg-[#f8f6fe] rounded-lg "
+                onChange={(e) => {
+                  setImageURL(e.target.value as unknown as string)
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="mt-10">
+            <h1 className="text-2xl capitalize">Vesting schedule</h1>
+          </div>
+
+          <div
+            onClick={(e) => {
+              console.log(e.target.id)
+              if (e.target.id === '_3months') {
+                _3months.current.style.backgroundColor = '#FFFFFF'
+                _3months.current.style.color = '#000000'
+                _3months.current.style.border = '2px solid black'
+                _6months.current.style.backgroundColor = 'black'
+                _6months.current.style.color = '#FFFFFF'
+                _1year.current.style.backgroundColor = 'black'
+                _1year.current.style.color = '#FFFFFF'
+              }
+              if (e.target.id === '_6months') {
+                _6months.current.style.backgroundColor = '#FFFFFF'
+                _6months.current.style.color = '#000000'
+                _6months.current.style.border = '2px solid black'
+                _3months.current.style.backgroundColor = 'black'
+                _3months.current.style.color = '#FFFFFF'
+                _1year.current.style.backgroundColor = 'black'
+                _1year.current.style.color = '#FFFFFF'
+              }
+              if (e.target.id === '_1year') {
+                _1year.current.style.backgroundColor = '#FFFFFF'
+                _1year.current.style.color = '#000000'
+                _1year.current.style.border = '2px solid black'
+                _6months.current.style.backgroundColor = 'black'
+                _6months.current.style.color = '#FFFFFF'
+                _3months.current.style.backgroundColor = 'black'
+                _3months.current.style.color = '#FFFFFF'
+              }
+            }}
+            className="flex justify-center items-center my-10 mx-auto"
+          >
+            <button
+              onClick={() => {
+                setVestingSchedule(QUATERLY)
+              }}
+            >
+              <div id="_3months" ref={_3months} className="bg-black text-[16px] text-white mr-20 py-5 px-20 hover:font-bold capitalize">
+                3 months
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                setVestingSchedule(HALF_A_YEAR)
+              }}
+            >
+              <div id="_6months" ref={_6months} className="bg-black text-[16px] text-white mr-20 py-5 px-20 hover:font-bold capitalize">
+                6 months
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                setVestingSchedule(YEARLY)
+              }}
+            >
+              <div id="_1year" ref={_1year} className="bg-black text-[16px] text-white mr-20 py-5 px-20 hover:font-bold capitalize ">
+                1 year
+              </div>
+            </button>
           </div>
 
           <button
