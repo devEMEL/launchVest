@@ -118,7 +118,7 @@ def deploy(
             txn=send_algos(
                 sender=deployer,
                 receiver=app_addr,
-                amt=algos_to_microalgos(3),
+                amt=algos_to_microalgos(2),
                 sp=algod_client.suggested_params()
             )
         )
@@ -151,13 +151,14 @@ def deploy(
 
     project_owner_client.list_project(
         asset_id=project_asset_id,
+        image_url="",
         start_timestamp=project_start_timestamp,
         end_timestamp=project_end_timestamp,
         claim_timestamp=claim_timestamp,
         price_per_asset=int(asset_price_with_decimals(ASSET_PRICE, ASSET_DECIMAL)),
         min_investment_per_investor=algos_to_microalgos(MIN_BUY),
         max_investment_per_investor=algos_to_microalgos(MAX_BUY),
-        vesting_schedule=2_592_000,
+        vesting_schedule=7_776_000,
         transaction_parameters=TransactionParameters(
             boxes=[(app_id, project_id.to_bytes(8, "big"))]
         )
@@ -171,7 +172,7 @@ def deploy(
     )
     print(response.return_value)
 
-    # # Deposit IDO tokens
+    # Deposit IDO tokens
     project_owner_client.deposit_ido_assets(
         txn=deposit_ido_assets(
             sender=project_owner_account,
@@ -194,7 +195,7 @@ def deploy(
     )
     print(response.return_value)
 
-    # # Invest in project
+    # Invest in project
     time.sleep(15)
     investor1_account = Account(private_key=mnemonic.to_private_key(os.getenv("INVESTOR_MNEMONIC")))
 

@@ -159,14 +159,12 @@
             "args": [
                 {
                     "type": "uint64",
-                    "name": "project_id",
-                    "desc": "The unique identifier of the project for which funds are withdrawn."
+                    "name": "project_id"
                 }
             ],
             "returns": {
                 "type": "void"
-            },
-            "desc": "Allows withdrawing the amount raised for a specific project and retains the fee in the escrow address."
+            }
         },
         {
             "name": "pause_project",
