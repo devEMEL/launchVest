@@ -221,6 +221,7 @@ def list_project(
             max_investment_per_investor.get() > pt.Int(0),
             comment="Min. and max. investment must be greater than 0",
         ),
+        
         pt.Assert(
             min_investment_per_investor.get() < max_investment_per_investor.get(),
             comment="Min. investment must be lesser than max. investment",
