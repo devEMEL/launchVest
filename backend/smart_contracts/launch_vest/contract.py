@@ -225,6 +225,9 @@ def list_project(
             min_investment_per_investor.get() < max_investment_per_investor.get(),
             comment="Min. investment must be lesser than max. investment",
         ),
+        (start_timestamp.set(start_timestamp.get() + pt.Global.latest_timestamp())),
+        (end_timestamp.set(end_timestamp.get() + pt.Global.latest_timestamp())),
+        (claim_timestamp.set(claim_timestamp.get() + pt.Global.latest_timestamp())),
         pt.Assert(
             start_timestamp.get() > pt.Global.latest_timestamp(),
             end_timestamp.get() > pt.Global.latest_timestamp(),
@@ -467,6 +470,7 @@ def invest(
             investment_amount=investor_investment_amount,
             output=investor_asset_allocation
         ),
+        (investor_asset_allocation.set(investor_asset_allocation.get())),
 
         investor.set(
             investor_address,
