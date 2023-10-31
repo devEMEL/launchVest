@@ -72,5 +72,5 @@ def calculate_disbursement(
 proceeds = calculate_proceeds_after_fee_deduction(1, 10)
 print(proceeds)
 
-disbursement = calculate_disbursement(proceeds, 90)
+disbursement = calculate_disbursement(proceeds, 10)
 print(disbursement)
