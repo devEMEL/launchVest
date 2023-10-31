@@ -19,7 +19,7 @@ PERCENTAGE = pt.Int(10)
 RECLAIM_WINDOW = pt.Int(1_209_600)
 
 QUARTERLY_VESTING_PERIOD = pt.Int(7_776_000)
-HALF_YEAR_VESTING_PERIOD = pt.Int(15_792_000)
+HALF_YEAR_VESTING_PERIOD = pt.Int(15_552_000)
 YEARLY_VESTING_PERIOD = pt.Int(31_536_000)
 
 
@@ -784,14 +784,14 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
             output=amount_raised
         ),
         (percentage := pt.abi.Uint64()).set(PERCENTAGE),
-        (withdraw_amount := pt.abi.Uint64()).set(pt.Int(0)),
-        calculate_disbursement(
-            total_amount=amount_raised,
-            percentage=percentage,
-            output=withdraw_amount
-        ),
-        disburse(withdraw_amount, project_owner_address),
-        (project_amount_withdrawn.set(project_amount_withdrawn.get() + withdraw_amount.get())),
+        # (withdraw_amount := pt.abi.Uint64()).set(pt.Int(0)),
+        # calculate_disbursement(
+        #     total_amount=amount_raised,
+        #     percentage=percentage,
+        #     output=withdraw_amount
+        # ),
+        # disburse(withdraw_amount, project_owner_address),
+        (project_amount_withdrawn.set(project_amount_withdrawn.get() + amount_raised.get())),
         project.set(
             project_owner_address,
             project_start_timestamp,

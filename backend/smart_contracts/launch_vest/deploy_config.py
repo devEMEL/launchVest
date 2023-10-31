@@ -45,8 +45,9 @@ TESTNET_ASSET_ID_T = 444276289
 NEW_TEST_ASSET = 463610258
 ASSET_PRICE = 1
 ASSET_DECIMAL = 6
-MIN_BUY = 1
-MAX_BUY = 5
+# MIN_BUY = 1
+MIN_BUY = 900_000
+MAX_BUY = 5_000_000
 
 
 def send_algos(
@@ -156,8 +157,8 @@ def deploy(
         end_timestamp=project_end_timestamp,
         claim_timestamp=claim_timestamp,
         price_per_asset=int(asset_price_with_decimals(ASSET_PRICE, ASSET_DECIMAL)),
-        min_investment_per_investor=algos_to_microalgos(MIN_BUY),
-        max_investment_per_investor=algos_to_microalgos(MAX_BUY),
+        min_investment_per_investor=MIN_BUY,
+        max_investment_per_investor=MAX_BUY,
         vesting_schedule=7_776_000,
         transaction_parameters=TransactionParameters(
             boxes=[(app_id, project_id.to_bytes(8, "big"))]
@@ -213,7 +214,7 @@ def deploy(
                 sender=investor1_account.address,
                 sp=algod_client.suggested_params(),
                 receiver=app_addr,
-                amt=algos_to_microalgos(MIN_BUY)
+                amt=MIN_BUY
             ),
             signer=investor1_account.signer
         ),
