@@ -32,6 +32,10 @@
                     "desc": "The unique identifier of the asset."
                 },
                 {
+                    "type": "string",
+                    "name": "image_url"
+                },
+                {
                     "type": "uint64",
                     "name": "start_timestamp",
                     "desc": "The timestamp when the project starts."
@@ -133,6 +137,24 @@
             "desc": "Allows users to claim a specific IDO Project asset."
         },
         {
+            "name": "reclaim_investment",
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "project",
+                    "desc": "Project (asset) ID to be claimed."
+                },
+                {
+                    "type": "bool",
+                    "name": "is_staking"
+                }
+            ],
+            "returns": {
+                "type": "void"
+            },
+            "desc": "Allows investors to reclaim their investment."
+        },
+        {
             "name": "withdraw_amount_raised",
             "args": [
                 {
@@ -198,7 +220,7 @@
                 }
             ],
             "returns": {
-                "type": "(address,uint64,uint64,uint64,uint64,uint64,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64,uint64,uint64)"
+                "type": "(address,uint64,uint64,uint64,uint64,uint64,string,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64,uint64,uint64)"
             },
             "desc": "Retrieves project information for the specified project ID and stores it in the output."
         },
@@ -212,7 +234,7 @@
                 }
             ],
             "returns": {
-                "type": "(address,uint64,uint64,uint64,uint64,bool)"
+                "type": "(address,uint64,uint64,uint64,uint64,bool,bool)"
             },
             "desc": "Retrieves investor information for the specified investor address and stores it in the output."
         }

@@ -118,7 +118,7 @@ def deploy(
             txn=send_algos(
                 sender=deployer,
                 receiver=app_addr,
-                amt=algos_to_microalgos(2),
+                amt=algos_to_microalgos(3),
                 sp=algod_client.suggested_params()
             )
         )

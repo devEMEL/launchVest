@@ -14,7 +14,9 @@ from backend.smart_contracts.launch_vest.formula_helpers import (
 ALGO_DECIMAL = pt.Int(6)
 
 LAUNCH_VEST_FEE = pt.Int(10)  # 10%
-PERCENTAGE = pt.Int(20)
+PERCENTAGE = pt.Int(100)
+
+RECLAIM_WINDOW = pt.Int(1_209_600)
 
 DAILY_VESTING_PERIOD = pt.Int(86_400)
 WEEKLY_VESTING_PERIOD = pt.Int(604_800)
@@ -41,6 +43,7 @@ class Investor(pt.abi.NamedTuple):
     asset_allocated: pt.abi.Field[pt.abi.Uint64]
     asset_claim_timestamp: pt.abi.Field[pt.abi.Uint64]
     claimed_ido_asset: pt.abi.Field[pt.abi.Bool]
+    reclaimed_investment: pt.abi.Field[pt.abi.Bool]
 
 
 class Project(pt.abi.NamedTuple):
@@ -69,6 +72,7 @@ class Project(pt.abi.NamedTuple):
     claim_timestamp: pt.abi.Field[pt.abi.Uint64]
     asset_id: pt.abi.Field[pt.abi.Uint64]
     asset_decimal: pt.abi.Field[pt.abi.Uint64]
+    image_url: pt.abi.Field[pt.abi.String]
     price_per_asset: pt.abi.Field[pt.abi.Uint64]
     min_investment_per_investor: pt.abi.Field[pt.abi.Uint64]
     max_investment_per_investor: pt.abi.Field[pt.abi.Uint64]
@@ -128,7 +132,7 @@ def escrow_asset_opt_in(asset: pt.abi.Asset) -> pt.Expr:
                 pt.TxnField.asset_amount: pt.Int(0),
                 pt.TxnField.asset_receiver: app.state.escrow_address,
                 pt.TxnField.xfer_asset: asset.asset_id(),
-                pt.TxnField.fee: pt.Int(0)
+                # pt.TxnField.fee: pt.Int(0)
             },
         )
     )
@@ -172,6 +176,7 @@ def fund_escrow_address(
 @app.external
 def list_project(
     asset_id: pt.abi.Asset,
+    image_url: pt.abi.String,
     start_timestamp: pt.abi.Uint64,
     end_timestamp: pt.abi.Uint64,
     claim_timestamp: pt.abi.Uint64,
@@ -201,6 +206,10 @@ def list_project(
 
     return pt.Seq(
         (asset_decimal := pt.AssetParam.decimals(asset_id.asset_id())),
+        pt.Assert(
+            pt.Not(app.state.pid_to_project[project_id_in_bytes].exists()),
+            comment="Project already staking"
+        ),
         pt.Assert(
             asset_decimal.value() != pt.Int(0),
             comment="A valid asset ID must be provided",
@@ -261,6 +270,7 @@ def list_project(
             claim_timestamp,
             project_asset_id,
             project_asset_decimal,
+            image_url,
             price_per_asset,
             min_investment_per_investor,
             max_investment_per_investor,
@@ -312,6 +322,7 @@ def deposit_ido_assets(
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
         (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
         (project_asset_decimal := pt.abi.Uint64()).set(project.asset_decimal),
+        (project_image_url := pt.abi.String()).set(project.image_url),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
         (project_max_investment_per_investor := pt.abi.Uint64()).set(project.max_investment_per_investor),
@@ -337,6 +348,7 @@ def deposit_ido_assets(
             project_claim_timestamp,
             project_asset_id,
             project_asset_decimal,
+            project_image_url,
             project_price_per_asset,
             project_min_investment_per_investor,
             project_max_investment_per_investor,
@@ -416,6 +428,7 @@ def invest(
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
         (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
         (project_asset_decimal := pt.abi.Uint64()).set(project.asset_decimal),
+        (project_image_url := pt.abi.String()).set(project.image_url),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_user := pt.abi.Uint64()).set(project.min_investment_per_investor),
         (project_max_investment_per_user := pt.abi.Uint64()).set(project.max_investment_per_investor),
@@ -448,6 +461,7 @@ def invest(
         (investor_investment_amount := pt.abi.Uint64()).set(txn.get().amount()),
         (investor_asset_claim_timestamp := pt.abi.Uint64()).set(pt.Int(0)),
         (investor_claimed_ido_asset := pt.abi.Bool()).set(FALSE),
+        (investor_reclaimed_investment := pt.abi.Bool()).set(FALSE),
 
         (investor_asset_allocation := pt.abi.Uint64()).set(pt.Int(0)),
 
@@ -465,6 +479,7 @@ def invest(
             investor_asset_allocation,
             investor_asset_claim_timestamp,
             investor_claimed_ido_asset,
+            investor_reclaimed_investment
         ),
         app.state.investor_to_project[investor_address].set(investor),
 
@@ -478,6 +493,7 @@ def invest(
             project_claim_timestamp,
             project_asset_id,
             project_asset_decimal,
+            project_image_url,
             project_price_per_asset,
             project_min_investment_per_user,
             project_max_investment_per_user,
@@ -526,19 +542,21 @@ def claim_ido_asset(
         (investor_asset_allocated := pt.abi.Uint64()).set(investor.asset_allocated),
         (investor_asset_claim_timestamp := pt.abi.Uint64()).set(investor.asset_claim_timestamp),
         (investor_claimed_ido_asset := pt.abi.Bool()).set(investor.claimed_ido_asset),
+        (investor_reclaimed_investment := pt.abi.Bool()).set(investor.reclaimed_investment),
 
         pt.Assert(is_staking.get() == TRUE),
         pt.Assert(investor_investment_amount.get() > pt.Int(0)),
         pt.Assert(investor_asset_allocated.get() > pt.Int(0)),
         pt.Assert(investor_asset_claim_timestamp.get() == pt.Int(0)),
         pt.Assert(investor_claimed_ido_asset.get() == FALSE),
+        pt.Assert(investor_reclaimed_investment.get() == FALSE),
 
         pt.InnerTxnBuilder.Execute({
             pt.TxnField.type_enum: pt.TxnType.AssetTransfer,
             pt.TxnField.asset_amount: investor_asset_allocated.get(),
             pt.TxnField.asset_receiver: investor_address.get(),
             pt.TxnField.xfer_asset: project_asset_id,
-            pt.TxnField.fee: pt.Int(0)
+            # pt.TxnField.fee: pt.Int(0)
         }),
 
         investor_asset_claim_timestamp.set(pt.Global.latest_timestamp()),
@@ -550,6 +568,68 @@ def claim_ido_asset(
             investor_asset_allocated,
             investor_asset_claim_timestamp,
             investor_claimed_ido_asset,
+            investor_reclaimed_investment
+        ),
+        app.state.investor_to_project[investor_address.get()].set(investor)
+    )
+
+
+# noinspection PyTypeChecker
+@app.external
+def reclaim_investment(
+    project: pt.abi.Asset,
+    is_staking: pt.abi.Bool
+) -> pt.Expr:
+    """
+    Allows investors to reclaim their investment.
+
+    :param pt.abi.Asset project: Project (asset) ID to be claimed.
+    :rtype: pt.Expr.
+    """
+    project_asset_id = project.asset_id()
+    project_id_in_bytes = pt.Itob(project_asset_id)
+
+    return pt.Seq(
+        pt.Assert(app.state.investor_to_project[pt.Txn.sender()].exists()),
+        pt.Assert(app.state.pid_to_project[project_id_in_bytes].exists()),
+
+        (investor := Investor()).decode(app.state.investor_to_project[pt.Txn.sender()].get()),
+        (project := Project()).decode(app.state.investor_to_project[project_id_in_bytes].get()),
+
+        (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
+
+        (investor_address := pt.abi.Address()).set(investor.address),
+        (investor_project_id := pt.abi.Uint64()).set(investor.project_id),
+        (investor_investment_amount := pt.abi.Uint64()).set(investor.investment_amount),
+        (investor_asset_allocated := pt.abi.Uint64()).set(investor.asset_allocated),
+        (investor_claimed_ido_asset := pt.abi.Bool()).set(investor.claimed_ido_asset),
+        (investor_asset_claim_timestamp := pt.abi.Uint64()).set(investor.asset_claim_timestamp),
+        (investor_reclaimed_investment := pt.abi.Bool()).set(investor.reclaimed_investment),
+
+        (asset_bal := pt.AssetHolding.balance(app.state.escrow_address.get(), project_asset_id)),
+        pt.Assert(asset_bal.value() > pt.Int(0)),
+
+        pt.Assert(investor_asset_allocated.get() > pt.Int(0)),
+        pt.Assert(is_staking.get() == TRUE),
+        pt.Assert(investor_claimed_ido_asset.get() == FALSE),
+        pt.Assert(investor_reclaimed_investment.get() == FALSE),
+        pt.Assert(RECLAIM_WINDOW >= (pt.Global.latest_timestamp() - project_claim_timestamp.get())),
+
+        pt.InnerTxnBuilder.Execute({
+            pt.TxnField.type_enum: pt.TxnType.Payment,
+            pt.TxnField.receiver: investor_address.get(),
+            pt.TxnField.amount: investor_investment_amount.get()
+        }),
+
+        investor_reclaimed_investment.set(TRUE),
+        investor.set(
+            investor_address,
+            investor_project_id,
+            investor_investment_amount,
+            investor_asset_allocated,
+            investor_asset_claim_timestamp,
+            investor_claimed_ido_asset,
+            investor_reclaimed_investment
         ),
         app.state.investor_to_project[investor_address.get()].set(investor)
     )
@@ -576,6 +656,7 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
         (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
         (project_asset_decimal := pt.abi.Uint64()).set(project.asset_decimal),
+        (project_image_url := pt.abi.String()).set(project.image_url),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
         (project_max_investment_per_investor := pt.abi.Uint64()).set(project.max_investment_per_investor),
@@ -636,6 +717,7 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
             project_claim_timestamp,
             project_asset_id,
             project_asset_decimal,
+            project_image_url,
             project_price_per_asset,
             project_min_investment_per_investor,
             project_max_investment_per_investor,
@@ -672,6 +754,7 @@ def pause_project(project_id: pt.abi.Uint64) -> pt.Expr:
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
         (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
         (project_asset_decimal := pt.abi.Uint64()).set(project.asset_decimal),
+        (project_image_url := pt.abi.String()).set(project.image_url),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
         (project_max_investment_per_investor := pt.abi.Uint64()).set(project.max_investment_per_investor),
@@ -694,6 +777,7 @@ def pause_project(project_id: pt.abi.Uint64) -> pt.Expr:
             project_claim_timestamp,
             project_asset_id,
             project_asset_decimal,
+            project_image_url,
             project_price_per_asset,
             project_min_investment_per_investor,
             project_max_investment_per_investor,
@@ -731,6 +815,7 @@ def unpause_project(project_id: pt.abi.Uint64) -> pt.Expr:
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
         (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
         (project_asset_decimal := pt.abi.Uint64()).set(project.asset_decimal),
+        (project_image_url := pt.abi.String()).set(project.image_url),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
         (project_max_investment_per_investor := pt.abi.Uint64()).set(project.max_investment_per_investor),
@@ -753,6 +838,7 @@ def unpause_project(project_id: pt.abi.Uint64) -> pt.Expr:
             project_claim_timestamp,
             project_asset_id,
             project_asset_decimal,
+            project_image_url,
             project_price_per_asset,
             project_min_investment_per_investor,
             project_max_investment_per_investor,

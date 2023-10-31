@@ -53,3 +53,24 @@ def calculate_staking_reward(
 ):
     assert (staking_duration == QUARTER_STAKING_PERIOD) or (staking_duration == HALF_YEAR_STAKING_PERIOD) or (staking_duration == ANNUAL_STAKING_PERIOD)
     return (stake_amount * RATE * staking_duration) / (100 * SECONDS_IN_A_YEAR)
+
+
+def calculate_proceeds_after_fee_deduction(
+    proceeds,
+    launch_vest_fee
+):
+    return proceeds - ((proceeds * launch_vest_fee) / 100)
+
+
+def calculate_disbursement(
+    total_amount,
+    percentage,
+):
+    return (percentage / 100) * total_amount
+
+
+proceeds = calculate_proceeds_after_fee_deduction(1, 10)
+print(proceeds)
+
+disbursement = calculate_disbursement(proceeds, 90)
+print(disbursement)
