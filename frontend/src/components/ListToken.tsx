@@ -20,7 +20,7 @@ const PER_BOX_MBR = 0.0025e6
 const PER_BYTE_MBR = 0.0004e6
 
 const ListToken = () => {
-  const [appId, setAppId] = useState<number>(455380620)
+  const [appId, setAppId] = useState<number>(464983859)
   const [assetId, setAssetId] = useState<bigint>(0n)
   const [startTimestamp, setStartTimestamp] = useState<bigint>(0n)
   const [endTimestamp, setEndTimestamp] = useState<bigint>(0n)
@@ -29,6 +29,7 @@ const ListToken = () => {
   const [minimumBuy, setMinimumBuy] = useState<bigint>(0n)
   const [maximumBuy, setMaximumBuy] = useState<bigint>(0n)
   const [imageURL, setImageURL] = useState<string>('')
+
   const [vestingSchedule, setVestingSchedule] = useState<bigint>(QUATERLY)
 
   const _3months = useRef()
@@ -65,8 +66,41 @@ const ListToken = () => {
     console.log(launchVestAppId)
   }
 
+  // const shortenURL = async (URL: string) => {
+  //   let _result;
+  //   await fetch('https://api-ssl.bitly.com/v4/shorten', {
+  //     method: 'POST',
+  //     mode: 'cors',
+  //     headers: {
+  //       Authorization: import.meta.env.VITE_APP_BITLY_TOKEN,
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify({
+  //       long_url: imageURL,
+  //       domain: 'bit.ly',
+  //       group_guid: import.meta.env.VITE_APP_GUID,
+  //     }),
+  //   })
+  //     .then((res) => res.json())
+  //     .then(async(data) => {
+  //       const new_link = data.link.replace('https://', '')
+  //       await fetch(`https://api-ssl.bitly.com/v4/bitlinks/${new_link}/qr?image_format=png`, {
+  //         mode: 'cors',
+  //         headers: {
+  //           Authorization: `Bearer ${import.meta.env.VITE_APP_BITLY_TOKEN}`,
+  //         },
+  //       })
+  //         .then((res) => res.json())
+  //         .then((result) => {
+  //           _result = result
+  //         })
+  //     })
+  //     return _result;
+  // }
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+
     if (!(assetId && startTimestamp && endTimestamp && claimTimestamp && assetPrice && minimumBuy && maximumBuy && imageURL)) return
     // const tokenKey = algosdk.bigIntToBytes(Number(assetId), 8)
     const tokenKey = algosdk.encodeUint64(BigInt(assetId))
@@ -87,13 +121,14 @@ const ListToken = () => {
     const listToken = await launchVestClient.listProject(
       {
         asset_id: BigInt(assetId),
+        image_url: String(imageURL),
         start_timestamp: BigInt(startTimestamp),
         end_timestamp: BigInt(endTimestamp),
         claim_timestamp: BigInt(claimTimestamp),
         price_per_asset: BigInt(assetPrice),
         max_investment_per_investor: BigInt(maximumBuy),
         min_investment_per_investor: BigInt(minimumBuy),
-        
+        vesting_schedule: BigInt(vestingSchedule),
       },
       {
         boxes: [tokenKey],
@@ -194,7 +229,7 @@ const ListToken = () => {
 
           <div className="mb-5">
             <label htmlFor="minimum__buy" className="text-2xl capitalize">
-              Minimum Buy
+              Minimum Buy ($)
             </label>
             <div className="mt-3">
               <input
@@ -211,7 +246,7 @@ const ListToken = () => {
 
           <div className="mb-5">
             <label htmlFor="maximum__buy" className="text-2xl capitalize">
-              Maximum Buy
+              Maximum Buy ($)
             </label>
             <div className="mt-3">
               <input
@@ -319,7 +354,6 @@ const ListToken = () => {
       </div>
 
       <button onClick={() => handleCreate()}>create app</button>
-      <button onClick={() => handleShowProjects()}>showProjects</button>
     </div>
   )
 }

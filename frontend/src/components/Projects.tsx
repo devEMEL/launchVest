@@ -49,7 +49,7 @@ const projects_ = [
 ]
 
 const Projects = () => {
-  const [appId, setAppId] = useState<number>(455380620)
+  const [appId, setAppId] = useState<number>(464983859)
   const [projects, setProjects] = useState<Array<object>>([])
   const { enqueueSnackbar } = useSnackbar()
   const { signer, activeAddress } = useWallet()
@@ -90,16 +90,18 @@ const Projects = () => {
         'asset id': Number(tokenList[4]),
         'asset decimal': Number(tokenList[5]),
         'asset price': Number(tokenList[6]),
-        'min buy': Number(tokenList[7]),
-        'max buy': Number(tokenList[8]),
-        'max cap': Number(tokenList[9]),
-        'assets for sale': Number(tokenList[10]),
-        ispaused: tokenList[11],
-        'initiated withdrawal': tokenList[12],
-        'proceeds withdrawn': tokenList[13],
-        'assets sold': Number(tokenList[14]),
-        'amount raised': Number(tokenList[15]),
-        'vesting schedule': Number(tokenList[16]),
+        'image url': String(tokenList[7]),
+        'min buy': Number(tokenList[8]),
+        'max buy': Number(tokenList[9]),
+        'max cap': Number(tokenList[10]),
+        'assets for sale': Number(tokenList[11]),
+        'ispaused': tokenList[12],
+        'initiated withdrawal': tokenList[13],
+        'proceeds withdrawn': tokenList[14],
+        'assets sold': Number(tokenList[15]),
+        'amount raised': Number(tokenList[16]),
+        'vesting schedule': Number(tokenList[17]),
+        
       }
       projectsArr.push(project)
     }
