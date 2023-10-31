@@ -335,9 +335,18 @@ frame_dig -6
 >
 // Claim time must be greater than start and end time
 assert
+frame_dig -7
 global LatestTimestamp
-itob
-log
++
+frame_bury -7
+frame_dig -6
+global LatestTimestamp
++
+frame_bury -6
+frame_dig -5
+global LatestTimestamp
++
+frame_bury -5
 frame_dig -1
 pushint 7776000 // 7776000
 ==
@@ -870,10 +879,6 @@ intc_0 // 0
 frame_bury 26
 frame_dig 22
 frame_dig 9
-pushint 10 // 10
-frame_dig 7
-exp
-*
 /
 frame_bury 26
 frame_dig 26

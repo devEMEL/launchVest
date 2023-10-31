@@ -226,9 +226,6 @@ def list_project(
             min_investment_per_investor.get() < max_investment_per_investor.get(),
             comment="Min. investment must be lesser than max. investment",
         ),
-        (start_timestamp.set(start_timestamp.get() + pt.Global.latest_timestamp())),
-        (end_timestamp.set(end_timestamp.get() + pt.Global.latest_timestamp())),
-        (claim_timestamp.set(claim_timestamp.get() + pt.Global.latest_timestamp())),
         pt.Assert(
             start_timestamp.get() > pt.Global.latest_timestamp(),
             end_timestamp.get() > pt.Global.latest_timestamp(),
@@ -244,7 +241,9 @@ def list_project(
             claim_timestamp.get() > end_timestamp.get(),
             comment="Claim time must be greater than start and end time",
         ),
-        pt.Log(pt.Itob(pt.Global.latest_timestamp())),
+        (start_timestamp.set(start_timestamp.get() + pt.Global.latest_timestamp())),
+        (end_timestamp.set(end_timestamp.get() + pt.Global.latest_timestamp())),
+        (claim_timestamp.set(claim_timestamp.get() + pt.Global.latest_timestamp())),
         pt.Assert(
             pt.Or(
                 vesting_schedule.get() == QUARTERLY_VESTING_PERIOD,
