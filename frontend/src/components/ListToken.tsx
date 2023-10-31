@@ -20,7 +20,7 @@ const PER_BOX_MBR = 0.0025e6
 const PER_BYTE_MBR = 0.0004e6
 
 const ListToken = () => {
-  const [appId, setAppId] = useState<number>(465008312)
+  const [appId, setAppId] = useState<number>(465022573)
   const [assetId, setAssetId] = useState<bigint>(0n)
   const [startTimestamp, setStartTimestamp] = useState<bigint>(0n)
   const [endTimestamp, setEndTimestamp] = useState<bigint>(0n)
@@ -262,8 +262,8 @@ const ListToken = () => {
           </div>
 
           <div className="mb-5">
-            <label htmlFor="image_url" className="text-2xl capitalize">
-              Image URL
+            <label htmlFor="image_url" className="text-2xl">
+              Image URL <span className='text-[15px]'>(ipfs/&#123;CID&#125; e.g ipfs://QmVoqUN21MPm91XffyBcVWQhemSLd1WjKY2a8Zr5WJDA9e)</span>
             </label>
             <div className="mt-3">
               <input
