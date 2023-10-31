@@ -273,7 +273,7 @@ def stake(
         (amount_staked := pt.abi.Uint64()).set(txn.get().asset_amount()),
         (asset_id := pt.abi.Uint64()).set(asset.asset_id()),
         (is_staking := pt.abi.Bool()).set(TRUE),
-        (start_timestamp := pt.abi.Uint64()).set(pt.Global.latest_timestamp()),
+        (start_timestamp := pt.abi.Uint64()).set(pt.Global.latest_timestamp() + start_timestamp.get()),
         (end_timestamp := pt.abi.Uint64()).set(start_timestamp.get() + stake_duration.get()),
 
         staker.set(
