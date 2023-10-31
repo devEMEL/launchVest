@@ -20,7 +20,8 @@ const projects_ = [
     'amount raised': 345,
     'assets for sale': 1234567,
     'assets sold': 4567889900,
-  },{
+  },
+  {
     'asset id': 5,
     'asset price': 890,
     'start timestamp': 2345,
@@ -49,7 +50,7 @@ const projects_ = [
 ]
 
 const Projects = () => {
-  const [appId, setAppId] = useState<number>(0)
+  const [appId, setAppId] = useState<number>(465084290)
   const [projects, setProjects] = useState<Array<object>>([])
   const { enqueueSnackbar } = useSnackbar()
   const { signer, activeAddress } = useWallet()
@@ -79,7 +80,7 @@ const Projects = () => {
     for (let _box of await launchVestClient.appClient.getBoxNames()) {
       let result = await launchVestClient.appClient.getBoxValue(_box)
 
-      const resultCodec = algosdk.ABIType.from('(address,uint64,uint64,uint64,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64)')
+      const resultCodec = algosdk.ABIType.from('(address,uint64,uint64,uint64,uint64,uint64,string,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64,uint64,uint64)')
       const tokenList = resultCodec.decode(result)
       console.log(tokenList)
       let project = {
@@ -89,19 +90,18 @@ const Projects = () => {
         'claim timestamp': Number(tokenList[3]),
         'asset id': Number(tokenList[4]),
         'asset decimal': Number(tokenList[5]),
-        'asset price': Number(tokenList[6]),
-        'image url': String(tokenList[7]),
+        'image url': String(tokenList[6]),
+        'asset price': Number(tokenList[7]),
         'min buy': Number(tokenList[8]),
         'max buy': Number(tokenList[9]),
         'max cap': Number(tokenList[10]),
         'assets for sale': Number(tokenList[11]),
-        'ispaused': tokenList[12],
+        ispaused: tokenList[12],
         'initiated withdrawal': tokenList[13],
-        'proceeds withdrawn': tokenList[14],
-        'assets sold': Number(tokenList[15]),
-        'amount raised': Number(tokenList[16]),
+        'assets sold': Number(tokenList[14]),
+        'amount raised': Number(tokenList[15]),
+        'proceeds withdrawn': tokenList[16],
         'vesting schedule': Number(tokenList[17]),
-        
       }
       projectsArr.push(project)
     }
@@ -116,8 +116,8 @@ const Projects = () => {
   }
 
   useEffect(() => {
-    // handleShowProjectsAction()
-    setProjects(projects_)
+    handleShowProjectsAction()
+    
   }, [])
 
   return (
@@ -125,9 +125,9 @@ const Projects = () => {
       <div className="flex flex-wrap">
         {!!projects &&
           projects.map((project) => (
-            <div className='basis-[33.3%] p-1 mb-5'>
+            <div className="basis-[33.3%] p-1 mb-5">
               {/* DISPLAY ASSET NAME FROM ASSETINFO */}
-              
+
               <Project project={project} key={project['asset id']} />
             </div>
           ))}

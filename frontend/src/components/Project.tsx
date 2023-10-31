@@ -21,11 +21,11 @@ const Project = ({ project }) => {
         </div>
         <div className="capitalize p-2 flex justify-between">
           <h1>start timestamp</h1>
-          <h1>{project['asset price']}</h1>
+          <h1>{project['start timestamp']}</h1>
         </div>
         <div className="capitalize p-2 flex justify-between">
           <h1>end timestamp</h1>
-          <h1>{project['start timestamp']}</h1>
+          <h1>{project['end timestamp']}</h1>
         </div>
         <div className="capitalize p-2 flex justify-between">
           <h1>claim timestamp</h1>
