@@ -232,6 +232,7 @@ def list_project(
             claim_timestamp.get() > pt.Global.latest_timestamp(),
             comment="Start, end and claim times must be greater than current time",
         ),
+        
         pt.Assert(
             start_timestamp.get() < end_timestamp.get(),
             comment="Start time must be less than end time",
