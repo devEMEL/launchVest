@@ -1290,7 +1290,7 @@ intc_0 // 0
 dupn 4
 bytec_0 // ""
 intc_0 // 0
-dupn 16
+dupn 15
 bytec_0 // ""
 dup
 frame_dig -1
@@ -1410,32 +1410,8 @@ pushint 100 // 100
 frame_bury 20
 pushint 10 // 10
 frame_bury 21
-intc_0 // 0
-frame_bury 22
-frame_dig 21
-intc_0 // 0
->
-assert
-frame_dig 21
-pushint 100 // 100
-<=
-assert
-frame_dig 21
-pushint 100 // 100
-/
-frame_dig 20
-*
-frame_bury 22
-itxn_begin
-intc_1 // pay
-itxn_field TypeEnum
-frame_dig 22
-itxn_field Amount
-frame_dig 1
-itxn_field Receiver
-itxn_submit
 frame_dig 17
-frame_dig 22
+frame_dig 20
 +
 frame_bury 17
 frame_dig 1
@@ -1455,12 +1431,12 @@ frame_dig 6
 itob
 concat
 frame_dig 7
-frame_bury 26
-frame_dig 26
 frame_bury 25
+frame_dig 25
+frame_bury 24
 intc 4 // 147
-frame_bury 23
-frame_dig 23
+frame_bury 22
+frame_dig 22
 itob
 extract 6 0
 concat
@@ -1499,7 +1475,7 @@ concat
 frame_dig 18
 itob
 concat
-frame_dig 25
+frame_dig 24
 concat
 frame_bury 0
 frame_dig -1
