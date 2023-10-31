@@ -20,7 +20,7 @@ const PER_BOX_MBR = 0.0025e6
 const PER_BYTE_MBR = 0.0004e6
 
 const ListToken = () => {
-  const [appId, setAppId] = useState<number>(464983859)
+  const [appId, setAppId] = useState<number>(0)
   const [assetId, setAssetId] = useState<bigint>(0n)
   const [startTimestamp, setStartTimestamp] = useState<bigint>(0n)
   const [endTimestamp, setEndTimestamp] = useState<bigint>(0n)
