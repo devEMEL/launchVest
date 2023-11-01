@@ -1,4 +1,3 @@
-import base64
 import os.path
 import shutil
 import time
@@ -242,6 +241,7 @@ def deploy(
     )
     print(response.return_value)
 
+    time.sleep(70)
     investor1_account_client.claim_ido_asset(
         is_staking=True,
         project=project_asset_id,

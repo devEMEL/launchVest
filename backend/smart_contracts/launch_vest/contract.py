@@ -11,7 +11,6 @@ from backend.smart_contracts.launch_vest.formula_helpers import (
     calculate_project_max_cap
 )
 
-ALGO_DECIMAL = pt.Int(6)
 
 LAUNCH_VEST_FEE = pt.Int(10)  # 10%
 PERCENTAGE = pt.Int(10)
@@ -30,10 +29,11 @@ class Investor(pt.abi.NamedTuple):
 
     :ivar pt.abi.Address address: The Algorand address of the investor.
     :ivar pt.abi.Uint64 project_id: The unique identifier of the project.
-    :ivar pt.abi.Uint64 amount_invested: The amount of the investment in Algos.
+    :ivar pt.abi.Uint64 investment_amount: The amount of the investment in Algos.
     :ivar pt.abi.Uint64 asset_allocation: The amount of allocated assets.
-    :ivar pt.abi.Bool has_filed_refund: A boolean indicating whether the investor has filed for a refund.
-    :ivar pt.abi.Bool claimed: A boolean indicating whether the investor has claimed assets.
+    :ivar pt.abi.Uint64 asset_claim_timestamp: The timestamp an investor claims their asset.
+    :ivar pt.abi.Bool claimed_ido_asset: A boolean indicating whether the investor has claimed assets.
+    :ivar pt.abi.Bool reclaimed_investment: A boolean indicating whether the investor has reclaimed their investment.
     """
     address: pt.abi.Field[pt.abi.Address]
     project_id: pt.abi.Field[pt.abi.Uint64]
@@ -53,23 +53,24 @@ class Project(pt.abi.NamedTuple):
     :ivar pt.abi.Uint64 end_timestamp: The timestamp when the project ends.
     :ivar pt.abi.Uint64 claim_timestamp: The timestamp for asset claiming.
     :ivar pt.abi.Uint64 asset_id: The unique asset ID of the Project.
+    :ivar pt.abi.String image_url: The project image url.
     :ivar pt.abi.Uint64 price_per_asset: The price of each asset.
     :ivar pt.abi.Uint64 min_investment_per_investor: The minimum investment per user.
     :ivar pt.abi.Uint64 max_investment_per_investor: The maximum investment per user.
     :ivar pt.abi.Uint64 max_cap: The maximum investment cap.
     :ivar pt.abi.Uint64 total_assets_for_sale: The total assets available for sale.
     :ivar pt.abi.Bool is_paused: A boolean indicating whether the project is paused.
-    :ivar pt.abi.Bool proceeds_withdrawn: A boolean indicating whether funds have been withdrawn.
+    :ivar pt.abi.Bool initiated_withdrawal: A boolean indicating whether project owner have initiated withdrawal.
     :ivar pt.abi.Uint64 total_assets_sold: The total assets sold.
     :ivar pt.abi.Uint64 total_amount_raised: The total amount raised.
-    :ivar pt.abi.Bool offers_vest_care: A boolean indicating whether the project offers Vest Care.
+    :ivar pt.abi.Uint64 amount_withdrawn: The total amount withdrawn so far.
+    :ivar pt.abi.Uint64 vesting_schedule: The lockup period of amount raised for this project.
     """
     owner_address: pt.abi.Field[pt.abi.Address]
     start_timestamp: pt.abi.Field[pt.abi.Uint64]
     end_timestamp: pt.abi.Field[pt.abi.Uint64]
     claim_timestamp: pt.abi.Field[pt.abi.Uint64]
     asset_id: pt.abi.Field[pt.abi.Uint64]
-    asset_decimal: pt.abi.Field[pt.abi.Uint64]
     image_url: pt.abi.Field[pt.abi.String]
     price_per_asset: pt.abi.Field[pt.abi.Uint64]
     min_investment_per_investor: pt.abi.Field[pt.abi.Uint64]
@@ -188,7 +189,7 @@ def list_project(
     Lists a new IDO Project on LaunchVest.
 
     :param pt.abi.Asset asset_id: The unique identifier of the asset.
-    :param image_url: IDO project image url.
+    :param image_url: Project image url.
     :param pt.abi.Uint64 start_timestamp: The timestamp when the project starts.
     :param pt.abi.Uint64 end_timestamp: The timestamp when the project ends.
     :param pt.abi.Uint64 claim_timestamp: The timestamp for asset claiming.
@@ -206,14 +207,15 @@ def list_project(
     project_id_bytes = pt.Itob(project_id)
 
     return pt.Seq(
-        (asset_decimal := pt.AssetParam.decimals(asset_id.asset_id())),
-        # TODO: Uncomment this, add assertion comments, fix price and decimal issues!
+        (asset_total := pt.AssetParam.total(asset_id.asset_id())),
+        # TODO: Uncomment this, fix price and decimal issues!
         # pt.Assert(
         #     pt.Not(app.state.pid_to_project[project_id_bytes].exists()),
         #     comment="Project already exists!"
         # ),
+        #  Checks if its a valid asset ID provided.
         pt.Assert(
-            asset_decimal.value() != pt.Int(0),
+            asset_total.value() > pt.Int(0),
             comment="A valid asset ID must be provided",
         ),
         pt.Assert(
@@ -257,7 +259,6 @@ def list_project(
         escrow_asset_opt_in(asset=asset_id),
         (project_owner_address := pt.abi.Address()).set(pt.Txn.sender()),
         (project_asset_id := pt.abi.Uint64()).set(asset_id.asset_id()),
-        (project_asset_decimal := pt.abi.Uint64()).set(asset_decimal.value()),
         (project_max_cap := pt.abi.Uint64()).set(pt.Int(0)),
         (project_total_assets_for_sale := pt.abi.Uint64()).set(pt.Int(0)),
         (project_is_paused := pt.abi.Bool()).set(FALSE),
@@ -273,7 +274,6 @@ def list_project(
             end_timestamp,
             claim_timestamp,
             project_asset_id,
-            project_asset_decimal,
             image_url,
             price_per_asset,
             min_investment_per_investor,
@@ -326,7 +326,6 @@ def deposit_ido_assets(
         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
         (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
-        (project_asset_decimal := pt.abi.Uint64()).set(project.asset_decimal),
         (project_image_url := pt.abi.String()).set(project.image_url),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
@@ -352,7 +351,6 @@ def deposit_ido_assets(
             project_end_timestamp,
             project_claim_timestamp,
             project_asset_id,
-            project_asset_decimal,
             project_image_url,
             project_price_per_asset,
             project_min_investment_per_investor,
@@ -376,6 +374,13 @@ def investor_payment(
     max_investment: pt.abi.Uint64,
     txn: pt.abi.PaymentTransaction
 ) -> pt.Expr:
+    """
+    Payment transaction from investor, investment must be within the min and max limits.
+
+    :param pt.abi.Uint64 min_investment: The minimum investment amount allowed.
+    :param pt.abi.Uint64 max_investment: The maximum investment amount allowed.
+    :param pt.abi.PaymentTransaction txn: The payment transaction containing investment details.
+    """
     return pt.Seq(
         pt.Assert(
             txn.get().receiver() == app.state.escrow_address.get(),
@@ -401,7 +406,7 @@ def invest(
     txn: pt.abi.PaymentTransaction
 ) -> pt.Expr:
     """
-    Allows investors invest in a Project.
+    Executes an investment transaction for a project.
 
     :param pt.abi.Bool is_staking: Indicates whether the investor is staking $VEST
     :param pt.abi.Asset project: The project (asset) ID to invest in.
@@ -438,7 +443,6 @@ def invest(
         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
         (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
-        (project_asset_decimal := pt.abi.Uint64()).set(project.asset_decimal),
         (project_image_url := pt.abi.String()).set(project.image_url),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_user := pt.abi.Uint64()).set(project.min_investment_per_investor),
@@ -479,6 +483,7 @@ def invest(
 
         (investor_asset_allocation := pt.abi.Uint64()).set(pt.Int(0)),
 
+        #  Modify this, allocation should be set off-chain.
         calculate_allocation_for_investor(
             price_per_asset=project_price_per_asset,
             investment_amount=investor_investment_amount,
@@ -505,7 +510,6 @@ def invest(
             project_end_timestamp,
             project_claim_timestamp,
             project_asset_id,
-            project_asset_decimal,
             project_image_url,
             project_price_per_asset,
             project_min_investment_per_user,
@@ -674,7 +678,7 @@ def reclaim_investment(
         ),
         pt.Assert(
             RECLAIM_WINDOW >= (pt.Global.latest_timestamp() - project_claim_timestamp.get()),
-            comment="Claim must be within the reclaim window."
+            comment="Claim must be within reclaim window."
         ),
 
         pt.InnerTxnBuilder.Execute({
@@ -699,10 +703,18 @@ def reclaim_investment(
     )
 
 
+# noinspection PyTypeChecker
 def disburse(
     amount: pt.abi.Uint64,
     receiver: pt.abi.Address,
 ) -> pt.Expr:
+    """
+    Disburses amount to receiver from escrow.
+
+    :param amount: Amount to be disbursed.
+    :param receiver: Receiver of amount to be disbursed.
+    :rtype: pt.Expr.
+    """
     return pt.Seq(
         pt.InnerTxnBuilder.Execute({
             pt.TxnField.type_enum: pt.TxnType.Payment,
@@ -715,6 +727,12 @@ def disburse(
 # noinspection PyTypeChecker
 @app.external
 def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
+    """
+    Allows the withdrawal of the amount raised for a specific project, retains LaunchVest fee in the escrow.
+
+    :param pt.abi.Uint64 project_id: The unique identifier of the project for which funds are withdrawn.
+    :rtype: pt.Expr
+    """
     project_id_bytes = pt.Itob(project_id.get())
     return pt.Seq(
         pt.Assert(
@@ -729,7 +747,6 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
         (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
-        (project_asset_decimal := pt.abi.Uint64()).set(project.asset_decimal),
         (project_image_url := pt.abi.String()).set(project.image_url),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
@@ -757,7 +774,6 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
         ),
 
         (abi_launch_vest_fee := pt.abi.Uint64()).set(LAUNCH_VEST_FEE),
-
         (amount_raised := pt.abi.Uint64()).set(pt.Int(0)),
         calculate_proceeds_after_fee_deduction(
             proceeds=project_total_amount_raised,
@@ -772,6 +788,7 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
             percentage=percentage,
             output=disburse_amount
         ),
+
         pt.If(project_initiated_withdrawal.get() == FALSE)
         .Then(
             disburse(disburse_amount, project_owner_address),
@@ -796,7 +813,6 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
             project_end_timestamp,
             project_claim_timestamp,
             project_asset_id,
-            project_asset_decimal,
             project_image_url,
             project_price_per_asset,
             project_min_investment_per_investor,
@@ -819,6 +835,7 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
 def pause_project(project_id: pt.abi.Uint64) -> pt.Expr:
     """
     Allows pausing a project with the specified project ID.
+
     :param pt.abi.Uint64 project_id: The unique identifier of the project to be paused.
     :rtype: pt.Expr
     """
@@ -836,7 +853,6 @@ def pause_project(project_id: pt.abi.Uint64) -> pt.Expr:
         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
         (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
-        (project_asset_decimal := pt.abi.Uint64()).set(project.asset_decimal),
         (project_image_url := pt.abi.String()).set(project.image_url),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
@@ -862,7 +878,6 @@ def pause_project(project_id: pt.abi.Uint64) -> pt.Expr:
             project_end_timestamp,
             project_claim_timestamp,
             project_asset_id,
-            project_asset_decimal,
             project_image_url,
             project_price_per_asset,
             project_min_investment_per_investor,
@@ -903,7 +918,6 @@ def unpause_project(project_id: pt.abi.Uint64) -> pt.Expr:
         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
         (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
-        (project_asset_decimal := pt.abi.Uint64()).set(project.asset_decimal),
         (project_image_url := pt.abi.String()).set(project.image_url),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
@@ -921,15 +935,14 @@ def unpause_project(project_id: pt.abi.Uint64) -> pt.Expr:
             project_is_paused.get() == TRUE,
             comment="Project must be paused."
         ),
-        project_is_paused.set(FALSE),
 
+        project_is_paused.set(FALSE),
         project.set(
             project_owner_address,
             project_start_timestamp,
             project_end_timestamp,
             project_claim_timestamp,
             project_asset_id,
-            project_asset_decimal,
             project_image_url,
             project_price_per_asset,
             project_min_investment_per_investor,

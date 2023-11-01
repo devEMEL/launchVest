@@ -7,7 +7,7 @@ from beaker.lib.storage import BoxMapping
 
 BASE_VALUE = pt.Int(10)
 
-FIVE_MINS_STAKING_PERIOD = pt.Int(300)
+FIVE_MINUTES_STAKING_PERIOD = pt.Int(300)
 QUARTER_STAKING_PERIOD = pt.Int(7_776_000)
 HALF_YEAR_STAKING_PERIOD = pt.Int(15_552_000)
 ANNUAL_STAKING_PERIOD = pt.Int(31_536_000)
@@ -17,7 +17,6 @@ SECONDS_IN_A_YEAR = pt.Int(31_536_000)
 
 class Staker(pt.abi.NamedTuple):
     """
-
     Represents a staker with the following instance variables:
 
     :ivar pt.abi.Address address: The stakers Algorand address.
@@ -263,7 +262,7 @@ def stake(
         ),
         pt.Assert(
             pt.Or(
-                stake_duration.get() == FIVE_MINS_STAKING_PERIOD,
+                stake_duration.get() == FIVE_MINUTES_STAKING_PERIOD,
                 stake_duration.get() == QUARTER_STAKING_PERIOD,
                 stake_duration.get() == HALF_YEAR_STAKING_PERIOD,
                 stake_duration.get() == ANNUAL_STAKING_PERIOD
