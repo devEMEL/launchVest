@@ -67,10 +67,3 @@ def calculate_disbursement(
     percentage,
 ):
     return (percentage / 100) * total_amount
-
-
-proceeds = calculate_proceeds_after_fee_deduction(1, 10)
-print(proceeds)
-
-disbursement = calculate_disbursement(proceeds, 10)
-print(disbursement)

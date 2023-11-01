@@ -33,7 +33,8 @@
                 },
                 {
                     "type": "string",
-                    "name": "image_url"
+                    "name": "image_url",
+                    "desc": "IDO project image url."
                 },
                 {
                     "type": "uint64",
@@ -67,7 +68,8 @@
                 },
                 {
                     "type": "uint64",
-                    "name": "vesting_schedule"
+                    "name": "vesting_schedule",
+                    "desc": "The vesting schedule of project."
                 }
             ],
             "returns": {
@@ -128,7 +130,8 @@
                 },
                 {
                     "type": "bool",
-                    "name": "is_staking"
+                    "name": "is_staking",
+                    "desc": "Flag to indicate whether investor is staking $VEST."
                 }
             ],
             "returns": {
@@ -146,7 +149,8 @@
                 },
                 {
                     "type": "bool",
-                    "name": "is_staking"
+                    "name": "is_staking",
+                    "desc": "Flag to indicate whether investor is current staking $VEST."
                 }
             ],
             "returns": {
@@ -209,20 +213,6 @@
             "desc": "Allows changing the admin account for the launchpad."
         },
         {
-            "name": "get_project",
-            "args": [
-                {
-                    "type": "uint64",
-                    "name": "project_id",
-                    "desc": "The unique identifier of the project to retrieve."
-                }
-            ],
-            "returns": {
-                "type": "(address,uint64,uint64,uint64,uint64,uint64,string,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64,uint64,uint64)"
-            },
-            "desc": "Retrieves project information for the specified project ID and stores it in the output."
-        },
-        {
             "name": "get_investor",
             "args": [
                 {
@@ -235,6 +225,20 @@
                 "type": "(address,uint64,uint64,uint64,uint64,bool,bool)"
             },
             "desc": "Retrieves investor information for the specified investor address and stores it in the output."
+        },
+        {
+            "name": "get_project",
+            "args": [
+                {
+                    "type": "uint64",
+                    "name": "project_id",
+                    "desc": "The unique identifier of the project to retrieve."
+                }
+            ],
+            "returns": {
+                "type": "(address,uint64,uint64,uint64,uint64,uint64,string,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64,uint64,uint64)"
+            },
+            "desc": "Retrieves project information for the specified project ID and stores it in the output."
         }
     ],
     "networks": {},
