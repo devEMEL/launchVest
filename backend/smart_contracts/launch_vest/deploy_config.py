@@ -104,8 +104,8 @@ def deploy(
         indexer_client=indexer_client,
     )
     app_client.deploy(
-        on_schema_break=algokit_utils.OnSchemaBreak.ReplaceApp,
-        on_update=algokit_utils.OnUpdate.ReplaceApp,
+        on_schema_break=algokit_utils.OnSchemaBreak.AppendApp,
+        on_update=algokit_utils.OnUpdate.AppendApp,
     )
     app_id = app_client.app_id
     app_addr = app_client.app_address

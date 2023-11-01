@@ -166,6 +166,7 @@ def fund_escrow_address(
             txn.get().amount() > pt.Int(0),
             txn.get().receiver() == app.state.escrow_address,
             txn.get().type_enum() == pt.TxnType.Payment,
+            comment="Invalid amount, receiver or type_enum"
         )
     )
 
@@ -235,8 +236,6 @@ def list_project(
             claim_timestamp.get() > pt.Global.latest_timestamp(),
             comment="Start, end and claim times must be greater than current time",
         ),
-        
-
         pt.Assert(
             start_timestamp.get() < end_timestamp.get(),
             comment="Start time must be less than end time",
@@ -252,7 +251,8 @@ def list_project(
                 vesting_schedule.get() == QUARTERLY_VESTING_PERIOD,
                 vesting_schedule.get() == HALF_YEAR_VESTING_PERIOD,
                 vesting_schedule.get() == YEARLY_VESTING_PERIOD,
-            )
+            ),
+            comment="Vesting schedule must fall between quarterly, half_year or yearly periods."
         ),
         escrow_asset_opt_in(asset=asset_id),
         (project_owner_address := pt.abi.Address()).set(pt.Txn.sender()),
@@ -320,6 +320,7 @@ def deposit_ido_assets(
             txn.get().type_enum() == pt.TxnType.AssetTransfer,
             txn.get().xfer_asset() == asset.asset_id(),
             txn.get().sender() == project_owner_address.get(),
+            comment="Invalid asset_amount, asset_receiver, type_enum, xfer_asset or sender."
         ),
         (project_start_timestamp := pt.abi.Uint64()).set(project.start_timestamp),
         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
@@ -379,12 +380,15 @@ def investor_payment(
         pt.Assert(
             txn.get().receiver() == app.state.escrow_address.get(),
             txn.get().type_enum() == pt.TxnType.Payment,
+            comment="Invalid receiver or transaction type."
         ),
         pt.Assert(
             pt.Or(
                 txn.get().asset_amount() >= min_investment.get(),
                 txn.get().asset_amount() <= max_investment.get(),
             ),
+            comment="Asset amount must be greater than or equal to min_investment"
+                    " and must be less than or equal to max_investment."
         ),
     )
 
@@ -410,7 +414,10 @@ def invest(
     project_id = project.asset_id()
     project_id_bytes = pt.Itob(project_id)
     return pt.Seq(
-        pt.Assert(is_staking.get() == TRUE),
+        pt.Assert(
+            is_staking.get() == TRUE,
+            comment="Investor must be staking $VEST."
+        ),
         pt.Assert(
             app.state.pid_to_project[project_id_bytes].exists(),
             comment="A valid project ID must be provided"
@@ -445,7 +452,10 @@ def invest(
         (project_amount_withdrawn := pt.abi.Uint64()).set(project.amount_withdrawn),
         (project_vesting_schedule := pt.abi.Uint64()).set(project.vesting_schedule),
 
-        pt.Assert(project_is_paused.get() == FALSE),
+        pt.Assert(
+            project_is_paused.get() == FALSE,
+            comment="Project must not be paused."
+        ),
         pt.Assert(
             project_total_amount_raised.get() < project_max_cap.get(),
             comment="Total amount raised must be less than Max. cap"
@@ -475,7 +485,6 @@ def invest(
             output=investor_asset_allocation
         ),
         (investor_asset_allocation.set(investor_asset_allocation.get())),
-
         investor.set(
             investor_address,
             investor_project_id,
@@ -531,15 +540,23 @@ def claim_ido_asset(
     project_id_bytes = pt.Itob(project_asset_id)
 
     return pt.Seq(
-        pt.Assert(app.state.investor_to_project[pt.Txn.sender()].exists()),
-        pt.Assert(app.state.pid_to_project[project_id_bytes].exists()),
-
-        (investor := Investor()).decode(app.state.investor_to_project[pt.Txn.sender()].get()),
+        pt.Assert(
+            app.state.investor_to_project[pt.Txn.sender()].exists(),
+            comment="Invalid investor."
+        ),
+        pt.Assert(
+            app.state.pid_to_project[project_id_bytes].exists(),
+            comment="Invalid project."
+        ),
 
         (project := Project()).decode(app.state.pid_to_project[pt.Itob(project_asset_id)].get()),
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
+        pt.Assert(
+            pt.Global.latest_timestamp() >= project_claim_timestamp.get(),
+            comment="Asset claiming hasn't begun."
+        ),
 
-        pt.Assert(pt.Global.latest_timestamp() >= project_claim_timestamp.get(), comment="Here"),
+        (investor := Investor()).decode(app.state.investor_to_project[pt.Txn.sender()].get()),
 
         (investor_address := pt.abi.Address()).set(investor.address),
         (investor_project_id := pt.abi.Uint64()).set(investor.project_id),
@@ -548,14 +565,30 @@ def claim_ido_asset(
         (investor_asset_claim_timestamp := pt.abi.Uint64()).set(investor.asset_claim_timestamp),
         (investor_claimed_ido_asset := pt.abi.Bool()).set(investor.claimed_ido_asset),
         (investor_reclaimed_investment := pt.abi.Bool()).set(investor.reclaimed_investment),
-
-        pt.Assert(is_staking.get() == TRUE),
-        pt.Assert(investor_investment_amount.get() > pt.Int(0)),
-        pt.Assert(investor_asset_allocation.get() > pt.Int(0)),
-        pt.Assert(investor_asset_claim_timestamp.get() == pt.Int(0)),
-        pt.Assert(investor_claimed_ido_asset.get() == FALSE),
-        pt.Assert(investor_reclaimed_investment.get() == FALSE),
-
+        pt.Assert(
+            is_staking.get() == TRUE,
+            comment="Investor must be staking."
+        ),
+        pt.Assert(
+            investor_investment_amount.get() > pt.Int(0),
+            comment="Investor amount must be greater than 0."
+        ),
+        pt.Assert(
+            investor_asset_allocation.get() > pt.Int(0),
+            comment="Investor asset allocation must be greater than 0."
+        ),
+        pt.Assert(
+            investor_asset_claim_timestamp.get() == pt.Int(0),
+            comment="Investor claim_timestamp must be 0."
+        ),
+        pt.Assert(
+            investor_claimed_ido_asset.get() == FALSE,
+            comment="Investor must have not claimed their allocation."
+        ),
+        pt.Assert(
+            investor_reclaimed_investment.get() == FALSE,
+            comment="Investor must have not reclaimed their investment."
+        ),
         pt.InnerTxnBuilder.Execute({
             pt.TxnField.type_enum: pt.TxnType.AssetTransfer,
             pt.TxnField.asset_amount: investor_asset_allocation.get(),
@@ -596,8 +629,14 @@ def reclaim_investment(
     project_id_bytes = pt.Itob(project_asset_id)
 
     return pt.Seq(
-        pt.Assert(app.state.investor_to_project[pt.Txn.sender()].exists()),
-        pt.Assert(app.state.pid_to_project[project_id_bytes].exists()),
+        pt.Assert(
+            app.state.investor_to_project[pt.Txn.sender()].exists(),
+            comment="Invalid investor."
+        ),
+        pt.Assert(
+            app.state.pid_to_project[project_id_bytes].exists(),
+            comment="Invalid project ID."
+        ),
 
         (investor := Investor()).decode(app.state.investor_to_project[pt.Txn.sender()].get()),
         (project := Project()).decode(app.state.investor_to_project[project_id_bytes].get()),
@@ -613,13 +652,30 @@ def reclaim_investment(
         (investor_reclaimed_investment := pt.abi.Bool()).set(investor.reclaimed_investment),
 
         (asset_bal := pt.AssetHolding.balance(app.state.escrow_address.get(), project_asset_id)),
-        pt.Assert(asset_bal.value() > pt.Int(0)),
-
-        pt.Assert(investor_asset_allocation.get() > pt.Int(0)),
-        pt.Assert(is_staking.get() == TRUE),
-        pt.Assert(investor_claimed_ido_asset.get() == FALSE),
-        pt.Assert(investor_reclaimed_investment.get() == FALSE),
-        pt.Assert(RECLAIM_WINDOW >= (pt.Global.latest_timestamp() - project_claim_timestamp.get())),
+        pt.Assert(
+            asset_bal.value() > pt.Int(0),
+            comment="Project assets must be available in escrow."
+        ),
+        pt.Assert(
+            is_staking.get() == TRUE,
+            comment="Investor must be staking $VEST."
+        ),
+        pt.Assert(
+            investor_asset_allocation.get() > pt.Int(0),
+            comment="Investor asset allocation must be greater than 0."
+        ),
+        pt.Assert(
+            investor_claimed_ido_asset.get() == FALSE,
+            comment="Investor must have not claimed their asset allocation."
+        ),
+        pt.Assert(
+            investor_reclaimed_investment.get() == FALSE,
+            comment="Investor must have not reclaimed investment."
+        ),
+        pt.Assert(
+            RECLAIM_WINDOW >= (pt.Global.latest_timestamp() - project_claim_timestamp.get()),
+            comment="Claim must be within the reclaim window."
+        ),
 
         pt.InnerTxnBuilder.Execute({
             pt.TxnField.type_enum: pt.TxnType.Payment,
@@ -661,7 +717,10 @@ def disburse(
 def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
     project_id_bytes = pt.Itob(project_id.get())
     return pt.Seq(
-        pt.Assert(app.state.pid_to_project[project_id_bytes].exists()),
+        pt.Assert(
+            app.state.pid_to_project[project_id_bytes].exists(),
+            comment="Invalid project ID."
+        ),
 
         (project := Project()).decode(app.state.pid_to_project[project_id_bytes].get()),
 
@@ -684,9 +743,18 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
         (project_amount_withdrawn := pt.abi.Uint64()).set(project.amount_withdrawn),
         (project_vesting_schedule := pt.abi.Uint64()).set(project.vesting_schedule),
 
-        pt.Assert(pt.Txn.sender() == project_owner_address.get()),
-        pt.Assert(project_total_amount_raised.get() > pt.Int(0)),
-        pt.Assert(pt.Global.latest_timestamp() > project_end_timestamp.get()),
+        pt.Assert(
+            pt.Txn.sender() == project_owner_address.get(),
+            comment="Invalid sender."
+        ),
+        pt.Assert(
+            project_total_amount_raised.get() > pt.Int(0),
+            comment="Amount raised must be greater than 0."
+        ),
+        pt.Assert(
+            pt.Global.latest_timestamp() > project_claim_timestamp.get(),
+            comment="Withdrawal must be after claim period."
+        ),
 
         (abi_launch_vest_fee := pt.abi.Uint64()).set(LAUNCH_VEST_FEE),
 
@@ -711,8 +779,14 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
             project_amount_withdrawn.set(project_amount_withdrawn.get() + disburse_amount.get())
         )
         .Else(
-            pt.Assert(pt.Global.latest_timestamp() > project_vesting_schedule.get()),
-            pt.Assert(project_amount_withdrawn.get() < amount_raised.get()),
+            pt.Assert(
+                pt.Global.latest_timestamp() > project_vesting_schedule.get(),
+                comment="Subsequent withdrawal must be after vesting period."
+            ),
+            pt.Assert(
+                project_amount_withdrawn.get() < amount_raised.get(),
+                comment="Accumulated withdrawn amount must be less than amount raised."
+            ),
             disburse(disburse_amount, project_owner_address),
             project_amount_withdrawn.set(project_amount_withdrawn.get() + disburse_amount.get())
         ),
@@ -750,7 +824,10 @@ def pause_project(project_id: pt.abi.Uint64) -> pt.Expr:
     """
     project_id_bytes = pt.Itob(project_id.get())
     return pt.Seq(
-        pt.Assert(app.state.pid_to_project[project_id_bytes].exists()),
+        pt.Assert(
+            app.state.pid_to_project[project_id_bytes].exists(),
+            comment="Invalid project ID."
+        ),
 
         (project := Project()).decode(app.state.pid_to_project[project_id_bytes].get()),
 
@@ -773,7 +850,10 @@ def pause_project(project_id: pt.abi.Uint64) -> pt.Expr:
         (project_amount_withdrawn := pt.abi.Uint64()).set(project.amount_withdrawn),
         (project_vesting_schedule := pt.abi.Uint64()).set(project.vesting_schedule),
 
-        pt.Assert(project_is_paused.get() == FALSE),
+        pt.Assert(
+            project_is_paused.get() == FALSE,
+            comment="Project must not be paused."
+        ),
         project_is_paused.set(TRUE),
 
         project.set(
@@ -811,7 +891,10 @@ def unpause_project(project_id: pt.abi.Uint64) -> pt.Expr:
     """
     project_id_bytes = pt.Itob(project_id.get())
     return pt.Seq(
-        pt.Assert(app.state.pid_to_project[project_id_bytes].exists()),
+        pt.Assert(
+            app.state.pid_to_project[project_id_bytes].exists(),
+            comment="Invalid project ID."
+        ),
 
         (project := Project()).decode(app.state.pid_to_project[project_id_bytes].get()),
 
@@ -834,7 +917,10 @@ def unpause_project(project_id: pt.abi.Uint64) -> pt.Expr:
         (project_amount_withdrawn := pt.abi.Uint64()).set(project.amount_withdrawn),
         (project_vesting_schedule := pt.abi.Uint64()).set(project.vesting_schedule),
 
-        pt.Assert(project_is_paused.get() == TRUE),
+        pt.Assert(
+            project_is_paused.get() == TRUE,
+            comment="Project must be paused."
+        ),
         project_is_paused.set(FALSE),
 
         project.set(
@@ -872,10 +958,7 @@ def change_launchpad_admin(
     :param pt.abi.Address new_admin_acct: The new admin account address.
     :rtype: pt.Expr
     """
-    return pt.Seq(
-        pt.Assert(pt.Txn.sender() == app.state.admin_acct.get()),
-        app.state.admin_acct.set(new_admin_acct.get())
-    )
+    return app.state.admin_acct.set(new_admin_acct.get())
 
 
 @app.external(read_only=True)

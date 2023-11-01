@@ -252,17 +252,20 @@ frame_dig -1
 gtxns Amount
 intc_0 // 0
 >
+// Invalid amount, receiver or type_enum
 assert
 frame_dig -1
 gtxns Receiver
 bytec_2 // "escrow_address"
 app_global_get
 ==
+// Invalid amount, receiver or type_enum
 assert
 frame_dig -1
 gtxns TypeEnum
 intc_1 // pay
 ==
+// Invalid amount, receiver or type_enum
 assert
 retsub
 
@@ -350,6 +353,7 @@ frame_dig -1
 pushint 31536000 // 31536000
 ==
 ||
+// Vesting schedule must fall between quarterly, half_year or yearly periods.
 assert
 itxn_begin
 pushint 4 // axfer
@@ -507,28 +511,33 @@ frame_dig -2
 gtxns AssetAmount
 intc_0 // 0
 >
+// Invalid asset_amount, asset_receiver, type_enum, xfer_asset or sender.
 assert
 frame_dig -2
 gtxns AssetReceiver
 bytec_2 // "escrow_address"
 app_global_get
 ==
+// Invalid asset_amount, asset_receiver, type_enum, xfer_asset or sender.
 assert
 frame_dig -2
 gtxns TypeEnum
 pushint 4 // axfer
 ==
+// Invalid asset_amount, asset_receiver, type_enum, xfer_asset or sender.
 assert
 frame_dig -2
 gtxns XferAsset
 frame_dig -1
 txnas Assets
 ==
+// Invalid asset_amount, asset_receiver, type_enum, xfer_asset or sender.
 assert
 frame_dig -2
 gtxns Sender
 frame_dig 1
 ==
+// Invalid asset_amount, asset_receiver, type_enum, xfer_asset or sender.
 assert
 frame_dig 0
 intc_2 // 32
@@ -703,6 +712,7 @@ dup
 frame_dig -3
 intc_1 // 1
 ==
+// Investor must be staking $VEST.
 assert
 frame_dig -2
 txnas Assets
@@ -811,6 +821,7 @@ frame_bury 19
 frame_dig 14
 intc_0 // 0
 ==
+// Project must not be paused.
 assert
 frame_dig 17
 frame_dig 12
@@ -832,11 +843,13 @@ gtxns Receiver
 bytec_2 // "escrow_address"
 app_global_get
 ==
+// Invalid receiver or transaction type.
 assert
 frame_dig -1
 gtxns TypeEnum
 intc_1 // pay
 ==
+// Invalid receiver or transaction type.
 assert
 frame_dig -1
 gtxns AssetAmount
@@ -847,6 +860,7 @@ gtxns AssetAmount
 frame_dig 11
 <=
 ||
+// Asset amount must be greater than or equal to min_investment and must be less than or equal to max_investment.
 assert
 txn Sender
 frame_bury 20
@@ -1000,9 +1014,9 @@ retsub
 claimidoasset_5:
 proto 2 0
 bytec_0 // ""
-dup
 intc_0 // 0
 bytec_0 // ""
+dup
 intc_0 // 0
 dupn 7
 bytec_0 // ""
@@ -1012,6 +1026,7 @@ box_len
 store 10
 store 9
 load 10
+// Invalid investor.
 assert
 frame_dig -2
 txnas Assets
@@ -1020,8 +1035,11 @@ box_len
 store 12
 store 11
 load 12
+// Invalid project.
 assert
-txn Sender
+frame_dig -2
+txnas Assets
+itob
 box_get
 store 14
 store 13
@@ -1029,75 +1047,79 @@ load 14
 assert
 load 13
 frame_bury 0
-frame_dig -2
-txnas Assets
-itob
+frame_dig 0
+intc_3 // 48
+extract_uint64
+frame_bury 1
+global LatestTimestamp
+frame_dig 1
+>=
+// Asset claiming hasn't begun.
+assert
+txn Sender
 box_get
 store 16
 store 15
 load 16
 assert
 load 15
-frame_bury 1
-frame_dig 1
-intc_3 // 48
-extract_uint64
 frame_bury 2
-global LatestTimestamp
 frame_dig 2
->=
-// Here
-assert
-frame_dig 0
 extract 0 32
 frame_bury 3
-frame_dig 0
+frame_dig 2
 intc_2 // 32
 extract_uint64
 frame_bury 4
-frame_dig 0
+frame_dig 2
 pushint 40 // 40
 extract_uint64
 frame_bury 5
-frame_dig 0
+frame_dig 2
 intc_3 // 48
 extract_uint64
 frame_bury 6
-frame_dig 0
+frame_dig 2
 pushint 56 // 56
 extract_uint64
 frame_bury 7
-frame_dig 0
+frame_dig 2
 intc 9 // 512
 getbit
 frame_bury 8
-frame_dig 0
+frame_dig 2
 intc 10 // 513
 getbit
 frame_bury 9
 frame_dig -1
 intc_1 // 1
 ==
+// Investor must be staking.
 assert
 frame_dig 5
 intc_0 // 0
 >
+// Investor amount must be greater than 0.
 assert
 frame_dig 6
 intc_0 // 0
 >
+// Investor asset allocation must be greater than 0.
 assert
 frame_dig 7
 intc_0 // 0
 ==
+// Investor claim_timestamp must be 0.
 assert
 frame_dig 8
 intc_0 // 0
 ==
+// Investor must have not claimed their allocation.
 assert
 frame_dig 9
 intc_0 // 0
 ==
+// Investor must have not reclaimed their investment.
 assert
 itxn_begin
 pushint 4 // axfer
@@ -1137,12 +1159,12 @@ intc_1 // 1
 frame_dig 9
 setbit
 concat
-frame_bury 0
+frame_bury 2
 frame_dig 3
 box_del
 pop
 frame_dig 3
-frame_dig 0
+frame_dig 2
 box_put
 retsub
 
@@ -1162,6 +1184,7 @@ box_len
 store 18
 store 17
 load 18
+// Invalid investor.
 assert
 frame_dig -2
 txnas Assets
@@ -1170,6 +1193,7 @@ box_len
 store 20
 store 19
 load 20
+// Invalid project ID.
 assert
 txn Sender
 box_get
@@ -1228,28 +1252,34 @@ asset_holding_get AssetBalance
 store 25
 intc_0 // 0
 >
-assert
-frame_dig 6
-intc_0 // 0
->
+// Project assets must be available in escrow.
 assert
 frame_dig -1
 intc_1 // 1
 ==
+// Investor must be staking $VEST.
+assert
+frame_dig 6
+intc_0 // 0
+>
+// Investor asset allocation must be greater than 0.
 assert
 frame_dig 7
 intc_0 // 0
 ==
+// Investor must have not claimed their asset allocation.
 assert
 frame_dig 9
 intc_0 // 0
 ==
+// Investor must have not reclaimed investment.
 assert
 pushint 1209600 // 1209600
 global LatestTimestamp
 frame_dig 2
 -
 >=
+// Claim must be within the reclaim window.
 assert
 itxn_begin
 intc_1 // pay
@@ -1315,6 +1345,7 @@ box_len
 store 27
 store 26
 load 27
+// Invalid project ID.
 assert
 frame_dig -1
 itob
@@ -1403,14 +1434,17 @@ frame_bury 18
 txn Sender
 frame_dig 1
 ==
+// Invalid sender.
 assert
 frame_dig 16
 intc_0 // 0
 >
+// Amount raised must be greater than 0.
 assert
 global LatestTimestamp
-frame_dig 3
+frame_dig 4
 >
+// Withdrawal must be after claim period.
 assert
 pushint 10 // 10
 frame_bury 19
@@ -1449,10 +1483,12 @@ bnz withdrawamountraised_7_l2
 global LatestTimestamp
 frame_dig 18
 >
+// Subsequent withdrawal must be after vesting period.
 assert
 frame_dig 17
 frame_dig 20
 <
+// Accumulated withdrawn amount must be less than amount raised.
 assert
 itxn_begin
 intc_1 // pay
@@ -1582,6 +1618,7 @@ box_len
 store 31
 store 30
 load 31
+// Invalid project ID.
 assert
 frame_dig -1
 itob
@@ -1670,6 +1707,7 @@ frame_bury 18
 frame_dig 13
 intc_0 // 0
 ==
+// Project must not be paused.
 assert
 intc_1 // 1
 !
@@ -1772,6 +1810,7 @@ box_len
 store 35
 store 34
 load 35
+// Invalid project ID.
 assert
 frame_dig -1
 itob
@@ -1860,6 +1899,7 @@ frame_bury 18
 frame_dig 13
 intc_1 // 1
 ==
+// Project must be paused.
 assert
 intc_0 // 0
 !
@@ -1946,11 +1986,6 @@ txn Sender
 global CreatorAddress
 ==
 // unauthorized
-assert
-txn Sender
-bytec_3 // "admin_acct"
-app_global_get
-==
 assert
 bytec_3 // "admin_acct"
 frame_dig -1
