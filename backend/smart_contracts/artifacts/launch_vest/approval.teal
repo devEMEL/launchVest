@@ -50,11 +50,11 @@ pushbytes 0x11fef69e // "change_launchpad_admin(address)void"
 ==
 bnz main_l17
 txna ApplicationArgs 0
-pushbytes 0x5cdc6c33 // "get_project(uint64)(address,uint64,uint64,uint64,uint64,uint64,string,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64,uint64,uint64)"
+pushbytes 0x5313374d // "get_investor(address)(address,uint64,uint64,uint64,uint64,bool,bool)"
 ==
 bnz main_l16
 txna ApplicationArgs 0
-pushbytes 0x5313374d // "get_investor(address)(address,uint64,uint64,uint64,uint64,bool,bool)"
+pushbytes 0x5cdc6c33 // "get_project(uint64)(address,uint64,uint64,uint64,uint64,uint64,string,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64,uint64,uint64)"
 ==
 bnz main_l15
 err
@@ -67,7 +67,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub getinvestorcaster_25
+callsub getprojectcaster_25
 intc_1 // 1
 return
 main_l16:
@@ -79,7 +79,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub getprojectcaster_24
+callsub getinvestorcaster_24
 intc_1 // 1
 return
 main_l17:
@@ -336,8 +336,12 @@ frame_dig -6
 // Claim time must be greater than start and end time
 assert
 frame_dig -1
+pushint 60 // 60
+==
+frame_dig -1
 pushint 7776000 // 7776000
 ==
+||
 frame_dig -1
 pushint 15552000 // 15552000
 ==
@@ -871,6 +875,11 @@ intc_0 // 0
 frame_bury 26
 frame_dig 22
 frame_dig 9
+>=
+// Investment amount cannot be lesser than asset price
+assert
+frame_dig 22
+frame_dig 9
 /
 frame_bury 26
 frame_dig 26
@@ -1250,6 +1259,10 @@ itxn_field Receiver
 frame_dig 5
 itxn_field Amount
 itxn_submit
+intc_0 // 0
+frame_bury 5
+intc_0 // 0
+frame_bury 6
 intc_1 // 1
 !
 !
@@ -1293,7 +1306,7 @@ intc_0 // 0
 dupn 4
 bytec_0 // ""
 intc_0 // 0
-dupn 15
+dupn 16
 bytec_0 // ""
 dup
 frame_dig -1
@@ -1413,10 +1426,65 @@ pushint 100 // 100
 frame_bury 20
 pushint 10 // 10
 frame_bury 21
+intc_0 // 0
+frame_bury 22
+frame_dig 21
+intc_0 // 0
+>
+assert
+frame_dig 21
+pushint 100 // 100
+<=
+assert
+frame_dig 21
+frame_dig 20
+*
+pushint 100 // 100
+/
+frame_bury 22
+frame_dig 14
+intc_0 // 0
+==
+bnz withdrawamountraised_7_l2
+global LatestTimestamp
+frame_dig 18
+>
+assert
 frame_dig 17
 frame_dig 20
+<
+assert
+itxn_begin
+intc_1 // pay
+itxn_field TypeEnum
+frame_dig 22
+itxn_field Amount
+frame_dig 1
+itxn_field Receiver
+itxn_submit
+frame_dig 17
+frame_dig 22
 +
 frame_bury 17
+b withdrawamountraised_7_l3
+withdrawamountraised_7_l2:
+itxn_begin
+intc_1 // pay
+itxn_field TypeEnum
+frame_dig 22
+itxn_field Amount
+frame_dig 1
+itxn_field Receiver
+itxn_submit
+intc_1 // 1
+!
+!
+frame_bury 14
+frame_dig 17
+frame_dig 22
++
+frame_bury 17
+withdrawamountraised_7_l3:
 frame_dig 1
 frame_dig 2
 itob
@@ -1434,12 +1502,12 @@ frame_dig 6
 itob
 concat
 frame_dig 7
+frame_bury 26
+frame_dig 26
 frame_bury 25
-frame_dig 25
-frame_bury 24
 intc 4 // 147
-frame_bury 22
-frame_dig 22
+frame_bury 23
+frame_dig 23
 itob
 extract 6 0
 concat
@@ -1478,7 +1546,7 @@ concat
 frame_dig 18
 itob
 concat
-frame_dig 24
+frame_dig 25
 concat
 frame_bury 0
 frame_dig -1
@@ -1889,12 +1957,11 @@ frame_dig -1
 app_global_put
 retsub
 
-// get_project
-getproject_11:
+// get_investor
+getinvestor_11:
 proto 1 1
 bytec_0 // ""
 frame_dig -1
-itob
 box_get
 store 39
 store 38
@@ -1904,11 +1971,12 @@ load 38
 frame_bury 0
 retsub
 
-// get_investor
-getinvestor_12:
+// get_project
+getproject_12:
 proto 1 1
 bytec_0 // ""
 frame_dig -1
+itob
 box_get
 store 41
 store 40
@@ -2123,16 +2191,15 @@ frame_dig 0
 callsub changelaunchpadadmin_10
 retsub
 
-// get_project_caster
-getprojectcaster_24:
+// get_investor_caster
+getinvestorcaster_24:
 proto 0 0
 bytec_0 // ""
-intc_0 // 0
+dup
 txna ApplicationArgs 1
-btoi
 frame_bury 1
 frame_dig 1
-callsub getproject_11
+callsub getinvestor_11
 frame_bury 0
 bytec 4 // 0x151f7c75
 frame_dig 0
@@ -2140,15 +2207,16 @@ concat
 log
 retsub
 
-// get_investor_caster
-getinvestorcaster_25:
+// get_project_caster
+getprojectcaster_25:
 proto 0 0
 bytec_0 // ""
-dup
+intc_0 // 0
 txna ApplicationArgs 1
+btoi
 frame_bury 1
 frame_dig 1
-callsub getinvestor_12
+callsub getproject_12
 frame_bury 0
 bytec 4 // 0x151f7c75
 frame_dig 0

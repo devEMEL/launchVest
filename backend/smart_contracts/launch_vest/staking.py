@@ -20,7 +20,7 @@ class Staker(pt.abi.NamedTuple):
 
     Represents a staker with the following instance variables:
 
-    :ivar pt.abi.Address address: The staker's Algorand address.
+    :ivar pt.abi.Address address: The stakers Algorand address.
     :ivar pt.abi.Uint64 amount: The amount staked.
     :ivar pt.abi.Uint64 asset_id: The ID of the asset being staked.
     :ivar pt.abi.Bool is_staking: A boolean indicating if the staker is actively staking.
@@ -348,6 +348,7 @@ def get_staker(
     """
     Retrieves staker information for the specified staker address and stores it in the output.
 
+    :param staker: The stakers address.
     :param Staker output: The object where staker information will be stored.
     :rtype: pt.Expr.
     """

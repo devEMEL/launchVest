@@ -21,6 +21,7 @@ def calculate_project_max_cap(
     return output.set(total_assets_for_sale.get() * price_per_asset.get())
 
 
+# noinspection PyTypeChecker
 def calculate_allocation_for_investor(
     investment_amount: pt.abi.Uint64,
     price_per_asset: pt.abi.Uint64,
@@ -35,7 +36,13 @@ def calculate_allocation_for_investor(
     :param pt.abi.Uint64 output: Result output of the computation.
     :return pt.Expr: Calculated asset allocation for an investor.
     """
-    return output.set(investment_amount.get() / price_per_asset.get())
+    return pt.Seq(
+        pt.Assert(
+            investment_amount.get() >= price_per_asset.get(),
+            comment="Investment amount cannot be lesser than asset price"
+        ),
+        output.set(investment_amount.get() / price_per_asset.get())
+    )
 
 
 def calculate_proceeds_after_fee_deduction(
@@ -66,7 +73,7 @@ def calculate_disbursement(
 ) -> pt.Expr:
     return pt.Seq(
         pt.Assert(percentage.get() > pt.Int(0), percentage.get() <= pt.Int(100)),
-        output.set((percentage.get() / pt.Int(100)) * total_amount.get())
+        output.set((percentage.get() * total_amount.get()) / pt.Int(100))
     )
 
 

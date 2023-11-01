@@ -18,6 +18,7 @@ PERCENTAGE = pt.Int(10)
 
 RECLAIM_WINDOW = pt.Int(1_209_600)
 
+ONE_MINUTE = pt.Int(60)
 QUARTERLY_VESTING_PERIOD = pt.Int(7_776_000)
 HALF_YEAR_VESTING_PERIOD = pt.Int(15_552_000)
 YEARLY_VESTING_PERIOD = pt.Int(31_536_000)
@@ -30,14 +31,14 @@ class Investor(pt.abi.NamedTuple):
     :ivar pt.abi.Address address: The Algorand address of the investor.
     :ivar pt.abi.Uint64 project_id: The unique identifier of the project.
     :ivar pt.abi.Uint64 amount_invested: The amount of the investment in Algos.
-    :ivar pt.abi.Uint64 asset_allocated: The amount of allocated assets.
+    :ivar pt.abi.Uint64 asset_allocation: The amount of allocated assets.
     :ivar pt.abi.Bool has_filed_refund: A boolean indicating whether the investor has filed for a refund.
     :ivar pt.abi.Bool claimed: A boolean indicating whether the investor has claimed assets.
     """
     address: pt.abi.Field[pt.abi.Address]
     project_id: pt.abi.Field[pt.abi.Uint64]
     investment_amount: pt.abi.Field[pt.abi.Uint64]
-    asset_allocated: pt.abi.Field[pt.abi.Uint64]
+    asset_allocation: pt.abi.Field[pt.abi.Uint64]
     asset_claim_timestamp: pt.abi.Field[pt.abi.Uint64]
     claimed_ido_asset: pt.abi.Field[pt.abi.Bool]
     reclaimed_investment: pt.abi.Field[pt.abi.Bool]
@@ -186,12 +187,14 @@ def list_project(
     Lists a new IDO Project on LaunchVest.
 
     :param pt.abi.Asset asset_id: The unique identifier of the asset.
+    :param image_url: IDO project image url.
     :param pt.abi.Uint64 start_timestamp: The timestamp when the project starts.
     :param pt.abi.Uint64 end_timestamp: The timestamp when the project ends.
     :param pt.abi.Uint64 claim_timestamp: The timestamp for asset claiming.
     :param pt.abi.Uint64 price_per_asset: The price of each asset.
     :param pt.abi.Uint64 min_investment_per_investor: The minimum investment per user.
     :param pt.abi.Uint64 max_investment_per_investor: The maximum investment per user.
+    :param pt.abi.Uint64 vesting_schedule: The vesting schedule of project.
     :rtype: pt.Expr.
 
     .. Note::
@@ -199,13 +202,13 @@ def list_project(
     """
     project = Project()
     project_id = asset_id.asset_id()
-    project_id_in_bytes = pt.Itob(project_id)
+    project_id_bytes = pt.Itob(project_id)
 
     return pt.Seq(
         (asset_decimal := pt.AssetParam.decimals(asset_id.asset_id())),
         # TODO: Uncomment this!
         # pt.Assert(
-        #     pt.Not(app.state.pid_to_project[project_id_in_bytes].exists()),
+        #     pt.Not(app.state.pid_to_project[project_id_bytes].exists()),
         #     comment="Project already exists!"
         # ),
         pt.Assert(
@@ -244,6 +247,7 @@ def list_project(
         ),
         pt.Assert(
             pt.Or(
+                vesting_schedule.get() == ONE_MINUTE,
                 vesting_schedule.get() == QUARTERLY_VESTING_PERIOD,
                 vesting_schedule.get() == HALF_YEAR_VESTING_PERIOD,
                 vesting_schedule.get() == YEARLY_VESTING_PERIOD,
@@ -282,7 +286,7 @@ def list_project(
             project_amount_withdrawn,
             project_vesting_schedule
         ),
-        app.state.pid_to_project[project_id_in_bytes].set(project),
+        app.state.pid_to_project[project_id_bytes].set(project),
     )
 
 
@@ -300,9 +304,9 @@ def deposit_ido_assets(
     :rtype: pt.Expr.
     """
     project_id = asset.asset_id()
-    project_id_in_bytes = pt.Itob(project_id)
+    project_id_bytes = pt.Itob(project_id)
     return pt.Seq(
-        (project := Project()).decode(app.state.pid_to_project[project_id_in_bytes].get()),
+        (project := Project()).decode(app.state.pid_to_project[project_id_bytes].get()),
         (project_owner_address := pt.abi.Address()).set(project.owner_address),
 
         pt.Assert(
@@ -360,7 +364,7 @@ def deposit_ido_assets(
             project_amount_withdrawn,
             project_vesting_schedule
         ),
-        app.state.pid_to_project[project_id_in_bytes].set(project)
+        app.state.pid_to_project[project_id_bytes].set(project)
     )
 
 
@@ -403,14 +407,14 @@ def invest(
 
     project_asset_id = project.asset_id()
     project_id = project.asset_id()
-    project_id_in_bytes = pt.Itob(project_id)
+    project_id_bytes = pt.Itob(project_id)
     return pt.Seq(
         pt.Assert(is_staking.get() == TRUE),
         pt.Assert(
-            app.state.pid_to_project[project_id_in_bytes].exists(),
+            app.state.pid_to_project[project_id_bytes].exists(),
             comment="A valid project ID must be provided"
         ),
-        (project := Project()).decode(app.state.pid_to_project[project_id_in_bytes].get()),
+        (project := Project()).decode(app.state.pid_to_project[project_id_bytes].get()),
 
         (project_asset_bal_in_escrow := pt.AssetHolding.balance(
             account=app.state.escrow_address,
@@ -505,7 +509,7 @@ def invest(
             project_amount_withdrawn,
             project_vesting_schedule
         ),
-        app.state.pid_to_project[project_id_in_bytes].set(project)
+        app.state.pid_to_project[project_id_bytes].set(project)
     )
 
 
@@ -519,14 +523,15 @@ def claim_ido_asset(
     Allows users to claim a specific IDO Project asset.
 
     :param pt.abi.Asset project: Project (asset) ID to be claimed.
+    :param is_staking: Flag to indicate whether investor is staking $VEST.
     :rtype: pt.Expr.
     """
     project_asset_id = project.asset_id()
-    project_id_in_bytes = pt.Itob(project_asset_id)
+    project_id_bytes = pt.Itob(project_asset_id)
 
     return pt.Seq(
         pt.Assert(app.state.investor_to_project[pt.Txn.sender()].exists()),
-        pt.Assert(app.state.pid_to_project[project_id_in_bytes].exists()),
+        pt.Assert(app.state.pid_to_project[project_id_bytes].exists()),
 
         (investor := Investor()).decode(app.state.investor_to_project[pt.Txn.sender()].get()),
 
@@ -538,21 +543,21 @@ def claim_ido_asset(
         (investor_address := pt.abi.Address()).set(investor.address),
         (investor_project_id := pt.abi.Uint64()).set(investor.project_id),
         (investor_investment_amount := pt.abi.Uint64()).set(investor.investment_amount),
-        (investor_asset_allocated := pt.abi.Uint64()).set(investor.asset_allocated),
+        (investor_asset_allocation := pt.abi.Uint64()).set(investor.asset_allocation),
         (investor_asset_claim_timestamp := pt.abi.Uint64()).set(investor.asset_claim_timestamp),
         (investor_claimed_ido_asset := pt.abi.Bool()).set(investor.claimed_ido_asset),
         (investor_reclaimed_investment := pt.abi.Bool()).set(investor.reclaimed_investment),
 
         pt.Assert(is_staking.get() == TRUE),
         pt.Assert(investor_investment_amount.get() > pt.Int(0)),
-        pt.Assert(investor_asset_allocated.get() > pt.Int(0)),
+        pt.Assert(investor_asset_allocation.get() > pt.Int(0)),
         pt.Assert(investor_asset_claim_timestamp.get() == pt.Int(0)),
         pt.Assert(investor_claimed_ido_asset.get() == FALSE),
         pt.Assert(investor_reclaimed_investment.get() == FALSE),
 
         pt.InnerTxnBuilder.Execute({
             pt.TxnField.type_enum: pt.TxnType.AssetTransfer,
-            pt.TxnField.asset_amount: investor_asset_allocated.get(),
+            pt.TxnField.asset_amount: investor_asset_allocation.get(),
             pt.TxnField.asset_receiver: investor_address.get(),
             pt.TxnField.xfer_asset: project_asset_id,
             # pt.TxnField.fee: pt.Int(0)
@@ -564,7 +569,7 @@ def claim_ido_asset(
             investor_address,
             investor_project_id,
             investor_investment_amount,
-            investor_asset_allocated,
+            investor_asset_allocation,
             investor_asset_claim_timestamp,
             investor_claimed_ido_asset,
             investor_reclaimed_investment
@@ -583,24 +588,25 @@ def reclaim_investment(
     Allows investors to reclaim their investment.
 
     :param pt.abi.Asset project: Project (asset) ID to be claimed.
+    :param is_staking: Flag to indicate whether investor is current staking $VEST.
     :rtype: pt.Expr.
     """
     project_asset_id = project.asset_id()
-    project_id_in_bytes = pt.Itob(project_asset_id)
+    project_id_bytes = pt.Itob(project_asset_id)
 
     return pt.Seq(
         pt.Assert(app.state.investor_to_project[pt.Txn.sender()].exists()),
-        pt.Assert(app.state.pid_to_project[project_id_in_bytes].exists()),
+        pt.Assert(app.state.pid_to_project[project_id_bytes].exists()),
 
         (investor := Investor()).decode(app.state.investor_to_project[pt.Txn.sender()].get()),
-        (project := Project()).decode(app.state.investor_to_project[project_id_in_bytes].get()),
+        (project := Project()).decode(app.state.investor_to_project[project_id_bytes].get()),
 
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
 
         (investor_address := pt.abi.Address()).set(investor.address),
         (investor_project_id := pt.abi.Uint64()).set(investor.project_id),
         (investor_investment_amount := pt.abi.Uint64()).set(investor.investment_amount),
-        (investor_asset_allocated := pt.abi.Uint64()).set(investor.asset_allocated),
+        (investor_asset_allocation := pt.abi.Uint64()).set(investor.asset_allocation),
         (investor_claimed_ido_asset := pt.abi.Bool()).set(investor.claimed_ido_asset),
         (investor_asset_claim_timestamp := pt.abi.Uint64()).set(investor.asset_claim_timestamp),
         (investor_reclaimed_investment := pt.abi.Bool()).set(investor.reclaimed_investment),
@@ -608,7 +614,7 @@ def reclaim_investment(
         (asset_bal := pt.AssetHolding.balance(app.state.escrow_address.get(), project_asset_id)),
         pt.Assert(asset_bal.value() > pt.Int(0)),
 
-        pt.Assert(investor_asset_allocated.get() > pt.Int(0)),
+        pt.Assert(investor_asset_allocation.get() > pt.Int(0)),
         pt.Assert(is_staking.get() == TRUE),
         pt.Assert(investor_claimed_ido_asset.get() == FALSE),
         pt.Assert(investor_reclaimed_investment.get() == FALSE),
@@ -620,12 +626,14 @@ def reclaim_investment(
             pt.TxnField.amount: investor_investment_amount.get()
         }),
 
+        investor_investment_amount.set(pt.Int(0)),
+        investor_asset_allocation.set(pt.Int(0)),
         investor_reclaimed_investment.set(TRUE),
         investor.set(
             investor_address,
             investor_project_id,
             investor_investment_amount,
-            investor_asset_allocated,
+            investor_asset_allocation,
             investor_asset_claim_timestamp,
             investor_claimed_ido_asset,
             investor_reclaimed_investment
@@ -634,108 +642,9 @@ def reclaim_investment(
     )
 
 
-# noinspection PyTypeChecker
-# @app.external
-# def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
-#     """
-#     Allows withdrawing the amount raised for a specific project and retains the fee in the escrow address.
-#
-#     :param pt.abi.Uint64 project_id: The unique identifier of the project for which funds are withdrawn.
-#     :rtype: pt.Expr
-#     """
-#     project_id_in_bytes = pt.Itob(project_id.get())
-#     return pt.Seq(
-#         pt.Assert(app.state.pid_to_project[project_id_in_bytes].exists()),
-#
-#         (project := Project()).decode(app.state.pid_to_project[project_id_in_bytes].get()),
-#
-#         (project_owner_address := pt.abi.Address()).set(project.owner_address),
-#         (project_start_timestamp := pt.abi.Uint64()).set(project.start_timestamp),
-#         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
-#         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
-#         (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
-#         (project_asset_decimal := pt.abi.Uint64()).set(project.asset_decimal),
-#         (project_image_url := pt.abi.String()).set(project.image_url),
-#         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
-#         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
-#         (project_max_investment_per_investor := pt.abi.Uint64()).set(project.max_investment_per_investor),
-#         (project_max_cap := pt.abi.Uint64()).set(project.max_cap),
-#         (project_total_assets_for_sale := pt.abi.Uint64()).set(project.total_assets_for_sale),
-#         (project_is_paused := pt.abi.Bool()).set(project.is_paused),
-#         (project_initiated_withdrawal := pt.abi.Bool()).set(project.initiated_withdrawal),
-#         (project_total_assets_sold := pt.abi.Uint64()).set(project.total_assets_sold),
-#         (project_total_amount_raised := pt.abi.Uint64()).set(project.total_amount_raised),
-#         (project_amount_withdrawn := pt.abi.Uint64()).set(project.amount_withdrawn),
-#         (project_vesting_schedule := pt.abi.Uint64()).set(project.vesting_schedule),
-#
-#         pt.Assert(pt.Txn.sender() == project_owner_address.get()),
-#         pt.Assert(project_total_amount_raised.get() > pt.Int(0)),
-#         pt.Assert(pt.Global.latest_timestamp() > project_end_timestamp.get()),
-#
-#         (abi_launch_vest_fee := pt.abi.Uint64()).set(LAUNCH_VEST_FEE),
-#
-#         (total_amount := pt.abi.Uint64()).set(pt.Int(0)),
-#         calculate_proceeds_after_fee_deduction(
-#             proceeds=project_total_amount_raised,
-#             launch_vest_fee=abi_launch_vest_fee,
-#             output=total_amount
-#         ),
-#
-#         (percentage := pt.abi.Uint64()).set(PERCENTAGE),
-#         (withdraw_amount := pt.abi.Uint64()).set(pt.Int(0)),
-#         calculate_disbursement(
-#             total_amount=total_amount,
-#             percentage=percentage,
-#             output=withdraw_amount,
-#         ),
-#         withdraw_amount.set(withdraw_amount.get() * pt.Int(1000_000)),
-#         pt.If(project_initiated_withdrawal.get() == FALSE)
-#         .Then(
-#             pt.InnerTxnBuilder.Execute({
-#                 pt.TxnField.type_enum: pt.TxnType.Payment,
-#                 pt.TxnField.amount: withdraw_amount.get(),
-#                 pt.TxnField.receiver: project_owner_address.get()
-#             }),
-#             project_initiated_withdrawal.set(TRUE),
-#             (project_amount_withdrawn.set(project_amount_withdrawn.get() + withdraw_amount.get()))
-#         )
-#         .Else(
-#             pt.Assert(pt.Global.latest_timestamp() > project_vesting_schedule.get()),
-#             pt.Assert(project_amount_withdrawn.get() < total_amount.get()),
-#             pt.InnerTxnBuilder.Execute({
-#                 pt.TxnField.type_enum: pt.TxnType.Payment,
-#                 pt.TxnField.amount: withdraw_amount.get(),
-#                 pt.TxnField.receiver: project_owner_address.get()
-#             }),
-#             (project_amount_withdrawn.set(project_amount_withdrawn.get() + withdraw_amount.get()))
-#         ),
-#         project.set(
-#             project_owner_address,
-#             project_start_timestamp,
-#             project_end_timestamp,
-#             project_claim_timestamp,
-#             project_asset_id,
-#             project_asset_decimal,
-#             project_image_url,
-#             project_price_per_asset,
-#             project_min_investment_per_investor,
-#             project_max_investment_per_investor,
-#             project_max_cap,
-#             project_total_assets_for_sale,
-#             project_is_paused,
-#             project_initiated_withdrawal,
-#             project_total_assets_sold,
-#             project_total_amount_raised,
-#             project_amount_withdrawn,
-#             project_vesting_schedule
-#         ),
-#         app.state.pid_to_project[project_id_in_bytes].set(project)
-#     )
-
-
 def disburse(
     amount: pt.abi.Uint64,
-    receiver: pt.abi.Address
+    receiver: pt.abi.Address,
 ) -> pt.Expr:
     return pt.Seq(
         pt.InnerTxnBuilder.Execute({
@@ -786,15 +695,26 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
             launch_vest_fee=abi_launch_vest_fee,
             output=amount_raised
         ),
+
         (percentage := pt.abi.Uint64()).set(PERCENTAGE),
-        # (withdraw_amount := pt.abi.Uint64()).set(pt.Int(0)),
-        # calculate_disbursement(
-        #     total_amount=amount_raised,
-        #     percentage=percentage,
-        #     output=withdraw_amount
-        # ),
-        # disburse(withdraw_amount, project_owner_address),
-        (project_amount_withdrawn.set(project_amount_withdrawn.get() + amount_raised.get())),
+        (disburse_amount := pt.abi.Uint64()).set(pt.Int(0)),
+        calculate_disbursement(
+            total_amount=amount_raised,
+            percentage=percentage,
+            output=disburse_amount
+        ),
+        pt.If(project_initiated_withdrawal.get() == FALSE)
+        .Then(
+            disburse(disburse_amount, project_owner_address),
+            project_initiated_withdrawal.set(TRUE),
+            project_amount_withdrawn.set(project_amount_withdrawn.get() + disburse_amount.get())
+        )
+        .Else(
+            pt.Assert(pt.Global.latest_timestamp() > project_vesting_schedule.get()),
+            pt.Assert(project_amount_withdrawn.get() < amount_raised.get()),
+            disburse(disburse_amount, project_owner_address),
+            project_amount_withdrawn.set(project_amount_withdrawn.get() + disburse_amount.get())
+        ),
         project.set(
             project_owner_address,
             project_start_timestamp,
@@ -827,11 +747,11 @@ def pause_project(project_id: pt.abi.Uint64) -> pt.Expr:
     :param pt.abi.Uint64 project_id: The unique identifier of the project to be paused.
     :rtype: pt.Expr
     """
-    project_id_in_bytes = pt.Itob(project_id.get())
+    project_id_bytes = pt.Itob(project_id.get())
     return pt.Seq(
-        pt.Assert(app.state.pid_to_project[project_id_in_bytes].exists()),
+        pt.Assert(app.state.pid_to_project[project_id_bytes].exists()),
 
-        (project := Project()).decode(app.state.pid_to_project[project_id_in_bytes].get()),
+        (project := Project()).decode(app.state.pid_to_project[project_id_bytes].get()),
 
         (project_owner_address := pt.abi.Address()).set(project.owner_address),
         (project_start_timestamp := pt.abi.Uint64()).set(project.start_timestamp),
@@ -875,7 +795,7 @@ def pause_project(project_id: pt.abi.Uint64) -> pt.Expr:
             project_amount_withdrawn,
             project_vesting_schedule
         ),
-        app.state.pid_to_project[project_id_in_bytes].set(project)
+        app.state.pid_to_project[project_id_bytes].set(project)
     )
 
 
@@ -888,11 +808,11 @@ def unpause_project(project_id: pt.abi.Uint64) -> pt.Expr:
     :param pt.abi.Uint64 project_id:The unique identifier of the project to be un-paused.
     :rtype: pt.Expr.
     """
-    project_id_in_bytes = pt.Itob(project_id.get())
+    project_id_bytes = pt.Itob(project_id.get())
     return pt.Seq(
-        pt.Assert(app.state.pid_to_project[project_id_in_bytes].exists()),
+        pt.Assert(app.state.pid_to_project[project_id_bytes].exists()),
 
-        (project := Project()).decode(app.state.pid_to_project[project_id_in_bytes].get()),
+        (project := Project()).decode(app.state.pid_to_project[project_id_bytes].get()),
 
         (project_owner_address := pt.abi.Address()).set(project.owner_address),
         (project_start_timestamp := pt.abi.Uint64()).set(project.start_timestamp),
@@ -936,7 +856,7 @@ def unpause_project(project_id: pt.abi.Uint64) -> pt.Expr:
             project_amount_withdrawn,
             project_vesting_schedule
         ),
-        app.state.pid_to_project[project_id_in_bytes].set(project)
+        app.state.pid_to_project[project_id_bytes].set(project)
     )
 
 
@@ -958,22 +878,6 @@ def change_launchpad_admin(
 
 
 @app.external(read_only=True)
-def get_project(
-    project_id: pt.abi.Uint64,
-    *,
-    output: Project
-) -> pt.Expr:
-    """
-    Retrieves project information for the specified project ID and stores it in the output.
-
-    :param pt.abi.Uint64 project_id: The unique identifier of the project to retrieve.
-    :param Project output: The object where project information will be stored.
-    :rtype: pt.Expr
-    """
-    return app.state.pid_to_project[project_id].store_into(output)
-
-
-@app.external(read_only=True)
 def get_investor(
     investor: pt.abi.Address,
     *,
@@ -987,3 +891,19 @@ def get_investor(
     :rtype: pt.Expr.
     """
     return app.state.investor_to_project[investor].store_into(output)
+
+
+@app.external(read_only=True)
+def get_project(
+    project_id: pt.abi.Uint64,
+    *,
+    output: Project
+) -> pt.Expr:
+    """
+    Retrieves project information for the specified project ID and stores it in the output.
+
+    :param pt.abi.Uint64 project_id: The unique identifier of the project to retrieve.
+    :param Project output: The object where project information will be stored.
+    :rtype: pt.Expr
+    """
+    return app.state.pid_to_project[project_id].store_into(output)
