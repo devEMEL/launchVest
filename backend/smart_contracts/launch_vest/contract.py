@@ -206,7 +206,7 @@ def list_project(
 
     return pt.Seq(
         (asset_decimal := pt.AssetParam.decimals(asset_id.asset_id())),
-        # TODO: Uncomment this!
+        # TODO: Uncomment this, add assertion comments, fix price and decimal issues!
         # pt.Assert(
         #     pt.Not(app.state.pid_to_project[project_id_bytes].exists()),
         #     comment="Project already exists!"
