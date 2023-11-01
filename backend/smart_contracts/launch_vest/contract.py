@@ -28,6 +28,7 @@ class Investor(pt.abi.NamedTuple):
     """
     Represents an investor, extends ``pt.abi.NamedTuple``.
 
+    
     :ivar pt.abi.Address address: The Algorand address of the investor.
     :ivar pt.abi.Uint64 project_id: The unique identifier of the project.
     :ivar pt.abi.Uint64 amount_invested: The amount of the investment in Algos.
