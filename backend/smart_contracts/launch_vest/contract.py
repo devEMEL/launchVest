@@ -11,7 +11,7 @@ from backend.smart_contracts.launch_vest.formula_helpers import (
     calculate_project_max_cap
 )
 
-
+USDC_ASSET_ID = pt.Int(10458941)
 LAUNCH_VEST_FEE = pt.Int(10)  # 10%
 PERCENTAGE = pt.Int(10)
 
@@ -138,8 +138,9 @@ def escrow_asset_opt_in(asset: pt.abi.Asset) -> pt.Expr:
     )
 
 
-@app.external
-def bootstrap() -> pt.Expr:
+# noinspection PyTypeChecker
+@app.external(authorize=bk.Authorize.only_creator())
+def bootstrap(asset: pt.abi.Asset) -> pt.Expr:
     """
     Initializes Launch Vest application's global state, sets the admin account, and sets the escrow address.
 
@@ -148,7 +149,9 @@ def bootstrap() -> pt.Expr:
     return pt.Seq(
         app.initialize_global_state(),
         app.state.admin_acct.set(pt.Global.creator_address()),
-        app.state.escrow_address.set(pt.Global.current_application_address())
+        app.state.escrow_address.set(pt.Global.current_application_address()),
+        (escrow_asset_bal := pt.AssetHolding.balance(app.state.escrow_address, asset.asset_id())),
+        pt.If(escrow_asset_bal.value() == pt.Int(0), escrow_asset_opt_in(asset=asset)),
     )
 
 
@@ -166,9 +169,9 @@ def fund_escrow_address(
     return pt.Seq(
         pt.Assert(
             txn.get().amount() > pt.Int(0),
-            txn.get().receiver() == app.state.escrow_address,
+            txn.get().receiver() == pt.Global.current_application_address(),
             txn.get().type_enum() == pt.TxnType.Payment,
-            comment="Invalid amount, receiver or type_enum"
+            comment="Invalid amount, receiver or type_enum."
         )
     )
 
@@ -206,7 +209,6 @@ def list_project(
     project = Project()
     project_id = asset_id.asset_id()
     project_id_bytes = pt.Itob(project_id)
-
     return pt.Seq(
         (asset_total := pt.AssetParam.total(asset_id.asset_id())),
         # TODO: Uncomment this, fix price and decimal issues!
@@ -214,7 +216,7 @@ def list_project(
         #     pt.Not(app.state.pid_to_project[project_id_bytes].exists()),
         #     comment="Project already exists!"
         # ),
-        #  Checks if its a valid asset ID provided.
+        # Checks if its a valid asset ID provided.
         pt.Assert(
             asset_total.value() > pt.Int(0),
             comment="A valid asset ID must be provided",
@@ -225,13 +227,8 @@ def list_project(
         ),
         pt.Assert(
             min_investment_per_investor.get() > pt.Int(0),
-            max_investment_per_investor.get() > pt.Int(0),
-            comment="Min. and max. investment must be greater than 0",
-        ),
-        
-        pt.Assert(
-            min_investment_per_investor.get() < max_investment_per_investor.get(),
-            comment="Min. investment must be lesser than max. investment",
+            max_investment_per_investor.get() > min_investment_per_investor.get(),
+            comment="Min. must be greater than 0, and max investment must be greater than min. investment.",
         ),
         pt.Assert(
             start_timestamp.get() > pt.Global.latest_timestamp(),
@@ -331,7 +328,6 @@ def deposit_ido_assets(
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
         (project_max_investment_per_investor := pt.abi.Uint64()).set(project.max_investment_per_investor),
-        (project_max_cap := pt.abi.Uint64()).set(project.max_cap),
         (project_total_assets_for_sale := pt.abi.Uint64()).set(txn.get().asset_amount()),
         (project_is_paused := pt.abi.Bool()).set(project.is_paused),
         (project_initiated_withdrawal := pt.abi.Bool()).set(project.initiated_withdrawal),
@@ -339,11 +335,11 @@ def deposit_ido_assets(
         (project_total_amount_raised := pt.abi.Uint64()).set(project.total_amount_raised),
         (project_amount_withdrawn := pt.abi.Uint64()).set(project.amount_withdrawn),
         (project_vesting_schedule := pt.abi.Uint64()).set(project.vesting_schedule),
-
-        calculate_project_max_cap(
-            total_assets_for_sale=project_total_assets_for_sale,
-            price_per_asset=project_price_per_asset,
-            output=project_max_cap
+        (project_max_cap := pt.abi.Uint64()).set(
+            calculate_project_max_cap(
+                project_total_assets_for_sale,
+                project_price_per_asset
+            )
         ),
 
         project.set(
@@ -370,22 +366,74 @@ def deposit_ido_assets(
 
 
 # noinspection PyTypeChecker
+@pt.Subroutine(pt.TealType.uint64)
 def investor_payment(
     min_investment: pt.abi.Uint64,
     max_investment: pt.abi.Uint64,
-    txn: pt.abi.PaymentTransaction
+    txn: pt.abi.Transaction,
 ) -> pt.Expr:
     """
     Payment transaction from investor, investment must be within the min and max limits.
 
+    Arguments must be passed in their order, since this is ``pt.Subroutine`` which only accepts positional args.
+
     :param pt.abi.Uint64 min_investment: The minimum investment amount allowed.
     :param pt.abi.Uint64 max_investment: The maximum investment amount allowed.
     :param pt.abi.PaymentTransaction txn: The payment transaction containing investment details.
+    :rtype pt.Expr.:
     """
     return pt.Seq(
         pt.Assert(
-            txn.get().receiver() == app.state.escrow_address.get(),
             txn.get().type_enum() == pt.TxnType.Payment,
+            comment="Transaction type must be a Payment type."
+        ),
+        pt.Assert(
+            txn.get().receiver() == app.state.escrow_address.get(),
+            comment="Invalid receiver or transaction type."
+        ),
+        pt.Assert(
+            pt.Or(
+                txn.get().amount() >= min_investment.get(),
+                txn.get().amount() <= max_investment.get(),
+            ),
+            comment="Asset amount must be greater than or equal to min_investment"
+                    " and must be less than or equal to max_investment."
+        ),
+        pt.Return(txn.get().amount())
+    )
+
+
+# noinspection PyTypeChecker
+@pt.Subroutine(pt.TealType.uint64)
+def investor_usdc_transfer(
+    min_investment: pt.abi.Uint64,
+    max_investment: pt.abi.Uint64,
+    asset_id: pt.abi.Asset,
+    txn: pt.abi.Transaction
+) -> pt.Expr:
+    """
+    Payment transaction from investor, investment must be within the min and max limits.
+
+    Arguments must be passed in their order, since this is ``pt.Subroutine`` which only accepts positional args.
+
+    :param pt.abi.Uint64 min_investment: The minimum investment amount allowed.
+    :param pt.abi.Uint64 max_investment: The maximum investment amount allowed.
+    :param pt.abi.Uint64 asset_id: The unique ID of the asset.
+    :param pt.abi.PaymentTransaction txn: The payment transaction containing investment details.
+    :rtype pt.Expr:
+    """
+    return pt.Seq(
+        pt.Assert(
+            txn.get().type_enum() == pt.TxnType.AssetTransfer,
+            comment="Transaction type must be AssetTransfer type."
+        ),
+        pt.Assert(
+            asset_id.asset_id() == USDC_ASSET_ID,
+            comment="Invalid asset ID for USDC."
+        ),
+        pt.Assert(
+            txn.get().asset_receiver() == app.state.escrow_address.get(),
+            txn.get().xfer_asset() == asset_id.asset_id(),
             comment="Invalid receiver or transaction type."
         ),
         pt.Assert(
@@ -396,6 +444,7 @@ def investor_payment(
             comment="Asset amount must be greater than or equal to min_investment"
                     " and must be less than or equal to max_investment."
         ),
+        pt.Return(txn.get().asset_amount())
     )
 
 
@@ -404,7 +453,8 @@ def investor_payment(
 def invest(
     is_staking: pt.abi.Bool,
     project: pt.abi.Asset,
-    txn: pt.abi.PaymentTransaction
+    txn: pt.abi.Transaction,
+    investment_asset_id: pt.abi.Asset
 ) -> pt.Expr:
     """
     Executes an investment transaction for a project.
@@ -412,6 +462,7 @@ def invest(
     :param pt.abi.Bool is_staking: Indicates whether the investor is staking $VEST
     :param pt.abi.Asset project: The project (asset) ID to invest in.
     :param pt.abi.PaymentTransaction txn: The payment transaction for the investment.
+    :param pt.abi.Asset investment_asset_id: The unique ID to of the asset.
     :rtype: pt.Expr.
     """
     investor = Investor()
@@ -463,32 +514,52 @@ def invest(
         ),
         pt.Assert(
             project_total_amount_raised.get() < project_max_cap.get(),
-            comment="Total amount raised must be less than Max. cap"
+            comment="Total amount raised must be less than max. cap"
         ),
         pt.Assert(
             pt.Global.latest_timestamp() >= project_start_timestamp.get(),
             pt.Global.latest_timestamp() < project_end_timestamp.get(),
             comment="Project must be live and ongoing."
         ),
-        investor_payment(
-            min_investment=project_min_investment_per_user,
-            max_investment=project_max_investment_per_user,
-            txn=txn
+        pt.Assert(
+            pt.Or(
+                txn.get().type_enum() == pt.TxnType.Payment,
+                txn.get().type_enum() == pt.TxnType.AssetTransfer
+            ),
+            comment="Invalid transaction type. Must be of type Payment or AssetTransfer."
+        ),
+        (investor_investment_amount := pt.abi.Uint64()).set(pt.Int(0)),
+        pt.If(txn.get().xfer_asset() == pt.Int(0))
+        .Then(
+            investor_investment_amount.set(
+                investor_payment(
+                    project_min_investment_per_user,
+                    project_max_investment_per_user,
+                    txn
+                )
+            ),
+        ).Else(
+            investor_investment_amount.set(
+                investor_usdc_transfer(
+                    project_min_investment_per_user,
+                    project_max_investment_per_user,
+                    investment_asset_id,
+                    txn
+                )
+            )
         ),
         (investor_address := pt.abi.Address()).set(pt.Txn.sender()),
         (investor_project_id := pt.abi.Uint64()).set(project_id),
-        (investor_investment_amount := pt.abi.Uint64()).set(txn.get().amount()),
         (investor_asset_claim_timestamp := pt.abi.Uint64()).set(pt.Int(0)),
         (investor_claimed_ido_asset := pt.abi.Bool()).set(FALSE),
         (investor_reclaimed_investment := pt.abi.Bool()).set(FALSE),
 
-        (investor_asset_allocation := pt.abi.Uint64()).set(pt.Int(0)),
-
         #  Modify this, allocation should be set off-chain.
-        calculate_allocation_for_investor(
-            price_per_asset=project_price_per_asset,
-            investment_amount=investor_investment_amount,
-            output=investor_asset_allocation
+        (investor_asset_allocation := pt.abi.Uint64()).set(
+            calculate_allocation_for_investor(
+                investor_investment_amount,
+                project_price_per_asset,
+            )
         ),
         (investor_asset_allocation.set(investor_asset_allocation.get())),
         investor.set(
@@ -621,13 +692,15 @@ def claim_ido_asset(
 @app.external
 def reclaim_investment(
     project: pt.abi.Asset,
-    is_staking: pt.abi.Bool
+    is_staking: pt.abi.Bool,
+    investment_asset_id: pt.abi.Asset
 ) -> pt.Expr:
     """
     Allows investors to reclaim their investment.
 
     :param pt.abi.Asset project: Project (asset) ID to be claimed.
     :param is_staking: Flag to indicate whether investor is current staking $VEST.
+    :param investment_asset_id: The unique asset ID of investment (ALGO, USDC).
     :rtype: pt.Expr.
     """
     project_asset_id = project.asset_id()
@@ -681,13 +754,25 @@ def reclaim_investment(
             RECLAIM_WINDOW >= (pt.Global.latest_timestamp() - project_claim_timestamp.get()),
             comment="Claim must be within reclaim window."
         ),
-
-        pt.InnerTxnBuilder.Execute({
-            pt.TxnField.type_enum: pt.TxnType.Payment,
-            pt.TxnField.receiver: investor_address.get(),
-            pt.TxnField.amount: investor_investment_amount.get()
-        }),
-
+        pt.If(investment_asset_id.asset_id() == pt.Int(0))
+        .Then(
+            pt.InnerTxnBuilder.Execute({
+                pt.TxnField.type_enum: pt.TxnType.Payment,
+                pt.TxnField.receiver: investor_address.get(),
+                pt.TxnField.amount: investor_investment_amount.get(),
+            }),
+        ).Else(
+            pt.Assert(
+                investment_asset_id.asset_id() == USDC_ASSET_ID,
+                comment=f"Reclaim asset must be USDC asset ID: {USDC_ASSET_ID}"
+            ),
+            pt.InnerTxnBuilder.Execute({
+                pt.TxnField.type_enum: pt.TxnType.AssetTransfer,
+                pt.TxnField.asset_receiver: investor_address.get(),
+                pt.TxnField.asset_amount: investor_investment_amount.get(),
+                pt.TxnField.xfer_asset: investment_asset_id.asset_id()
+            }),
+        ),
         investor_investment_amount.set(pt.Int(0)),
         investor_asset_allocation.set(pt.Int(0)),
         investor_reclaimed_investment.set(TRUE),
@@ -775,19 +860,19 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
         ),
 
         (abi_launch_vest_fee := pt.abi.Uint64()).set(LAUNCH_VEST_FEE),
-        (amount_raised := pt.abi.Uint64()).set(pt.Int(0)),
-        calculate_proceeds_after_fee_deduction(
-            proceeds=project_total_amount_raised,
-            launch_vest_fee=abi_launch_vest_fee,
-            output=amount_raised
+        (amount_raised := pt.abi.Uint64()).set(
+            calculate_proceeds_after_fee_deduction(
+                project_total_amount_raised,
+                abi_launch_vest_fee
+            )
         ),
 
         (percentage := pt.abi.Uint64()).set(PERCENTAGE),
-        (disburse_amount := pt.abi.Uint64()).set(pt.Int(0)),
-        calculate_disbursement(
-            total_amount=amount_raised,
-            percentage=percentage,
-            output=disburse_amount
+        (disburse_amount := pt.abi.Uint64()).set(
+            calculate_disbursement(
+                amount_raised,
+                percentage
+            )
         ),
 
         pt.If(project_initiated_withdrawal.get() == FALSE)
@@ -846,7 +931,6 @@ def pause_project(project_id: pt.abi.Uint64) -> pt.Expr:
             app.state.pid_to_project[project_id_bytes].exists(),
             comment="Invalid project ID."
         ),
-
         (project := Project()).decode(app.state.pid_to_project[project_id_bytes].get()),
 
         (project_owner_address := pt.abi.Address()).set(project.owner_address),
@@ -911,7 +995,6 @@ def unpause_project(project_id: pt.abi.Uint64) -> pt.Expr:
             app.state.pid_to_project[project_id_bytes].exists(),
             comment="Invalid project ID."
         ),
-
         (project := Project()).decode(app.state.pid_to_project[project_id_bytes].get()),
 
         (project_owner_address := pt.abi.Address()).set(project.owner_address),
@@ -963,9 +1046,7 @@ def unpause_project(project_id: pt.abi.Uint64) -> pt.Expr:
 
 # noinspection PyTypeChecker
 @app.external(authorize=bk.Authorize.only_creator())
-def change_launchpad_admin(
-    new_admin_acct: pt.abi.Address
-) -> pt.Expr:
+def change_launchpad_admin(new_admin_acct: pt.abi.Address) -> pt.Expr:
     """
     Allows changing the admin account for the launchpad.
 

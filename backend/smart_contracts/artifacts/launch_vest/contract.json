@@ -3,7 +3,12 @@
     "methods": [
         {
             "name": "bootstrap",
-            "args": [],
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                }
+            ],
             "returns": {
                 "type": "void"
             },
@@ -110,9 +115,14 @@
                     "desc": "The project (asset) ID to invest in."
                 },
                 {
-                    "type": "pay",
+                    "type": "txn",
                     "name": "txn",
                     "desc": "The payment transaction for the investment."
+                },
+                {
+                    "type": "asset",
+                    "name": "investment_asset_id",
+                    "desc": "The unique ID to of the asset."
                 }
             ],
             "returns": {
@@ -151,6 +161,11 @@
                     "type": "bool",
                     "name": "is_staking",
                     "desc": "Flag to indicate whether investor is current staking $VEST."
+                },
+                {
+                    "type": "asset",
+                    "name": "investment_asset_id",
+                    "desc": "The unique asset ID of investment (ALGO, USDC)."
                 }
             ],
             "returns": {

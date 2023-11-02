@@ -1,12 +1,12 @@
 #pragma version 8
-intcblock 0 1 32 48 139 848 849 131 512 513
-bytecblock 0x 0x00 0x657363726f775f61646472657373 0x61646d696e5f61636374 0x151f7c75
+intcblock 0 1 32 48 139 848 849 131 10458941 512 513
+bytecblock 0x 0x657363726f775f61646472657373 0x00 0x61646d696e5f61636374 0x151f7c75
 txn NumAppArgs
 intc_0 // 0
 ==
 bnz main_l28
 txna ApplicationArgs 0
-pushbytes 0xbec76d87 // "bootstrap()void"
+pushbytes 0x34494d87 // "bootstrap(asset)void"
 ==
 bnz main_l27
 txna ApplicationArgs 0
@@ -22,7 +22,7 @@ pushbytes 0x33755ef0 // "deposit_ido_assets(axfer,asset)void"
 ==
 bnz main_l24
 txna ApplicationArgs 0
-pushbytes 0x4d8bcb19 // "invest(bool,asset,pay)void"
+pushbytes 0xbb7ae3a4 // "invest(bool,asset,txn,asset)void"
 ==
 bnz main_l23
 txna ApplicationArgs 0
@@ -30,7 +30,7 @@ pushbytes 0x2d388f26 // "claim_ido_asset(asset,bool)void"
 ==
 bnz main_l22
 txna ApplicationArgs 0
-pushbytes 0xc4bdcca7 // "reclaim_investment(asset,bool)void"
+pushbytes 0xfd796045 // "reclaim_investment(asset,bool,asset)void"
 ==
 bnz main_l21
 txna ApplicationArgs 0
@@ -67,7 +67,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub getprojectcaster_25
+callsub getprojectcaster_31
 intc_1 // 1
 return
 main_l16:
@@ -79,7 +79,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub getinvestorcaster_24
+callsub getinvestorcaster_30
 intc_1 // 1
 return
 main_l17:
@@ -91,7 +91,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub changelaunchpadadmincaster_23
+callsub changelaunchpadadmincaster_29
 intc_1 // 1
 return
 main_l18:
@@ -103,7 +103,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub unpauseprojectcaster_22
+callsub unpauseprojectcaster_28
 intc_1 // 1
 return
 main_l19:
@@ -115,7 +115,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub pauseprojectcaster_21
+callsub pauseprojectcaster_27
 intc_1 // 1
 return
 main_l20:
@@ -127,7 +127,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub withdrawamountraisedcaster_20
+callsub withdrawamountraisedcaster_26
 intc_1 // 1
 return
 main_l21:
@@ -139,7 +139,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub reclaiminvestmentcaster_19
+callsub reclaiminvestmentcaster_25
 intc_1 // 1
 return
 main_l22:
@@ -151,7 +151,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub claimidoassetcaster_18
+callsub claimidoassetcaster_24
 intc_1 // 1
 return
 main_l23:
@@ -163,7 +163,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub investcaster_17
+callsub investcaster_23
 intc_1 // 1
 return
 main_l24:
@@ -175,7 +175,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub depositidoassetscaster_16
+callsub depositidoassetscaster_22
 intc_1 // 1
 return
 main_l25:
@@ -187,7 +187,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub listprojectcaster_15
+callsub listprojectcaster_21
 intc_1 // 1
 return
 main_l26:
@@ -199,7 +199,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub fundescrowaddresscaster_14
+callsub fundescrowaddresscaster_20
 intc_1 // 1
 return
 main_l27:
@@ -211,7 +211,7 @@ intc_0 // 0
 !=
 &&
 assert
-callsub bootstrapcaster_13
+callsub bootstrapcaster_19
 intc_1 // 1
 return
 main_l28:
@@ -228,49 +228,126 @@ assert
 intc_1 // 1
 return
 
+// calculate_project_max_cap
+calculateprojectmaxcap_0:
+proto 2 1
+frame_dig -2
+frame_dig -1
+*
+retsub
+
+// calculate_allocation_for_investor
+calculateallocationforinvestor_1:
+proto 2 1
+frame_dig -2
+frame_dig -1
+>=
+// Investment amount cannot be lesser than asset price
+assert
+frame_dig -2
+frame_dig -1
+/
+retsub
+
+// calculate_proceeds_after_fee_deduction
+calculateproceedsafterfeededuction_2:
+proto 2 1
+frame_dig -2
+frame_dig -2
+frame_dig -1
+*
+pushint 100 // 100
+/
+-
+retsub
+
+// calculate_disbursement
+calculatedisbursement_3:
+proto 2 1
+frame_dig -1
+intc_0 // 0
+>
+assert
+frame_dig -1
+pushint 100 // 100
+<=
+assert
+frame_dig -1
+frame_dig -2
+*
+pushint 100 // 100
+/
+retsub
+
 // bootstrap
-bootstrap_0:
-proto 0 0
+bootstrap_4:
+proto 1 0
+txn Sender
+global CreatorAddress
+==
+// unauthorized
+assert
 bytec_3 // "admin_acct"
 bytec_0 // ""
 app_global_put
-bytec_2 // "escrow_address"
+bytec_1 // "escrow_address"
 bytec_0 // ""
 app_global_put
 bytec_3 // "admin_acct"
 global CreatorAddress
 app_global_put
-bytec_2 // "escrow_address"
+bytec_1 // "escrow_address"
 global CurrentApplicationAddress
 app_global_put
+bytec_1 // "escrow_address"
+app_global_get
+frame_dig -1
+txnas Assets
+asset_holding_get AssetBalance
+store 0
+intc_0 // 0
+==
+bz bootstrap_4_l2
+itxn_begin
+pushint 4 // axfer
+itxn_field TypeEnum
+intc_0 // 0
+itxn_field AssetAmount
+bytec_1 // "escrow_address"
+app_global_get
+itxn_field AssetReceiver
+frame_dig -1
+txnas Assets
+itxn_field XferAsset
+itxn_submit
+bootstrap_4_l2:
 retsub
 
 // fund_escrow_address
-fundescrowaddress_1:
+fundescrowaddress_5:
 proto 1 0
 frame_dig -1
 gtxns Amount
 intc_0 // 0
 >
-// Invalid amount, receiver or type_enum
+// Invalid amount, receiver or type_enum.
 assert
 frame_dig -1
 gtxns Receiver
-bytec_2 // "escrow_address"
-app_global_get
+global CurrentApplicationAddress
 ==
-// Invalid amount, receiver or type_enum
+// Invalid amount, receiver or type_enum.
 assert
 frame_dig -1
 gtxns TypeEnum
 intc_1 // pay
 ==
-// Invalid amount, receiver or type_enum
+// Invalid amount, receiver or type_enum.
 assert
 retsub
 
 // list_project
-listproject_2:
+listproject_6:
 proto 9 0
 bytec_0 // ""
 dup
@@ -281,7 +358,7 @@ dup
 frame_dig -9
 txnas Assets
 asset_params_get AssetTotal
-store 0
+store 1
 intc_0 // 0
 >
 // A valid asset ID must be provided
@@ -358,7 +435,7 @@ pushint 4 // axfer
 itxn_field TypeEnum
 intc_0 // 0
 itxn_field AssetAmount
-bytec_2 // "escrow_address"
+bytec_1 // "escrow_address"
 app_global_get
 itxn_field AssetReceiver
 frame_dig -9
@@ -435,7 +512,7 @@ concat
 frame_dig 4
 itob
 concat
-bytec_1 // 0x00
+bytec_2 // 0x00
 intc_0 // 0
 frame_dig 5
 setbit
@@ -471,7 +548,7 @@ box_put
 retsub
 
 // deposit_ido_assets
-depositidoassets_3:
+depositidoassets_7:
 proto 2 0
 bytec_0 // ""
 dup
@@ -486,11 +563,11 @@ frame_dig -1
 txnas Assets
 itob
 box_get
+store 3
 store 2
-store 1
-load 2
+load 3
 assert
-load 1
+load 2
 frame_bury 0
 frame_dig 0
 extract 0 32
@@ -508,7 +585,7 @@ intc_0 // 0
 assert
 frame_dig -2
 gtxns AssetReceiver
-bytec_2 // "escrow_address"
+bytec_1 // "escrow_address"
 app_global_get
 ==
 // Invalid asset_amount, asset_receiver, type_enum, xfer_asset or sender.
@@ -568,41 +645,37 @@ frame_dig 0
 pushint 82 // 82
 extract_uint64
 frame_bury 9
-frame_dig 0
-pushint 90 // 90
-extract_uint64
-frame_bury 10
 frame_dig -2
 gtxns AssetAmount
-frame_bury 11
+frame_bury 10
 frame_dig 0
 intc 5 // 848
 getbit
-frame_bury 12
+frame_bury 11
 frame_dig 0
 intc 6 // 849
 getbit
-frame_bury 13
+frame_bury 12
 frame_dig 0
 pushint 107 // 107
 extract_uint64
-frame_bury 14
+frame_bury 13
 frame_dig 0
 pushint 115 // 115
 extract_uint64
-frame_bury 15
+frame_bury 14
 frame_dig 0
 pushint 123 // 123
 extract_uint64
-frame_bury 16
+frame_bury 15
 frame_dig 0
 intc 7 // 131
 extract_uint64
-frame_bury 17
-frame_dig 11
+frame_bury 16
+frame_dig 10
 frame_dig 7
-*
-frame_bury 10
+callsub calculateprojectmaxcap_0
+frame_bury 17
 frame_dig 1
 frame_dig 2
 itob
@@ -635,19 +708,22 @@ concat
 frame_dig 9
 itob
 concat
+frame_dig 17
+itob
+concat
 frame_dig 10
 itob
 concat
-frame_dig 11
-itob
-concat
-bytec_1 // 0x00
+bytec_2 // 0x00
 intc_0 // 0
-frame_dig 12
+frame_dig 11
 setbit
 intc_1 // 1
-frame_dig 13
+frame_dig 12
 setbit
+concat
+frame_dig 13
+itob
 concat
 frame_dig 14
 itob
@@ -656,9 +732,6 @@ frame_dig 15
 itob
 concat
 frame_dig 16
-itob
-concat
-frame_dig 17
 itob
 concat
 frame_dig 20
@@ -676,55 +749,130 @@ frame_dig 0
 box_put
 retsub
 
+// investor_payment
+investorpayment_8:
+proto 3 1
+frame_dig -1
+gtxns TypeEnum
+intc_1 // pay
+==
+// Transaction type must be a Payment type.
+assert
+frame_dig -1
+gtxns Receiver
+bytec_1 // "escrow_address"
+app_global_get
+==
+// Invalid receiver or transaction type.
+assert
+frame_dig -1
+gtxns Amount
+frame_dig -3
+>=
+frame_dig -1
+gtxns Amount
+frame_dig -2
+<=
+||
+// Asset amount must be greater than or equal to min_investment and must be less than or equal to max_investment.
+assert
+frame_dig -1
+gtxns Amount
+retsub
+
+// investor_usdc_transfer
+investorusdctransfer_9:
+proto 4 1
+frame_dig -1
+gtxns TypeEnum
+pushint 4 // axfer
+==
+// Transaction type must be AssetTransfer type.
+assert
+frame_dig -2
+txnas Assets
+intc 8 // 10458941
+==
+// Invalid asset ID for USDC.
+assert
+frame_dig -1
+gtxns AssetReceiver
+bytec_1 // "escrow_address"
+app_global_get
+==
+// Invalid receiver or transaction type.
+assert
+frame_dig -1
+gtxns XferAsset
+frame_dig -2
+txnas Assets
+==
+// Invalid receiver or transaction type.
+assert
+frame_dig -1
+gtxns AssetAmount
+frame_dig -4
+>=
+frame_dig -1
+gtxns AssetAmount
+frame_dig -3
+<=
+||
+// Asset amount must be greater than or equal to min_investment and must be less than or equal to max_investment.
+assert
+frame_dig -1
+gtxns AssetAmount
+retsub
+
 // invest
-invest_4:
-proto 3 0
+invest_10:
+proto 4 0
 bytec_0 // ""
 dupn 2
 intc_0 // 0
 dupn 3
 bytec_0 // ""
 intc_0 // 0
-dupn 10
+dupn 11
 bytec_0 // ""
 intc_0 // 0
-dupn 7
+dupn 6
 bytec_0 // ""
 dup
 intc_0 // 0
 dup
 bytec_0 // ""
 dup
-frame_dig -3
+frame_dig -4
 intc_1 // 1
 ==
 // Investor must be staking $VEST.
 assert
-frame_dig -2
+frame_dig -3
 txnas Assets
 itob
 box_len
+store 5
 store 4
-store 3
-load 4
+load 5
 // A valid project ID must be provided
 assert
-frame_dig -2
+frame_dig -3
 txnas Assets
 itob
 box_get
+store 7
 store 6
-store 5
-load 6
+load 7
 assert
-load 5
+load 6
 frame_bury 1
-bytec_2 // "escrow_address"
+bytec_1 // "escrow_address"
 app_global_get
-frame_dig -2
+frame_dig -3
 txnas Assets
 asset_holding_get AssetBalance
-store 7
+store 8
 intc_0 // 0
 >
 // Project assets must be available in escrow.
@@ -808,7 +956,7 @@ assert
 frame_dig 16
 frame_dig 11
 <
-// Total amount raised must be less than Max. cap
+// Total amount raised must be less than max. cap
 assert
 global LatestTimestamp
 frame_dig 3
@@ -820,42 +968,47 @@ frame_dig 4
 <
 // Project must be live and ongoing.
 assert
-frame_dig -1
-gtxns Receiver
-bytec_2 // "escrow_address"
-app_global_get
-==
-// Invalid receiver or transaction type.
-assert
-frame_dig -1
+frame_dig -2
 gtxns TypeEnum
 intc_1 // pay
 ==
-// Invalid receiver or transaction type.
-assert
-frame_dig -1
-gtxns AssetAmount
-frame_dig 9
->=
-frame_dig -1
-gtxns AssetAmount
-frame_dig 10
-<=
+frame_dig -2
+gtxns TypeEnum
+pushint 4 // axfer
+==
 ||
-// Asset amount must be greater than or equal to min_investment and must be less than or equal to max_investment.
+// Invalid transaction type. Must be of type Payment or AssetTransfer.
 assert
-txn Sender
+intc_0 // 0
 frame_bury 19
-frame_dig 19
+frame_dig -2
+gtxns XferAsset
+intc_0 // 0
+==
+bnz invest_10_l2
+frame_dig 9
+frame_dig 10
+frame_dig -1
+frame_dig -2
+callsub investorusdctransfer_9
+frame_bury 19
+b invest_10_l3
+invest_10_l2:
+frame_dig 9
+frame_dig 10
+frame_dig -2
+callsub investorpayment_8
+frame_bury 19
+invest_10_l3:
+txn Sender
+frame_bury 20
+frame_dig 20
 len
 intc_2 // 32
 ==
 assert
-frame_dig -2
+frame_dig -3
 txnas Assets
-frame_bury 20
-frame_dig -1
-gtxns Amount
 frame_bury 21
 intc_0 // 0
 frame_bury 22
@@ -867,24 +1020,17 @@ intc_0 // 0
 !
 !
 frame_bury 24
-intc_0 // 0
-frame_bury 25
-frame_dig 21
+frame_dig 19
 frame_dig 8
->=
-// Investment amount cannot be lesser than asset price
-assert
-frame_dig 21
-frame_dig 8
-/
+callsub calculateallocationforinvestor_1
 frame_bury 25
 frame_dig 25
 frame_bury 25
-frame_dig 19
 frame_dig 20
+frame_dig 21
 itob
 concat
-frame_dig 21
+frame_dig 19
 itob
 concat
 frame_dig 25
@@ -893,7 +1039,7 @@ concat
 frame_dig 22
 itob
 concat
-bytec_1 // 0x00
+bytec_2 // 0x00
 intc_0 // 0
 frame_dig 23
 setbit
@@ -902,10 +1048,10 @@ frame_dig 24
 setbit
 concat
 frame_bury 0
-frame_dig 19
+frame_dig 20
 box_del
 pop
-frame_dig 19
+frame_dig 20
 frame_dig 0
 box_put
 frame_dig 12
@@ -913,7 +1059,7 @@ frame_dig 25
 -
 frame_bury 15
 frame_dig 16
-frame_dig 21
+frame_dig 19
 +
 frame_bury 16
 frame_dig 2
@@ -954,7 +1100,7 @@ concat
 frame_dig 12
 itob
 concat
-bytec_1 // 0x00
+bytec_2 // 0x00
 intc_0 // 0
 frame_dig 13
 setbit
@@ -977,12 +1123,12 @@ concat
 frame_dig 32
 concat
 frame_bury 1
-frame_dig -2
+frame_dig -3
 txnas Assets
 itob
 box_del
 pop
-frame_dig -2
+frame_dig -3
 txnas Assets
 itob
 frame_dig 1
@@ -990,7 +1136,7 @@ box_put
 retsub
 
 // claim_ido_asset
-claimidoasset_5:
+claimidoasset_11:
 proto 2 0
 bytec_0 // ""
 intc_0 // 0
@@ -1002,29 +1148,29 @@ bytec_0 // ""
 dup
 txn Sender
 box_len
+store 10
 store 9
-store 8
-load 9
+load 10
 // Invalid investor.
 assert
 frame_dig -2
 txnas Assets
 itob
 box_len
+store 12
 store 11
-store 10
-load 11
+load 12
 // Invalid project.
 assert
 frame_dig -2
 txnas Assets
 itob
 box_get
+store 14
 store 13
-store 12
-load 13
+load 14
 assert
-load 12
+load 13
 frame_bury 0
 frame_dig 0
 intc_3 // 48
@@ -1037,11 +1183,11 @@ frame_dig 1
 assert
 txn Sender
 box_get
+store 16
 store 15
-store 14
-load 15
+load 16
 assert
-load 14
+load 15
 frame_bury 2
 frame_dig 2
 extract 0 32
@@ -1063,11 +1209,11 @@ pushint 56 // 56
 extract_uint64
 frame_bury 7
 frame_dig 2
-intc 8 // 512
+intc 9 // 512
 getbit
 frame_bury 8
 frame_dig 2
-intc 9 // 513
+intc 10 // 513
 getbit
 frame_bury 9
 frame_dig -1
@@ -1130,7 +1276,7 @@ concat
 frame_dig 7
 itob
 concat
-bytec_1 // 0x00
+bytec_2 // 0x00
 intc_0 // 0
 frame_dig 8
 setbit
@@ -1148,8 +1294,8 @@ box_put
 retsub
 
 // reclaim_investment
-reclaiminvestment_6:
-proto 2 0
+reclaiminvestment_12:
+proto 3 0
 bytec_0 // ""
 dup
 intc_0 // 0
@@ -1160,37 +1306,37 @@ bytec_0 // ""
 dup
 txn Sender
 box_len
+store 18
 store 17
-store 16
-load 17
+load 18
 // Invalid investor.
 assert
-frame_dig -2
+frame_dig -3
 txnas Assets
 itob
 box_len
+store 20
 store 19
-store 18
-load 19
+load 20
 // Invalid project ID.
 assert
 txn Sender
 box_get
+store 22
 store 21
-store 20
-load 21
+load 22
 assert
-load 20
+load 21
 frame_bury 0
-frame_dig -2
+frame_dig -3
 txnas Assets
 itob
 box_get
+store 24
 store 23
-store 22
-load 23
+load 24
 assert
-load 22
+load 23
 frame_bury 1
 frame_dig 1
 intc_3 // 48
@@ -1212,7 +1358,7 @@ intc_3 // 48
 extract_uint64
 frame_bury 6
 frame_dig 0
-intc 8 // 512
+intc 9 // 512
 getbit
 frame_bury 7
 frame_dig 0
@@ -1220,20 +1366,20 @@ pushint 56 // 56
 extract_uint64
 frame_bury 8
 frame_dig 0
-intc 9 // 513
+intc 10 // 513
 getbit
 frame_bury 9
-bytec_2 // "escrow_address"
+bytec_1 // "escrow_address"
 app_global_get
-frame_dig -2
+frame_dig -3
 txnas Assets
 asset_holding_get AssetBalance
-store 24
+store 25
 intc_0 // 0
 >
 // Project assets must be available in escrow.
 assert
-frame_dig -1
+frame_dig -2
 intc_1 // 1
 ==
 // Investor must be staking $VEST.
@@ -1260,6 +1406,30 @@ frame_dig 2
 >=
 // Claim must be within reclaim window.
 assert
+frame_dig -1
+txnas Assets
+intc_0 // 0
+==
+bnz reclaiminvestment_12_l2
+frame_dig -1
+txnas Assets
+intc 8 // 10458941
+==
+// Reclaim asset must be USDC asset ID: (Int 10458941)
+assert
+itxn_begin
+pushint 4 // axfer
+itxn_field TypeEnum
+frame_dig 3
+itxn_field AssetReceiver
+frame_dig 5
+itxn_field AssetAmount
+frame_dig -1
+txnas Assets
+itxn_field XferAsset
+itxn_submit
+b reclaiminvestment_12_l3
+reclaiminvestment_12_l2:
 itxn_begin
 intc_1 // pay
 itxn_field TypeEnum
@@ -1268,6 +1438,7 @@ itxn_field Receiver
 frame_dig 5
 itxn_field Amount
 itxn_submit
+reclaiminvestment_12_l3:
 intc_0 // 0
 frame_bury 5
 intc_0 // 0
@@ -1289,7 +1460,7 @@ concat
 frame_dig 8
 itob
 concat
-bytec_1 // 0x00
+bytec_2 // 0x00
 intc_0 // 0
 frame_dig 7
 setbit
@@ -1307,7 +1478,7 @@ box_put
 retsub
 
 // withdraw_amount_raised
-withdrawamountraised_7:
+withdrawamountraised_13:
 proto 1 0
 bytec_0 // ""
 dup
@@ -1321,19 +1492,19 @@ dup
 frame_dig -1
 itob
 box_len
+store 27
 store 26
-store 25
-load 26
+load 27
 // Invalid project ID.
 assert
 frame_dig -1
 itob
 box_get
+store 29
 store 28
-store 27
-load 28
+load 29
 assert
-load 27
+load 28
 frame_bury 0
 frame_dig 0
 extract 0 32
@@ -1423,38 +1594,20 @@ frame_dig 4
 assert
 pushint 10 // 10
 frame_bury 18
-intc_0 // 0
-frame_bury 19
-frame_dig 15
 frame_dig 15
 frame_dig 18
-*
-pushint 100 // 100
-/
--
+callsub calculateproceedsafterfeededuction_2
 frame_bury 19
 pushint 10 // 10
 frame_bury 20
-intc_0 // 0
-frame_bury 21
-frame_dig 20
-intc_0 // 0
->
-assert
-frame_dig 20
-pushint 100 // 100
-<=
-assert
-frame_dig 20
 frame_dig 19
-*
-pushint 100 // 100
-/
+frame_dig 20
+callsub calculatedisbursement_3
 frame_bury 21
 frame_dig 13
 intc_0 // 0
 ==
-bnz withdrawamountraised_7_l2
+bnz withdrawamountraised_13_l2
 global LatestTimestamp
 frame_dig 17
 >
@@ -1477,8 +1630,8 @@ frame_dig 16
 frame_dig 21
 +
 frame_bury 16
-b withdrawamountraised_7_l3
-withdrawamountraised_7_l2:
+b withdrawamountraised_13_l3
+withdrawamountraised_13_l2:
 itxn_begin
 intc_1 // pay
 itxn_field TypeEnum
@@ -1495,7 +1648,7 @@ frame_dig 16
 frame_dig 21
 +
 frame_bury 16
-withdrawamountraised_7_l3:
+withdrawamountraised_13_l3:
 frame_dig 1
 frame_dig 2
 itob
@@ -1534,7 +1687,7 @@ concat
 frame_dig 11
 itob
 concat
-bytec_1 // 0x00
+bytec_2 // 0x00
 intc_0 // 0
 frame_dig 12
 setbit
@@ -1568,7 +1721,7 @@ box_put
 retsub
 
 // pause_project
-pauseproject_8:
+pauseproject_14:
 proto 1 0
 bytec_0 // ""
 dup
@@ -1587,19 +1740,19 @@ assert
 frame_dig -1
 itob
 box_len
+store 31
 store 30
-store 29
-load 30
+load 31
 // Invalid project ID.
 assert
 frame_dig -1
 itob
 box_get
+store 33
 store 32
-store 31
-load 32
+load 33
 assert
-load 31
+load 32
 frame_bury 0
 frame_dig 0
 extract 0 32
@@ -1719,7 +1872,7 @@ concat
 frame_dig 11
 itob
 concat
-bytec_1 // 0x00
+bytec_2 // 0x00
 intc_0 // 0
 frame_dig 12
 setbit
@@ -1753,7 +1906,7 @@ box_put
 retsub
 
 // unpause_project
-unpauseproject_9:
+unpauseproject_15:
 proto 1 0
 bytec_0 // ""
 dup
@@ -1772,19 +1925,19 @@ assert
 frame_dig -1
 itob
 box_len
+store 35
 store 34
-store 33
-load 34
+load 35
 // Invalid project ID.
 assert
 frame_dig -1
 itob
 box_get
+store 37
 store 36
-store 35
-load 36
+load 37
 assert
-load 35
+load 36
 frame_bury 0
 frame_dig 0
 extract 0 32
@@ -1904,7 +2057,7 @@ concat
 frame_dig 11
 itob
 concat
-bytec_1 // 0x00
+bytec_2 // 0x00
 intc_0 // 0
 frame_dig 12
 setbit
@@ -1938,7 +2091,7 @@ box_put
 retsub
 
 // change_launchpad_admin
-changelaunchpadadmin_10:
+changelaunchpadadmin_16:
 proto 1 0
 txn Sender
 global CreatorAddress
@@ -1951,42 +2104,48 @@ app_global_put
 retsub
 
 // get_investor
-getinvestor_11:
+getinvestor_17:
 proto 1 1
 bytec_0 // ""
 frame_dig -1
 box_get
+store 39
 store 38
-store 37
-load 38
+load 39
 assert
-load 37
+load 38
 frame_bury 0
 retsub
 
 // get_project
-getproject_12:
+getproject_18:
 proto 1 1
 bytec_0 // ""
 frame_dig -1
 itob
 box_get
+store 41
 store 40
-store 39
-load 40
+load 41
 assert
-load 39
+load 40
 frame_bury 0
 retsub
 
 // bootstrap_caster
-bootstrapcaster_13:
+bootstrapcaster_19:
 proto 0 0
-callsub bootstrap_0
+intc_0 // 0
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+frame_bury 0
+frame_dig 0
+callsub bootstrap_4
 retsub
 
 // fund_escrow_address_caster
-fundescrowaddresscaster_14:
+fundescrowaddresscaster_20:
 proto 0 0
 intc_0 // 0
 txn GroupIndex
@@ -1999,11 +2158,11 @@ intc_1 // pay
 ==
 assert
 frame_dig 0
-callsub fundescrowaddress_1
+callsub fundescrowaddress_5
 retsub
 
 // list_project_caster
-listprojectcaster_15:
+listprojectcaster_21:
 proto 0 0
 intc_0 // 0
 bytec_0 // ""
@@ -2045,11 +2204,11 @@ frame_dig 5
 frame_dig 6
 frame_dig 7
 frame_dig 8
-callsub listproject_2
+callsub listproject_6
 retsub
 
 // deposit_ido_assets_caster
-depositidoassetscaster_16:
+depositidoassetscaster_22:
 proto 0 0
 intc_0 // 0
 dup
@@ -2068,131 +2227,136 @@ pushint 4 // axfer
 assert
 frame_dig 0
 frame_dig 1
-callsub depositidoassets_3
+callsub depositidoassets_7
 retsub
 
 // invest_caster
-investcaster_17:
+investcaster_23:
+proto 0 0
+intc_0 // 0
+dupn 3
+txna ApplicationArgs 1
+intc_0 // 0
+pushint 8 // 8
+*
+getbit
+frame_bury 0
+txna ApplicationArgs 2
+intc_0 // 0
+getbyte
+frame_bury 1
+txna ApplicationArgs 3
+intc_0 // 0
+getbyte
+frame_bury 3
+txn GroupIndex
+intc_1 // 1
+-
+frame_bury 2
+frame_dig 0
+frame_dig 1
+frame_dig 2
+frame_dig 3
+callsub invest_10
+retsub
+
+// claim_ido_asset_caster
+claimidoassetcaster_24:
+proto 0 0
+intc_0 // 0
+dup
+txna ApplicationArgs 1
+intc_0 // 0
+getbyte
+frame_bury 0
+txna ApplicationArgs 2
+intc_0 // 0
+pushint 8 // 8
+*
+getbit
+frame_bury 1
+frame_dig 0
+frame_dig 1
+callsub claimidoasset_11
+retsub
+
+// reclaim_investment_caster
+reclaiminvestmentcaster_25:
 proto 0 0
 intc_0 // 0
 dupn 2
 txna ApplicationArgs 1
 intc_0 // 0
-pushint 8 // 8
-*
-getbit
+getbyte
 frame_bury 0
 txna ApplicationArgs 2
 intc_0 // 0
-getbyte
+pushint 8 // 8
+*
+getbit
 frame_bury 1
-txn GroupIndex
-intc_1 // 1
--
+txna ApplicationArgs 3
+intc_0 // 0
+getbyte
 frame_bury 2
-frame_dig 2
-gtxns TypeEnum
-intc_1 // pay
-==
-assert
 frame_dig 0
 frame_dig 1
 frame_dig 2
-callsub invest_4
-retsub
-
-// claim_ido_asset_caster
-claimidoassetcaster_18:
-proto 0 0
-intc_0 // 0
-dup
-txna ApplicationArgs 1
-intc_0 // 0
-getbyte
-frame_bury 0
-txna ApplicationArgs 2
-intc_0 // 0
-pushint 8 // 8
-*
-getbit
-frame_bury 1
-frame_dig 0
-frame_dig 1
-callsub claimidoasset_5
-retsub
-
-// reclaim_investment_caster
-reclaiminvestmentcaster_19:
-proto 0 0
-intc_0 // 0
-dup
-txna ApplicationArgs 1
-intc_0 // 0
-getbyte
-frame_bury 0
-txna ApplicationArgs 2
-intc_0 // 0
-pushint 8 // 8
-*
-getbit
-frame_bury 1
-frame_dig 0
-frame_dig 1
-callsub reclaiminvestment_6
+callsub reclaiminvestment_12
 retsub
 
 // withdraw_amount_raised_caster
-withdrawamountraisedcaster_20:
+withdrawamountraisedcaster_26:
 proto 0 0
 intc_0 // 0
 txna ApplicationArgs 1
 btoi
 frame_bury 0
 frame_dig 0
-callsub withdrawamountraised_7
+callsub withdrawamountraised_13
 retsub
 
 // pause_project_caster
-pauseprojectcaster_21:
+pauseprojectcaster_27:
 proto 0 0
 intc_0 // 0
 txna ApplicationArgs 1
 btoi
 frame_bury 0
 frame_dig 0
-callsub pauseproject_8
+callsub pauseproject_14
 retsub
 
 // unpause_project_caster
-unpauseprojectcaster_22:
+unpauseprojectcaster_28:
 proto 0 0
 intc_0 // 0
 txna ApplicationArgs 1
 btoi
 frame_bury 0
 frame_dig 0
-callsub unpauseproject_9
+callsub unpauseproject_15
 retsub
 
 // change_launchpad_admin_caster
-changelaunchpadadmincaster_23:
+changelaunchpadadmincaster_29:
 proto 0 0
 bytec_0 // ""
 txna ApplicationArgs 1
 frame_bury 0
 frame_dig 0
-callsub changelaunchpadadmin_10
+callsub changelaunchpadadmin_16
 retsub
 
 // get_investor_caster
-getinvestorcaster_24:
+getinvestorcaster_30:
 proto 0 0
 bytec_0 // ""
 dup
 txna ApplicationArgs 1
 frame_bury 1
 frame_dig 1
-callsub getinvestor_11
+callsub getinvestor_17
 frame_bury 0
 bytec 4 // 0x151f7c75
 frame_dig 0
@@ -2201,7 +2365,7 @@ log
 retsub
 
 // get_project_caster
-getprojectcaster_25:
+getprojectcaster_31:
 proto 0 0
 bytec_0 // ""
 intc_0 // 0
@@ -2209,7 +2373,7 @@ txna ApplicationArgs 1
 btoi
 frame_bury 1
 frame_dig 1
-callsub getproject_12
+callsub getproject_18
 frame_bury 0
 bytec 4 // 0x151f7c75
 frame_dig 0

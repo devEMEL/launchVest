@@ -1,5 +1,7 @@
+import base64
 import os.path
 import shutil
+import sys
 import time
 from pathlib import Path
 
@@ -45,7 +47,7 @@ TESTNET_ASSET_ID_T = 444276289
 NEW_TEST_ASSET = 463610258
 ASSET_PRICE = 1
 ASSET_DECIMAL = 6
-MIN_BUY = 1_000_000
+MIN_BUY = 10
 MAX_BUY = 5_000_000
 
 
@@ -109,19 +111,19 @@ def deploy(
     app_id = app_client.app_id
     app_addr = app_client.app_address
 
-    # # Bootstrap app
-    app_client.bootstrap()
-
     # Fund escrow account
     if algod_client.account_info(app_addr)['amount'] == 0:
         app_client.fund_escrow_address(
             txn=send_algos(
                 sender=deployer,
                 receiver=app_addr,
-                amt=algos_to_microalgos(2),
+                amt=algos_to_microalgos(3),
                 sp=algod_client.suggested_params()
             )
         )
+
+    # # Bootstrap app
+    app_client.bootstrap(asset=10458941)
 
     project_owner_account = Account(private_key=mnemonic.to_private_key(os.getenv("PROJECT_OWNER_MNEMONIC")))
     project_id = project_asset_id = TESTNET_ASSET_ID_T
@@ -155,7 +157,7 @@ def deploy(
         start_timestamp=project_start_timestamp,
         end_timestamp=project_end_timestamp,
         claim_timestamp=claim_timestamp,
-        price_per_asset=int(asset_price_with_decimals(ASSET_PRICE, ASSET_DECIMAL)),
+        price_per_asset=ASSET_PRICE,
         min_investment_per_investor=MIN_BUY,
         max_investment_per_investor=MAX_BUY,
         vesting_schedule=60,
@@ -177,7 +179,7 @@ def deploy(
         txn=deposit_ido_assets(
             sender=project_owner_account,
             receiver=app_addr,
-            amt=int(asset_price_with_decimals(ASSET_PRICE, ASSET_DECIMAL)),
+            amt=20_000,
             asset_id=project_asset_id,
             sp=algod_client.suggested_params()
         ),
@@ -208,12 +210,21 @@ def deploy(
     investor1_account_client.invest(
         is_staking=True,
         project=project_id,
+        investment_asset_id=10458941,
         txn=TransactionWithSigner(
-            txn=PaymentTxn(
+            # txn=PaymentTxn(
+            #     sender=investor1_account.address,
+            #     sp=algod_client.suggested_params(),
+            #     receiver=app_addr,
+            #     amt=MIN_BUY
+            # ),
+            # signer=investor1_account.signer
+            txn=AssetTransferTxn(
                 sender=investor1_account.address,
                 sp=algod_client.suggested_params(),
                 receiver=app_addr,
-                amt=MIN_BUY
+                amt=MIN_BUY,
+                index=10458941
             ),
             signer=investor1_account.signer
         ),
@@ -242,16 +253,18 @@ def deploy(
     print(response.return_value)
 
     time.sleep(70)
-    investor1_account_client.claim_ido_asset(
+    investor1_account_client.reclaim_investment(
+        project=project_id,
         is_staking=True,
-        project=project_asset_id,
+        investment_asset_id=10458941,
         transaction_parameters=TransactionParameters(
             boxes=[
                 (app_id, project_id.to_bytes(8, "big")),
                 (app_id, encoding.decode_address(investor1_account.address)),
-            ]
+            ],
         )
     )
+
     response = investor1_account_client.get_investor(
         investor=investor1_account.address,
         transaction_parameters=TransactionParameters(
@@ -260,12 +273,6 @@ def deploy(
     )
     print(response.return_value)
 
-    project_owner_client.withdraw_amount_raised(
-        project_id=project_id,
-        transaction_parameters=TransactionParameters(
-            boxes=[(app_id, project_id.to_bytes(8, "big"))]
-        )
-    )
     response = project_owner_client.get_project(
         project_id=project_id,
         transaction_parameters=TransactionParameters(
@@ -273,6 +280,38 @@ def deploy(
         )
     )
     print(response.return_value)
+
+    # investor1_account_client.claim_ido_asset(
+    #     is_staking=True,
+    #     project=project_asset_id,
+    #     transaction_parameters=TransactionParameters(
+    #         boxes=[
+    #             (app_id, project_id.to_bytes(8, "big")),
+    #             (app_id, encoding.decode_address(investor1_account.address)),
+    #         ]
+    #     )
+    # )
+    # response = investor1_account_client.get_investor(
+    #     investor=investor1_account.address,
+    #     transaction_parameters=TransactionParameters(
+    #         boxes=[(app_id, encoding.decode_address(investor1_account.address))]
+    #     )
+    # )
+    # print(response.return_value)
+    #
+    # project_owner_client.withdraw_amount_raised(
+    #     project_id=project_id,
+    #     transaction_parameters=TransactionParameters(
+    #         boxes=[(app_id, project_id.to_bytes(8, "big"))]
+    #     )
+    # )
+    # response = project_owner_client.get_project(
+    #     project_id=project_id,
+    #     transaction_parameters=TransactionParameters(
+    #         boxes=[(app_id, project_id.to_bytes(8, "big"))]
+    #     )
+    # )
+    # print(response.return_value)
 
 
 def execute_deployment(network: str = "localnet") -> None:
@@ -300,6 +339,7 @@ def execute_deployment(network: str = "localnet") -> None:
             config=algokit_utils.get_algonode_config(network="testnet", config="indexer", token="")
         )
         deployer = Account(private_key=mnemonic.to_private_key(os.getenv("DEPLOYER_MNEMONIC")))
+        # deployer = Account(private_key=mnemonic.to_private_key(os.getenv("PROJECT_OWNER_MNEMONIC")))
 
     # deploy(
     #     algod_client=algod_client,
