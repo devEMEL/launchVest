@@ -371,17 +371,12 @@ assert
 frame_dig -3
 intc_0 // 0
 >
-// Min. and max. investment must be greater than 0
+// Min. must be greater than 0, and max investment must be greater than min. investment.
 assert
 frame_dig -2
-intc_0 // 0
->
-// Min. and max. investment must be greater than 0
-assert
 frame_dig -3
-frame_dig -2
-<
-// Min. investment must be lesser than max. investment
+>
+// Min. must be greater than 0, and max investment must be greater than min. investment.
 assert
 frame_dig -7
 global LatestTimestamp
