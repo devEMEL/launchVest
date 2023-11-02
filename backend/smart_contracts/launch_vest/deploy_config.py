@@ -324,7 +324,7 @@ def execute_deployment(network: str = "localnet") -> None:
 
     if os.path.exists(artifacts_path):
         shutil.rmtree(artifacts_path)
-    build(Path(f"{artifacts_path}/{vest_stake.name}"), vest_stake)
+    # build(Path(f"{artifacts_path}/{vest_stake.name}"), vest_stake)
     build(Path(f"{artifacts_path}/{launch_vest.name}"), launch_vest)
 
     if network == "localnet":
@@ -341,12 +341,12 @@ def execute_deployment(network: str = "localnet") -> None:
         deployer = Account(private_key=mnemonic.to_private_key(os.getenv("DEPLOYER_MNEMONIC")))
         # deployer = Account(private_key=mnemonic.to_private_key(os.getenv("PROJECT_OWNER_MNEMONIC")))
 
-    deploy(
-        algod_client=algod_client,
-        indexer_client=indexer_client,
-        app_spec=vest_stake.build(),
-        deployer=deployer
-    )
+    # deploy(
+    #     algod_client=algod_client,
+    #     indexer_client=indexer_client,
+    #     app_spec=vest_stake.build(),
+    #     deployer=deployer
+    # )
     deploy(
         algod_client=algod_client,
         indexer_client=indexer_client,
