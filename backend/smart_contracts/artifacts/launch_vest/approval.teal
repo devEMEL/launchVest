@@ -744,14 +744,14 @@ frame_dig 0
 box_put
 retsub
 
-// investor_payment
-investorpayment_8:
+// investor_algo_payment
+investoralgopayment_8:
 proto 3 1
 frame_dig -1
 gtxns TypeEnum
 intc_1 // pay
 ==
-// Transaction type must be a Payment type.
+// Transaction type must be Payment.
 assert
 frame_dig -1
 gtxns Receiver
@@ -769,20 +769,20 @@ gtxns Amount
 frame_dig -2
 <=
 ||
-// Asset amount must be greater than or equal to min_investment and must be less than or equal to max_investment.
+// Asset amount must be greater or equal to min_investment and must be less than or equal to max_investment.
 assert
 frame_dig -1
 gtxns Amount
 retsub
 
-// investor_usdc_transfer
-investorusdctransfer_9:
+// investor_usdc_payment
+investorusdcpayment_9:
 proto 4 1
 frame_dig -1
 gtxns TypeEnum
 pushint 4 // axfer
 ==
-// Transaction type must be AssetTransfer type.
+// Transaction type must be AssetTransfer.
 assert
 frame_dig -2
 txnas Assets
@@ -813,7 +813,7 @@ gtxns AssetAmount
 frame_dig -3
 <=
 ||
-// Asset amount must be greater than or equal to min_investment and must be less than or equal to max_investment.
+// Asset amount must be greater or equal to min_investment and must be less than or equal to max_investment.
 assert
 frame_dig -1
 gtxns AssetAmount
@@ -985,14 +985,14 @@ frame_dig 9
 frame_dig 10
 frame_dig -1
 frame_dig -2
-callsub investorusdctransfer_9
+callsub investorusdcpayment_9
 frame_bury 19
 b invest_10_l3
 invest_10_l2:
 frame_dig 9
 frame_dig 10
 frame_dig -2
-callsub investorpayment_8
+callsub investoralgopayment_8
 frame_bury 19
 invest_10_l3:
 txn Sender

@@ -193,7 +193,7 @@ def list_project(
     Lists a new IDO Project on LaunchVest.
 
     :param pt.abi.Asset asset_id: The unique identifier of the asset.
-    :param image_url: Project image url.
+    :param image_url: The project image url.
     :param pt.abi.Uint64 start_timestamp: The timestamp when the project starts.
     :param pt.abi.Uint64 end_timestamp: The timestamp when the project ends.
     :param pt.abi.Uint64 claim_timestamp: The timestamp for asset claiming.
@@ -367,7 +367,7 @@ def deposit_ido_assets(
 
 # noinspection PyTypeChecker
 @pt.Subroutine(pt.TealType.uint64)
-def investor_payment(
+def investor_algo_payment(
     min_investment: pt.abi.Uint64,
     max_investment: pt.abi.Uint64,
     txn: pt.abi.Transaction,
@@ -385,7 +385,7 @@ def investor_payment(
     return pt.Seq(
         pt.Assert(
             txn.get().type_enum() == pt.TxnType.Payment,
-            comment="Transaction type must be a Payment type."
+            comment="Transaction type must be Payment."
         ),
         pt.Assert(
             txn.get().receiver() == app.state.escrow_address.get(),
@@ -396,7 +396,7 @@ def investor_payment(
                 txn.get().amount() >= min_investment.get(),
                 txn.get().amount() <= max_investment.get(),
             ),
-            comment="Asset amount must be greater than or equal to min_investment"
+            comment="Asset amount must be greater or equal to min_investment"
                     " and must be less than or equal to max_investment."
         ),
         pt.Return(txn.get().amount())
@@ -405,7 +405,7 @@ def investor_payment(
 
 # noinspection PyTypeChecker
 @pt.Subroutine(pt.TealType.uint64)
-def investor_usdc_transfer(
+def investor_usdc_payment(
     min_investment: pt.abi.Uint64,
     max_investment: pt.abi.Uint64,
     asset_id: pt.abi.Asset,
@@ -425,7 +425,7 @@ def investor_usdc_transfer(
     return pt.Seq(
         pt.Assert(
             txn.get().type_enum() == pt.TxnType.AssetTransfer,
-            comment="Transaction type must be AssetTransfer type."
+            comment="Transaction type must be AssetTransfer."
         ),
         pt.Assert(
             asset_id.asset_id() == USDC_ASSET_ID,
@@ -441,7 +441,7 @@ def investor_usdc_transfer(
                 txn.get().asset_amount() >= min_investment.get(),
                 txn.get().asset_amount() <= max_investment.get(),
             ),
-            comment="Asset amount must be greater than or equal to min_investment"
+            comment="Asset amount must be greater or equal to min_investment"
                     " and must be less than or equal to max_investment."
         ),
         pt.Return(txn.get().asset_amount())
@@ -532,7 +532,7 @@ def invest(
         pt.If(txn.get().xfer_asset() == pt.Int(0))
         .Then(
             investor_investment_amount.set(
-                investor_payment(
+                investor_algo_payment(
                     project_min_investment_per_user,
                     project_max_investment_per_user,
                     txn
@@ -540,7 +540,7 @@ def invest(
             ),
         ).Else(
             investor_investment_amount.set(
-                investor_usdc_transfer(
+                investor_usdc_payment(
                     project_min_investment_per_user,
                     project_max_investment_per_user,
                     investment_asset_id,

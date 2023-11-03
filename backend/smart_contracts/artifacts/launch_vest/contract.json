@@ -39,7 +39,7 @@
                 {
                     "type": "string",
                     "name": "image_url",
-                    "desc": "Project image url."
+                    "desc": "The project image url."
                 },
                 {
                     "type": "uint64",
