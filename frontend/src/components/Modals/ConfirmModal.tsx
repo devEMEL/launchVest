@@ -1,10 +1,14 @@
 import { useDispatch, useSelector } from 'react-redux'
 import { hideConfirmModal } from '../../services/features/confirmModal/confirmModalSlice'
 import { RootState } from '../../services/store/store'
+import { useSnackbar } from 'notistack'
+import { useState } from 'react'
 
 const ConfirmModal = ({ text, txn }) => {
+  const [loading, setLoading] = useState<boolean>(false)
   const { showModal } = useSelector((store: RootState) => store.confirmModal)
   const dispatch = useDispatch()
+  const { enqueueSnackbar } = useSnackbar()
   return (
     <div>
       {showModal && (

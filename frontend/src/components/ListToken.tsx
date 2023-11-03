@@ -22,13 +22,14 @@ const PER_BYTE_MBR = 0.0004e6
 const ListToken = () => {
   const [appId, setAppId] = useState<number>(466175126)
   const [assetId, setAssetId] = useState<bigint>(0n)
-  const [startTimestamp, setStartTimestamp] = useState<bigint>(0n)
-  const [endTimestamp, setEndTimestamp] = useState<bigint>(0n)
-  const [claimTimestamp, setClaimTimestamp] = useState<bigint>(0n)
+  const [startTimestamp, setStartTimestamp] = useState<string>('')
+  const [endTimestamp, setEndTimestamp] = useState<string>('')
+  const [claimTimestamp, setClaimTimestamp] = useState<string>('')
   const [assetPrice, setAssetPrice] = useState<bigint>(0n)
   const [minimumBuy, setMinimumBuy] = useState<bigint>(0n)
   const [maximumBuy, setMaximumBuy] = useState<bigint>(0n)
   const [imageURL, setImageURL] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
 
   const [vestingSchedule, setVestingSchedule] = useState<bigint>(QUATERLY)
 
@@ -98,44 +99,66 @@ const ListToken = () => {
   //     return _result;
   // }
 
+  const toTimestamp = (strDate: string) => {
+    const dt = Date.parse(strDate)
+    return dt / 1000
+  }
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    // if (!(assetId && startTimestamp && endTimestamp && claimTimestamp && assetPrice && minimumBuy && maximumBuy && imageURL)) return
+    setLoading(true)
 
-    if (!(assetId && startTimestamp && endTimestamp && claimTimestamp && assetPrice && minimumBuy && maximumBuy && imageURL)) return
-    // const tokenKey = algosdk.bigIntToBytes(Number(assetId), 8)
-    const tokenKey = algosdk.encodeUint64(BigInt(assetId))
-    const tupleType = algosdk.ABIType.from('(uint64,uint64,uint64,uint64,uint64,uint64,uint64)')
-    const encodedTuple = tupleType.encode([
-      BigInt(assetId),
-      BigInt(startTimestamp),
-      BigInt(endTimestamp),
-      BigInt(claimTimestamp),
-      BigInt(assetPrice),
-      BigInt(maximumBuy),
-      BigInt(minimumBuy),
-    ])
-    const costTokenBox = PER_BOX_MBR + PER_BYTE_MBR * (8 + encodedTuple.byteLength * 2)
-    console.log(costTokenBox)
-    await launchVestClient.appClient.fundAppAccount(algokit.microAlgos(costTokenBox + 400_000))
+    try {
+      const _startTimestamp = toTimestamp(startTimestamp)
+      const _endTimestamp = toTimestamp(endTimestamp)
+      const _claimTimestamp = toTimestamp(claimTimestamp)
 
-    const listToken = await launchVestClient.listProject(
-      {
-        asset_id: BigInt(assetId),
-        image_url: String(imageURL),
-        start_timestamp: BigInt(startTimestamp),
-        end_timestamp: BigInt(endTimestamp),
-        claim_timestamp: BigInt(claimTimestamp),
-        price_per_asset: BigInt(assetPrice),
-        max_investment_per_investor: BigInt(maximumBuy),
-        min_investment_per_investor: BigInt(minimumBuy),
-        vesting_schedule: BigInt(vestingSchedule),
-      },
-      {
-        boxes: [tokenKey],
-        sendParams: { fee: algokit.microAlgos(200_000) },
-      },
-    )
-    console.log(listToken)
+      if (!(assetId && startTimestamp && endTimestamp && claimTimestamp && assetPrice && minimumBuy && maximumBuy && imageURL)) {
+        enqueueSnackbar(`Error: Make sure all fields are set.`, { variant: 'error' })
+        return
+      } else {
+        // const tokenKey = algosdk.bigIntToBytes(Number(assetId), 8)
+        const tokenKey = algosdk.encodeUint64(BigInt(assetId))
+        const tupleType = algosdk.ABIType.from('(uint64,uint64,uint64,uint64,uint64,uint64,uint64)')
+        const encodedTuple = tupleType.encode([
+          BigInt(assetId),
+          BigInt(_startTimestamp),
+          BigInt(_endTimestamp),
+          BigInt(_claimTimestamp),
+          BigInt(assetPrice),
+          BigInt(maximumBuy),
+          BigInt(minimumBuy),
+        ])
+        const costTokenBox = PER_BOX_MBR + PER_BYTE_MBR * (8 + encodedTuple.byteLength * 2)
+        console.log(costTokenBox)
+        await launchVestClient.appClient.fundAppAccount(algokit.microAlgos(costTokenBox + 400_000))
+
+        const listToken = await launchVestClient.listProject(
+          {
+            asset_id: BigInt(assetId),
+            image_url: String(imageURL),
+            start_timestamp: BigInt(_startTimestamp),
+            end_timestamp: BigInt(_endTimestamp),
+            claim_timestamp: BigInt(_claimTimestamp),
+            price_per_asset: BigInt(assetPrice),
+            max_investment_per_investor: BigInt(maximumBuy),
+            min_investment_per_investor: BigInt(minimumBuy),
+            vesting_schedule: BigInt(vestingSchedule),
+          },
+          {
+            boxes: [tokenKey],
+            sendParams: { fee: algokit.microAlgos(200_000) },
+          },
+        )
+        console.log(listToken)
+        enqueueSnackbar(`Project Listed successfully`)
+      }
+    } catch (e) {
+      enqueueSnackbar(`Error listing project: ${(e as Error).message}`, { variant: 'error' })
+      setLoading(false)
+      return
+    }
   }
   return (
     <div className="max-w-[60%] w-[100%] mx-auto">
@@ -165,12 +188,12 @@ const ListToken = () => {
             </label>
             <div className="mt-3">
               <input
-                type="text"
+                type="datetime-local"
                 name="start__timestamp"
                 id="start__timestamp"
                 className="w-[100%] h-[50px] text-[16px] p-5 border-2 outline-0 bg-[#f8f6fe] rounded-lg "
                 onChange={(e) => {
-                  setStartTimestamp(e.target.value as unknown as bigint)
+                  setStartTimestamp(e.target.value as unknown as string)
                 }}
               />
             </div>
@@ -182,12 +205,12 @@ const ListToken = () => {
             </label>
             <div className="mt-3">
               <input
-                type="text"
+                type="datetime-local"
                 name="end__timestamp"
                 id="end__timestamp"
                 className="w-[100%] h-[50px] text-[16px] p-5 border-2 outline-0 bg-[#f8f6fe] rounded-lg "
                 onChange={(e) => {
-                  setEndTimestamp(e.target.value as unknown as bigint)
+                  setEndTimestamp(e.target.value as unknown as string)
                 }}
               />
             </div>
@@ -199,12 +222,12 @@ const ListToken = () => {
             </label>
             <div className="mt-3">
               <input
-                type="text"
+                type="datetime-local"
                 name="claim__timestamp"
                 id="claim__timestamp"
                 className="w-[100%] h-[50px] text-[16px] p-5 border-2 outline-0 bg-[#f8f6fe] rounded-lg "
                 onChange={(e) => {
-                  setClaimTimestamp(e.target.value as unknown as bigint)
+                  setClaimTimestamp(e.target.value as unknown as string)
                 }}
               />
             </div>
@@ -263,7 +286,8 @@ const ListToken = () => {
 
           <div className="mb-5">
             <label htmlFor="image_url" className="text-2xl">
-              Image URL <span className='text-[15px]'>(ipfs/&#123;CID&#125; e.g ipfs://QmVoqUN21MPm91XffyBcVWQhemSLd1WjKY2a8Zr5WJDA9e)</span>
+              Image URL{' '}
+              <span className="text-[15px]">(ipfs/&#123;CID&#125; e.g ipfs://QmVoqUN21MPm91XffyBcVWQhemSLd1WjKY2a8Zr5WJDA9e)</span>
             </label>
             <div className="mt-3">
               <input
@@ -315,7 +339,7 @@ const ListToken = () => {
             }}
             className="flex justify-center items-center my-10 mx-auto"
           >
-            <button
+            <button type='button'
               onClick={() => {
                 setVestingSchedule(QUATERLY)
               }}
@@ -324,7 +348,7 @@ const ListToken = () => {
                 3 months
               </div>
             </button>
-            <button
+            <button type='button'
               onClick={() => {
                 setVestingSchedule(HALF_A_YEAR)
               }}
@@ -333,7 +357,7 @@ const ListToken = () => {
                 6 months
               </div>
             </button>
-            <button
+            <button type='button'
               onClick={() => {
                 setVestingSchedule(YEARLY)
               }}
@@ -348,7 +372,7 @@ const ListToken = () => {
             type="submit"
             className="w-[100%] h-[50px] border-2 outline-0 rounded-full bg-[#000000] text-[16px] text-[#ffffff] font-bold shadow-lg shadow-indigo-500/40"
           >
-            Submit
+            {loading  ? <div className="loading loading-spinner" /> : 'submit'}
           </button>
         </form>
       </div>

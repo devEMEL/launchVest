@@ -55,7 +55,7 @@ export default function App() {
   return (
     <SnackbarProvider maxSnack={3}>
       <WalletProvider value={walletProviders}>
-        <div className="w-full h-full">
+        <div className="w-full h-full font-Montserrat">
           {/* NAVBAR */}
           <Navbar />
 

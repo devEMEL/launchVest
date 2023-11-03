@@ -22,6 +22,7 @@ const Stake = () => {
   const dispatch = useDispatch()
   const [amount, setAmount] = useState<bigint>(0n)
   const [stakeType, setStakeType] = useState<number>(0)
+  const [loading, setLoading] = useState<boolean>(false)
 
   const [stakeDuration, setStakeDuration] = useState<bigint>(0n)
 
@@ -81,16 +82,30 @@ const Stake = () => {
 
   const stakeTxnAction = async () => {
     // on error alert ('Error staking! Ensure you have enough funds or are not currently staking')
+    setLoading(true)
     await stakeTxn()
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err))
+      .then(() => {
+        enqueueSnackbar(`Staked successfully.`, { variant: 'success' })
+        setLoading(false)
+      })
+      .catch((err) => {
+        enqueueSnackbar(`Error staking: ${(err as Error).message}`, { variant: 'error' })
+        setLoading(false)
+      })
   }
 
   const unstakeTxnAction = async () => {
     // on error alert ('Error staking! Ensure you have enough funds or are not currently staking')
+    setLoading(true)
     await unstakeTxn()
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err))
+      .then(() => {
+        enqueueSnackbar(`Unstaked successfully.`, { variant: 'success' })
+        setLoading(false)
+      })
+      .catch((err) => {
+        enqueueSnackbar(`Error unstaking: ${(err as Error).message}`, { variant: 'error' })
+        setLoading(false)
+      })
   }
 
   return (
@@ -179,7 +194,7 @@ const Stake = () => {
             <div
               id="_1year"
               ref={_1year}
-              className="bg-black text-[26px] text-white mr-20 py-10 px-20 hover:text-[30px] hover:font-bold capitalize "
+              className="bg-black text-[26px] text-white mr-20 py-10 px-20 hover:text-[30px] hover:font-bold capitalize"
             >
               1 year
             </div>
@@ -193,8 +208,8 @@ const Stake = () => {
             Number(amount) == 0 || Number(stakeDuration) == 0
               ? () => {
                   // alert error
-                  console.log('no duration selected')
-                  return
+                  console.log('no duration selected');
+                  enqueueSnackbar(`Error staking, make sure amount and duration are selected:`, { variant: 'error' })
                 }
               : () => {
                   dispatch(showConfirmModal())

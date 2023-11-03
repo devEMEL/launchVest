@@ -180,18 +180,30 @@ const ProjectPage = () => {
 
   const buyTxnAction = async () => {
     await buyTxn()
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err))
+      .then(() => {
+        enqueueSnackbar(`Presale purchase successfully.`, { variant: 'success' })
+      })
+      .catch((err) => {
+        enqueueSnackbar(`presale purchase failed: ${(err as Error).message}`, { variant: 'error' })
+      })
   }
   const claimTxnAction = async () => {
     await claimTxn()
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err))
+      .then(() => {
+        enqueueSnackbar(`Claimed successfully.`, { variant: 'success' })
+      })
+      .catch((err) => {
+        enqueueSnackbar(`Claiming failed: ${(err as Error).message}`, { variant: 'error' })
+      })
   }
   const reclaimTxnAction = async () => {
     await reclaimTxn()
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err))
+      .then(() => {
+        enqueueSnackbar(`Reclaimed successfully.`, { variant: 'success' })
+      })
+      .catch((err) => {
+        enqueueSnackbar(`Reclaiming failed: ${(err as Error).message}`, { variant: 'error' })
+      })
   }
 
   return (
