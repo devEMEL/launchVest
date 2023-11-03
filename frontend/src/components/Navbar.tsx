@@ -2,6 +2,7 @@ import { useWallet } from '@txnlab/use-wallet'
 import { useDispatch } from 'react-redux'
 import { showConnectModal } from '../services/features/connectModal/connectModalSlice'
 import { ellipseAddress } from '../utils/ellipseAddress'
+import { Link } from 'react-router-dom'
 
 const Navbar = () => {
   const dispatch = useDispatch()
@@ -18,10 +19,19 @@ const Navbar = () => {
   }
 
   return (
-    <nav className="max-w-[90%] w-[100%] mx-auto py-5 capitalize bg-white text-black w-full">
+    <nav className="max-w-[90%] w-[100%] mx-auto py-5 capitalize bg-white text-black w-full mb-10">
       <div className="flex justify-between items-center">
-        <div className="text-[40px]">LaunchVest</div>
-        <div className="flex items-center">
+        <div className="text-[40px]"><Link to="/">LaunchVest</Link></div>
+        <div className="">
+          <button className="capitalize mr-5 pb-1 border-b-2 border-black">
+            <Link to="/list-project">list project</Link>
+          </button>
+          <button className="capitalize mr-5 pb-1 border-b-2 border-black">
+            <Link to="/stake">Stake</Link>
+          </button>
+          <button className="capitalize mr-5 pb-1 border-b-2 border-black">
+            <Link to="/projects">projects</Link>
+          </button>
           {activeAccount && (
             <button className="capitalize bg-white text-black py-4 px-10 rounded-full">{ellipseAddress(activeAddress)}</button>
           )}

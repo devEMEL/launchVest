@@ -7,6 +7,7 @@ import { useSnackbar } from 'notistack'
 import algosdk from 'algosdk'
 import Project from './Project'
 
+
 const projects_ = [
   {
     'asset id': 5,
@@ -50,7 +51,7 @@ const projects_ = [
 ]
 
 const Projects = () => {
-  const [appId, setAppId] = useState<number>(0)
+  const [appId, setAppId] = useState<number>(466175126)
   const [projects, setProjects] = useState<Array<object>>([])
   const { enqueueSnackbar } = useSnackbar()
   const { signer, activeAddress } = useWallet()
@@ -74,8 +75,6 @@ const Projects = () => {
   )
 
   const handleShowProjects = async () => {
-    console.log('handleShowProjects')
-
     let projectsArr = []
     for (let _box of await launchVestClient.appClient.getBoxNames()) {
       let result = await launchVestClient.appClient.getBoxValue(_box)
@@ -85,7 +84,8 @@ const Projects = () => {
       )
       const tokenList = resultCodec.decode(result)
       console.log(tokenList)
-      if (tokenList.length == 18) { // use length to get specific boxes 
+      if (tokenList.length == 18) {
+        // use length to get specific boxes
         let project = {
           'owner address': String(tokenList[0]),
           'start timestamp': Number(tokenList[1]),
@@ -109,6 +109,7 @@ const Projects = () => {
         projectsArr.push(project)
       }
     }
+
     return projectsArr
   }
 
@@ -135,13 +136,13 @@ const Projects = () => {
             </div>
           ))}
       </div>
-      <button
+      {/* <button
         onClick={() => {
           handleShowProjectsAction()
         }}
       >
         handleShowProjectsAction
-      </button>
+      </button> */}
     </div>
   )
 }

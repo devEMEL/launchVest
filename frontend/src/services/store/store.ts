@@ -5,7 +5,7 @@ import confirmModalReducer from '../features/confirmModal/confirmModalSlice'
 export const store = configureStore({
   reducer: {
     connectModal: connectModalReducer,
-    confirmModal: confirmModalReducer
+    confirmModal: confirmModalReducer,
   },
 })
 

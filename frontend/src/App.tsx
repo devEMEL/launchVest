@@ -13,8 +13,12 @@ import ListToken from './components/ListToken'
 import Projects from './components/Projects'
 import Stake from './components/Stake'
 import { useEffect } from 'react'
+import ProjectPage from './components/ProjectPage'
+import HomePage from './components/HomePage'
 
 let providersArray: ProvidersArray
+
+const BASE_URL = 'https://price-feeds.goracle.io'
 
 providersArray = [
   { id: PROVIDER_ID.DEFLY, clientStatic: DeflyWalletConnect },
@@ -24,8 +28,6 @@ providersArray = [
 ]
 
 export default function App() {
-  const { activeAddress, connectedAccounts } = useWallet()
-
   const algodConfig = getAlgodConfigFromViteEnvironment()
 
   const walletProviders = useInitializeProviders({
@@ -39,8 +41,15 @@ export default function App() {
     algosdkStatic: algosdk,
   })
 
+  // const fetchGora = async () => {
+  //   await fetch(`${BASE_URL}/api/v2/crypto/prices?key=##signKey&assets=algo&curr=usd`)
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       console.log(data)
+  //     })
+  // }
   // useEffect(() => {
-  //   reconnectProviders(walletProviders)
+  //   fetchGora()
   // }, [])
 
   return (
@@ -49,16 +58,20 @@ export default function App() {
         <div className="w-full h-full">
           {/* NAVBAR */}
           <Navbar />
+
+          {/* <button onClick={() => fetchGora()}>makeRequest</button> */}
+
           {/* MODALS */}
           <ConnectModal />
 
           {/* ROUTES */}
           <Routes>
             {/* <Route path="/" element={<Collection />} /> */}
-
-            <Route path="/list-token" element={<ListToken />} />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/list-project" element={<ListToken />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/stake" element={<Stake />} />
+            <Route path="/project/:projectId" element={<ProjectPage />} />
             {/* <Route path="/asset/:assetId" element={<Asset />} /> */}
             {/* <Route path="*" element={<NotFound />} /> */}
           </Routes>

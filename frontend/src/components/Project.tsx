@@ -6,11 +6,15 @@ import { useWallet } from '@txnlab/use-wallet'
 import { useSnackbar } from 'notistack'
 import algosdk from 'algosdk'
 import { VestStakeClient } from '../contracts/vest_stake'
+import { useNavigate } from 'react-router-dom'
 
 const ASSET_ID = 460043736
 
 const Project = ({ project }) => {
   const [appId, setAppId] = useState<number>(0)
+  const [assetName, setAssetName] = useState<string>('')
+  const [imageURL, setImageURL] = useState<string>('')
+  
   const { enqueueSnackbar } = useSnackbar()
   const { signer, activeAddress } = useWallet()
   const algodConfig = getAlgodConfigFromViteEnvironment()
@@ -22,6 +26,7 @@ const Project = ({ project }) => {
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const sender = { signer, addr: activeAddress! }
+  const navigate = useNavigate()
 
   const launchVestClient = new LaunchVestClient(
     {
@@ -32,6 +37,27 @@ const Project = ({ project }) => {
     algodClient,
   )
 
+  const getAsset = async (assetID: number) => {
+    const asset = await algodClient.getAssetByID(assetID).do()
+
+    return asset.params.name
+  }
+
+  const getAssetAction = async () => {
+    await getAsset(Number(project['asset id'])).then((data) => {
+      console.log(data)
+      setAssetName(data)
+    })
+  }
+  const getAssetImage = async(ipfsLink) => {
+    const CID = ipfsLink.split("//")[1]
+    return ''.concat(`https://ipfs.io/ipfs/${CID}`)
+  }
+  const getAssetImageAction = async () => {
+    await getAssetImage(project['image url']).then((data) => {
+      setImageURL(data)
+    })
+  }
   const vestStakeClient = new VestStakeClient(
     {
       resolveBy: 'id',
@@ -58,41 +84,18 @@ const Project = ({ project }) => {
     )
   }
 
-  const handleBuy = async () => {
-    // isStaking, asset id, paymentTxn
-    // read box and check whether address has isStaking true;
+  useEffect(() => {
+    getAssetAction()
+    getAssetImageAction()
+  }, [])
 
-    // let projectsArr = []
-    // for (let _box of await launchVestClient.appClient.getBoxNames()) {
-    //   console.log(Buffer.from(_box.nameRaw, 'base64').toString('utf8'))
-    //   let result = await launchVestClient.appClient.getBoxValue(_box)
-
-    // }
-    const tokenKey = algosdk.encodeUint64(BigInt(project['asset id']))
-    const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
-      from: String(activeAddress),
-      to: String(project['owner address']),
-      amount: BigInt(6_000_000),
-      suggestedParams: await algodClient.getTransactionParams().do(),
-    })
-
-    const tx = await launchVestClient.invest(
-      { is_staking: Boolean(true), project: BigInt(project['asset id']), txn },
-      {
-        boxes: [algosdk.decodeAddress(activeAddress).publicKey, tokenKey],
-      },
-    )
-    console.log(tx)
-  }
+  
   return (
     <div className="p-10 border-2 text-[20px] bg-black text-[#dddddd] rounded-[50px]">
-      <h2 className="mb-2 text-center text-[25px]">ASSET NAME</h2>
-      {/* {Object.entries(project).map((res) => (
-        <div className="capitalize p-2 flex justify-between">
-          <h1>{res[0]}</h1>
-          <h1>{res[1]}</h1>
-        </div>
-      ))} */}
+      <h2 className="mb-2 text-center text-[25px]">{assetName}</h2>
+      <div className="flex justify-center mt-5">
+        <img src={imageURL} alt="" width={150} className='' />
+      </div>
       <div className="">
         <div className="capitalize p-2 flex justify-between">
           <h1>asset id</h1>
@@ -115,7 +118,7 @@ const Project = ({ project }) => {
           <h1>{convertTimestampToDate(project['claim timestamp'])}</h1>
         </div>
 
-        <div className="capitalize p-2 flex justify-between">
+        {/* <div className="capitalize p-2 flex justify-between">
           <h1>min buy</h1>
           <h1>{project['min buy']}</h1>
         </div>
@@ -139,16 +142,23 @@ const Project = ({ project }) => {
         <div className="capitalize p-2 flex justify-between">
           <h1>assets sold</h1>
           <h1>{project['assets sold']}</h1>
-        </div>
+        </div> */}
       </div>
-      <div className="flex pt-10">
-        <div className="basis-[50%] mr-5">
+      <div className="flex pt-10 justify-center">
+        {/* <div className="basis-[50%] mr-5">
           <button className="w-full capitalize bg-[#dddddd] text-black py-4 px-10 rounded-full" onClick={() => handleBuy()}>
             Buy
           </button>
-        </div>
+        </div> */}
         <div className="basis-[50%]">
-          <button className="w-full capitalize bg-[#dddddd] text-black py-4 px-10 rounded-full">claim</button>
+          <button
+            className="w-full capitalize bg-[#dddddd] text-black py-4 px-10 rounded-full"
+            onClick={() => {
+              navigate(`/project/${project['asset id']}`)
+            }}
+          >
+            View project
+          </button>
         </div>
       </div>
     </div>
