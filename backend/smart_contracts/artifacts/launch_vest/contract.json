@@ -3,7 +3,12 @@
     "methods": [
         {
             "name": "bootstrap",
-            "args": [],
+            "args": [
+                {
+                    "type": "asset",
+                    "name": "asset"
+                }
+            ],
             "returns": {
                 "type": "void"
             },
@@ -34,7 +39,7 @@
                 {
                     "type": "string",
                     "name": "image_url",
-                    "desc": "IDO project image url."
+                    "desc": "The project image url."
                 },
                 {
                     "type": "uint64",
@@ -110,15 +115,20 @@
                     "desc": "The project (asset) ID to invest in."
                 },
                 {
-                    "type": "pay",
+                    "type": "txn",
                     "name": "txn",
                     "desc": "The payment transaction for the investment."
+                },
+                {
+                    "type": "asset",
+                    "name": "investment_asset_id",
+                    "desc": "The unique ID to of the asset."
                 }
             ],
             "returns": {
                 "type": "void"
             },
-            "desc": "Allows investors invest in a Project."
+            "desc": "Executes an investment transaction for a project."
         },
         {
             "name": "claim_ido_asset",
@@ -151,6 +161,11 @@
                     "type": "bool",
                     "name": "is_staking",
                     "desc": "Flag to indicate whether investor is current staking $VEST."
+                },
+                {
+                    "type": "asset",
+                    "name": "investment_asset_id",
+                    "desc": "The unique asset ID of investment (ALGO, USDC)."
                 }
             ],
             "returns": {
@@ -163,12 +178,14 @@
             "args": [
                 {
                     "type": "uint64",
-                    "name": "project_id"
+                    "name": "project_id",
+                    "desc": "The unique identifier of the project for which funds are withdrawn."
                 }
             ],
             "returns": {
                 "type": "void"
-            }
+            },
+            "desc": "Allows the withdrawal of the amount raised for a specific project, retains LaunchVest fee in the escrow."
         },
         {
             "name": "pause_project",
@@ -236,7 +253,7 @@
                 }
             ],
             "returns": {
-                "type": "(address,uint64,uint64,uint64,uint64,uint64,string,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64,uint64,uint64)"
+                "type": "(address,uint64,uint64,uint64,uint64,string,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64,uint64,uint64)"
             },
             "desc": "Retrieves project information for the specified project ID and stores it in the output."
         }
