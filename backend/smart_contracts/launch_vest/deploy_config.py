@@ -209,7 +209,7 @@ def deploy(
     )
     investor1_account_client.invest(
         is_staking=True,
-        project=project_id,
+        project_id=project_id,
         investment_asset_id=10458941,
         txn=TransactionWithSigner(
             # txn=PaymentTxn(
@@ -254,7 +254,7 @@ def deploy(
 
     time.sleep(70)
     investor1_account_client.reclaim_investment(
-        project=project_id,
+        project_id=project_id,
         is_staking=True,
         investment_asset_id=10458941,
         transaction_parameters=TransactionParameters(

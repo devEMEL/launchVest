@@ -291,20 +291,20 @@ def un_stake(asset: pt.abi.Asset) -> pt.Expr:
     :param asset: The asset to be unstaked.
     :rtype: pt.Expr
     """
+    staker = Staker()
     return pt.Seq(
         pt.Assert(
             app.state.staker_to_stake[pt.Txn.sender()].exists(),
             comment="Invalid staker."
         ),
-        (staker := Staker()).decode(app.state.staker_to_stake[pt.Txn.sender()].get()),
 
+        staker.decode(app.state.staker_to_stake[pt.Txn.sender()].get()),
         (staker_address := pt.abi.Address()).set(staker.address),
         (staker_amount := pt.abi.Uint64()).set(staker.amount),
         (staker_asset := pt.abi.Uint64()).set(staker.asset_id),
         (staker_is_staking := pt.abi.Bool()).set(staker.is_staking),
         (staker_start_timestamp := pt.abi.Uint64()).set(staker.start_timestamp),
         (staker_end_timestamp := pt.abi.Uint64()).set(staker.end_timestamp),
-
         pt.Assert(
             staker_is_staking.get() == TRUE,
             comment="Staker must be staking."
@@ -324,13 +324,13 @@ def un_stake(asset: pt.abi.Asset) -> pt.Expr:
                 staker_duration
             ),
         ),
-
         pt.InnerTxnBuilder.Execute({
             pt.TxnField.type_enum: pt.TxnType.AssetTransfer,
             pt.TxnField.xfer_asset: asset.asset_id(),
             pt.TxnField.asset_receiver: staker_address.get(),
             pt.TxnField.asset_amount: reward_amount.get()
         }),
+
         staker_is_staking.set(FALSE),
         staker.set(
             staker_address,

@@ -110,24 +110,18 @@ result = app_client.call(
     boxes=[(app_id, encoding.decode_address(admin_acct.address))]
 )
 print(result.return_value)
-
-app_client.call(
-    stake,
-    asset=VEST_AID,
-    stake_duration=FIVE_MINS_STAKING_PERIOD,
-    txn=txn,
-    boxes=[(app_id, encoding.decode_address(admin_acct.address))]
-)
-
-result = app_client.call(
-    get_staker,
-    staker=admin_acct.address,
-    boxes=[(app_id, encoding.decode_address(admin_acct.address))]
-)
-print(result.return_value)
-
+#
 # app_client.call(
-#     un_stake,
+#     stake,
 #     asset=VEST_AID,
+#     stake_duration=FIVE_MINS_STAKING_PERIOD,
+#     txn=txn,
 #     boxes=[(app_id, encoding.decode_address(admin_acct.address))]
 # )
+#
+# result = app_client.call(
+#     get_staker,
+#     staker=admin_acct.address,
+#     boxes=[(app_id, encoding.decode_address(admin_acct.address))]
+# )
+# print(result.return_value)

@@ -111,7 +111,7 @@
                 },
                 {
                     "type": "asset",
-                    "name": "project",
+                    "name": "project_id",
                     "desc": "The project (asset) ID to invest in."
                 },
                 {
@@ -135,7 +135,7 @@
             "args": [
                 {
                     "type": "asset",
-                    "name": "project",
+                    "name": "project_id",
                     "desc": "Project (asset) ID to be claimed."
                 },
                 {
@@ -154,7 +154,7 @@
             "args": [
                 {
                     "type": "asset",
-                    "name": "project",
+                    "name": "project_id",
                     "desc": "Project (asset) ID to be claimed."
                 },
                 {
