@@ -145,9 +145,7 @@ def escrow_asset_opt_in(asset: pt.abi.Asset) -> pt.Expr:
 
 # noinspection PyTypeChecker
 @app.external
-def fund_escrow_address(
-    txn: pt.abi.PaymentTransaction
-) -> pt.Expr:
+def fund_escrow_address(txn: pt.abi.PaymentTransaction) -> pt.Expr:
     """
     Fund escrow address with Algos.
 
