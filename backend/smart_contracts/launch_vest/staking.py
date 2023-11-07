@@ -137,7 +137,8 @@ def escrow_asset_opt_in(asset: pt.abi.Asset) -> pt.Expr:
             pt.TxnField.type_enum: pt.TxnType.AssetTransfer,
             pt.TxnField.xfer_asset: asset.asset_id(),
             pt.TxnField.asset_amount: pt.Int(0),
-            pt.TxnField.asset_receiver: app.state.escrow_address
+            pt.TxnField.asset_receiver: app.state.escrow_address,
+            pt.TxnField.fee: pt.Int(0)
         })
     )
 
@@ -328,7 +329,8 @@ def un_stake(asset: pt.abi.Asset) -> pt.Expr:
             pt.TxnField.type_enum: pt.TxnType.AssetTransfer,
             pt.TxnField.xfer_asset: asset.asset_id(),
             pt.TxnField.asset_receiver: staker_address.get(),
-            pt.TxnField.asset_amount: reward_amount.get()
+            pt.TxnField.asset_amount: reward_amount.get(),
+            pt.TxnField.fee: pt.Int(0)
         }),
 
         staker_is_staking.set(FALSE),

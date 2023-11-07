@@ -133,7 +133,7 @@ def escrow_asset_opt_in(asset: pt.abi.Asset) -> pt.Expr:
                 pt.TxnField.asset_amount: pt.Int(0),
                 pt.TxnField.asset_receiver: app.state.escrow_address,
                 pt.TxnField.xfer_asset: asset.asset_id(),
-                # pt.TxnField.fee: pt.Int(0)
+                pt.TxnField.fee: pt.Int(0)
             },
         )
     )
@@ -685,7 +685,7 @@ def claim_ido_asset(
             pt.TxnField.asset_amount: investor_asset_allocation.get(),
             pt.TxnField.asset_receiver: investor_address.get(),
             pt.TxnField.xfer_asset: project_asset_id,
-            # pt.TxnField.fee: pt.Int(0)
+            pt.TxnField.fee: pt.Int(0)
         }),
 
         investor_asset_claim_timestamp.set(pt.Global.latest_timestamp()),
@@ -777,6 +777,7 @@ def reclaim_investment(
                 pt.TxnField.type_enum: pt.TxnType.Payment,
                 pt.TxnField.receiver: investor_address.get(),
                 pt.TxnField.amount: investor_investment_amount.get(),
+                pt.TxnField.fee: pt.Int(0)
             }),
         ).Else(
             pt.Assert(
@@ -787,7 +788,8 @@ def reclaim_investment(
                 pt.TxnField.type_enum: pt.TxnType.AssetTransfer,
                 pt.TxnField.asset_receiver: investor_address.get(),
                 pt.TxnField.asset_amount: investor_investment_amount.get(),
-                pt.TxnField.xfer_asset: investment_asset_id.asset_id()
+                pt.TxnField.xfer_asset: investment_asset_id.asset_id(),
+                pt.TxnField.fee: pt.Int(0)
             }),
         ),
         investor_investment_amount.set(pt.Int(0)),
@@ -822,7 +824,8 @@ def disburse(
         pt.InnerTxnBuilder.Execute({
             pt.TxnField.type_enum: pt.TxnType.Payment,
             pt.TxnField.amount: amount.get(),
-            pt.TxnField.receiver: receiver.get()
+            pt.TxnField.receiver: receiver.get(),
+            pt.TxnField.fee: pt.Int(0)
         }),
     )
 
