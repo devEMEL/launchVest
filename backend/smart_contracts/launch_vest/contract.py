@@ -383,13 +383,13 @@ def investor_algo_payment(
     txn: pt.abi.Transaction,
 ) -> pt.Expr:
     """
-    Payment transaction from investor, investment must be within the min and max limits.
+    ALGO transaction from investor, investment must be within the min and max limits.
 
     Arguments must be passed in their order, since this is ``pt.Subroutine`` which only accepts positional args.
 
     :param pt.abi.Uint64 min_investment: The minimum investment amount allowed.
     :param pt.abi.Uint64 max_investment: The maximum investment amount allowed.
-    :param pt.abi.PaymentTransaction txn: The payment transaction containing investment details.
+    :param pt.abi.Transaction txn: The transaction containing investment details (type_enum must be of Payment).
     :rtype pt.Expr.:
     """
     return pt.Seq(
@@ -422,14 +422,14 @@ def investor_usdc_payment(
     txn: pt.abi.Transaction
 ) -> pt.Expr:
     """
-    Payment transaction from investor, investment must be within the min and max limits.
+    USDC transaction from investor, investment must be within the min and max limits.
 
     Arguments must be passed in their order, since this is ``pt.Subroutine`` which only accepts positional args.
 
     :param pt.abi.Uint64 min_investment: The minimum investment amount allowed.
     :param pt.abi.Uint64 max_investment: The maximum investment amount allowed.
     :param pt.abi.Uint64 asset_id: The unique ID of the asset.
-    :param pt.abi.PaymentTransaction txn: The payment transaction containing investment details.
+    :param pt.abi.Transaction txn: The transaction containing investment details (type_enum must be of AssetTransfer).
     :rtype pt.Expr:
     """
     return pt.Seq(
