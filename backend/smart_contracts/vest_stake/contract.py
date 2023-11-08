@@ -203,7 +203,7 @@ def set_asset_decimal(asset_decimal: pt.abi.Uint64) -> pt.Expr:
     Sets the asset decimal.
 
     :param pt.abi.Uint64 asset_decimal: The asset decimal.
-    :rtype pt.Expr.:
+    :rtype: pt.Expr.
     """
     return app.state.vest_decimals.set(asset_decimal.get())
 
@@ -283,7 +283,7 @@ def stake(
 
 # noinspection PyTypeChecker
 @app.external
-def un_stake(asset: pt.abi.Asset) -> pt.Expr:
+def unstake(asset: pt.abi.Asset) -> pt.Expr:
     """
     Initiates the unstaking of the specified asset.
 

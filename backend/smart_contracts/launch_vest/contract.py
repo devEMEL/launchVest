@@ -28,7 +28,6 @@ class Investor(pt.abi.NamedTuple):
     """
     Represents an investor, extends ``pt.abi.NamedTuple``.
 
-    
     :ivar pt.abi.Address address: The Algorand address of the investor.
     :ivar pt.abi.Uint64 project_id: The unique identifier of the project.
     :ivar pt.abi.Uint64 investment_amount: The amount of the investment in Algos.
@@ -124,7 +123,7 @@ def escrow_asset_opt_in(asset: pt.abi.Asset) -> pt.Expr:
     Executes LaunchVest escrow (application) address asset opt in.
 
     :param pt.abi.Asset asset: The asset to be opted into.
-    :rtype pt.Expr:
+    :rtype: pt.Expr
     """
     return pt.Seq(
         pt.InnerTxnBuilder.Execute(
@@ -390,7 +389,7 @@ def investor_algo_payment(
     :param pt.abi.Uint64 min_investment: The minimum investment amount allowed.
     :param pt.abi.Uint64 max_investment: The maximum investment amount allowed.
     :param pt.abi.Transaction txn: The transaction containing investment details (type_enum must be of Payment).
-    :rtype pt.Expr.:
+    :rtype: pt.Expr.
     """
     return pt.Seq(
         pt.Assert(
@@ -430,7 +429,7 @@ def investor_usdc_payment(
     :param pt.abi.Uint64 max_investment: The maximum investment amount allowed.
     :param pt.abi.Uint64 asset_id: The unique ID of the asset.
     :param pt.abi.Transaction txn: The transaction containing investment details (type_enum must be of AssetTransfer).
-    :rtype pt.Expr:
+    :rtype: pt.Expr
     """
     return pt.Seq(
         pt.Assert(

@@ -115,7 +115,7 @@
             "desc": "Initiates a stake for the specified asset and duration."
         },
         {
-            "name": "un_stake",
+            "name": "unstake",
             "args": [
                 {
                     "type": "asset",

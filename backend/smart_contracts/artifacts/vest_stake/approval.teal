@@ -34,7 +34,7 @@ pushbytes 0xae4b9e92 // "stake(asset,uint64,axfer)void"
 ==
 bnz main_l13
 txna ApplicationArgs 0
-pushbytes 0x57baa5b5 // "un_stake(asset)void"
+pushbytes 0x0c9550b7 // "unstake(asset)void"
 ==
 bnz main_l12
 txna ApplicationArgs 0
@@ -480,7 +480,7 @@ frame_dig 0
 box_put
 retsub
 
-// un_stake
+// unstake
 unstake_8:
 proto 1 0
 bytec_0 // ""
@@ -711,7 +711,7 @@ frame_dig 2
 callsub stake_7
 retsub
 
-// un_stake_caster
+// unstake_caster
 unstakecaster_17:
 proto 0 0
 intc_0 // 0

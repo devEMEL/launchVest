@@ -19,6 +19,8 @@ const YEARLY = 31_536_000n
 const PER_BOX_MBR = 0.0025e6
 const PER_BYTE_MBR = 0.0004e6
 
+const USDC_ASSET_ID = 10458941
+
 const ListToken = () => {
   const [appId, setAppId] = useState<number>(466175126)
   const [assetId, setAssetId] = useState<bigint>(0n)
@@ -63,7 +65,7 @@ const ListToken = () => {
     const launchVestAppId = (await launchVestClient.appClient.getAppReference()).appId
     setAppId(Number(launchVestAppId))
     await launchVestClient.appClient.fundAppAccount(algokit.microAlgos(200_000))
-    await launchVestClient.bootstrap()
+    await launchVestClient.bootstrap({asset: USDC_ASSET_ID})
     console.log(launchVestAppId)
   }
 

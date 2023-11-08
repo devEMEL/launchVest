@@ -1,7 +1,5 @@
-import base64
 import os.path
 import shutil
-import sys
 import time
 from pathlib import Path
 
@@ -9,30 +7,18 @@ import algokit_utils
 from algosdk.util import algos_to_microalgos
 from algokit_utils import Account, TransactionParameters
 from algosdk import encoding, mnemonic
-from algosdk.atomic_transaction_composer import TransactionSigner, TransactionWithSigner
+from algosdk.atomic_transaction_composer import TransactionWithSigner
 from algosdk.transaction import AssetTransferTxn, PaymentTxn, SuggestedParams
 from algosdk.v2client.algod import AlgodClient
 from algosdk.v2client.indexer import IndexerClient
 from dotenv import load_dotenv
 
-from backend.smart_contracts.helpers.formula_helpers import (
-    asset_price_with_decimals
-)
 from backend.smart_contracts.helpers.account_helpers.account import (
-    fund_account_with_algos,
     generate_algo_funded_account
 )
-from backend.smart_contracts.helpers.asset_helpers.asset_manager import (
-    transfer_asset,
-    optin_asset
-)
 from backend.smart_contracts.helpers.build import build
-from backend.smart_contracts.helpers.date_time_helpers.time_conversion import (
-    convert_to_timestamp,
-    timestamp_from_log_to_time
-)
 from backend.smart_contracts.launch_vest.contract import app as launch_vest
-from backend.smart_contracts.launch_vest.staking import app as vest_stake
+from backend.smart_contracts.vest_stake.contract import app as vest_stake
 
 
 ARTIFACTS_PATH = "../artifacts"

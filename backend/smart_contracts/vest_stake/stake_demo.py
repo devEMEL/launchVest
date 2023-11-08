@@ -1,9 +1,8 @@
 import os
-import time
 import algokit_utils
 
 from beaker import client
-from staking import app, bootstrap, fund_escrow_address, get_staker, set_annual_rate, set_stake_amounts, stake, un_stake
+from backend.smart_contracts.vest_stake.contract import app, bootstrap, fund_escrow_address, get_staker, stake
 from algosdk.atomic_transaction_composer import TransactionWithSigner
 from algosdk.transaction import AssetTransferTxn, PaymentTxn, SuggestedParams
 from algosdk import encoding, mnemonic
