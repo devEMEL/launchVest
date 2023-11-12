@@ -18,28 +18,28 @@ def calculate_project_max_cap(
     return total_assets_for_sale.get() * price_per_asset.get()
 
 
-# noinspection PyTypeChecker
-@pt.Subroutine(pt.TealType.uint64)
-def calculate_allocation_for_investor(
-    investment_amount: pt.abi.Uint64,
-    price_per_asset: pt.abi.Uint64,
-) -> pt.Expr:
-    """
-    Formula for calculating an investor's asset allocation.
-
-    Arguments must be passed in their order, since this is ``pt.Subroutine`` which only accepts positional args.
-
-    :param pt.abi.Uint64 investment_amount: The amount of tokens bought in the base token (ALGO).
-    :param pt.abi.Uint64 price_per_asset: The price of the IDO Project asset.
-    :return pt.Expr: Calculated asset allocation for an investor.
-    """
-    return pt.Seq(
-        pt.Assert(
-            investment_amount.get() >= price_per_asset.get(),
-            comment="Investment amount cannot be lesser than asset price"
-        ),
-        pt.Return(investment_amount.get() / price_per_asset.get())
-    )
+# # noinspection PyTypeChecker
+# @pt.Subroutine(pt.TealType.uint64)
+# def calculate_allocation_for_investor(
+#     investment_amount: pt.abi.Uint64,
+#     price_per_asset: pt.abi.Uint64,
+# ) -> pt.Expr:
+#     """
+#     Formula for calculating an investor's asset allocation.
+#
+#     Arguments must be passed in their order, since this is ``pt.Subroutine`` which only accepts positional args.
+#
+#     :param pt.abi.Uint64 investment_amount: The amount of tokens bought in the base token (ALGO).
+#     :param pt.abi.Uint64 price_per_asset: The price of the IDO Project asset.
+#     :return pt.Expr: Calculated asset allocation for an investor.
+#     """
+#     return pt.Seq(
+#         pt.Assert(
+#             investment_amount.get() >= price_per_asset.get(),
+#             comment="Investment amount cannot be lesser than asset price"
+#         ),
+#         pt.Return(investment_amount.get() / price_per_asset.get())
+#     )
 
 
 @pt.Subroutine(pt.TealType.uint64)

@@ -4,13 +4,11 @@ import pyteal as pt
 from beaker.consts import FALSE, TRUE
 from beaker.lib.storage import BoxMapping
 
-from backend.smart_contracts.launch_vest.formula_helpers import (
-    calculate_allocation_for_investor,
+from formula_helpers import (
     calculate_disbursement,
     calculate_proceeds_after_fee_deduction,
     calculate_project_max_cap
 )
-
 
 USDC_ASSET_ID = pt.Int(10458941)
 LAUNCH_VEST_FEE = pt.Int(10)  # 10%
@@ -463,7 +461,7 @@ def invest(
     is_staking: pt.abi.Bool,
     project_id: pt.abi.Asset,
     txn: pt.abi.Transaction,
-    investment_asset_id: pt.abi.Asset
+    asset_allocation: pt.abi.Uint64
 ) -> pt.Expr:
     """
     Executes an investment transaction for a project.
@@ -471,7 +469,7 @@ def invest(
     :param pt.abi.Bool is_staking: Indicates whether the investor is staking $VEST
     :param pt.abi.Asset project_id: The project (asset) ID to invest in.
     :param pt.abi.PaymentTransaction txn: The payment transaction for the investment.
-    :param pt.abi.Asset investment_asset_id: The unique ID to of the asset.
+    :param asset_allocation: Asset allocation for investor.
     :rtype: pt.Expr.
     """
     investor = Investor()
@@ -540,25 +538,17 @@ def invest(
             ),
             comment="Invalid transaction type. Must be of type Payment or AssetTransfer."
         ),
+        pt.Assert(
+            asset_allocation.get() > pt.Int(0),
+            comment="Asset allocation must be greater than 0."
+        ),
 
         (investor_investment_amount := pt.abi.Uint64()).set(pt.Int(0)),
-        pt.If(txn.get().xfer_asset() == pt.Int(0))
-        .Then(
-            investor_investment_amount.set(
-                investor_algo_payment(
-                    project_min_investment_per_user,
-                    project_max_investment_per_user,
-                    txn
-                )
-            ),
-        ).Else(
-            investor_investment_amount.set(
-                investor_usdc_payment(
-                    project_min_investment_per_user,
-                    project_max_investment_per_user,
-                    investment_asset_id,
-                    txn
-                )
+        investor_investment_amount.set(
+            investor_algo_payment(
+                project_min_investment_per_user,
+                project_max_investment_per_user,
+                txn
             )
         ),
         (investor_address := pt.abi.Address()).set(pt.Txn.sender()),
@@ -566,26 +556,18 @@ def invest(
         (investor_asset_claim_timestamp := pt.abi.Uint64()).set(pt.Int(0)),
         (investor_claimed_ido_asset := pt.abi.Bool()).set(FALSE),
         (investor_reclaimed_investment := pt.abi.Bool()).set(FALSE),
-        #  Modify this, allocation should be set off-chain.
-        (investor_asset_allocation := pt.abi.Uint64()).set(
-            calculate_allocation_for_investor(
-                investor_investment_amount,
-                project_price_per_asset,
-            )
-        ),
-        (investor_asset_allocation.set(investor_asset_allocation.get())),
         investor.set(
             investor_address,
             investor_project_id,
             investor_investment_amount,
-            investor_asset_allocation,
+            asset_allocation,
             investor_asset_claim_timestamp,
             investor_claimed_ido_asset,
             investor_reclaimed_investment
         ),
         app.state.investor_to_project[investor_address].set(investor),
 
-        project_total_assets_sold.set(project_total_assets_for_sale.get() - investor_asset_allocation.get()),
+        project_total_assets_sold.set(project_total_assets_for_sale.get() - asset_allocation.get()),
         project_total_amount_raised.set(project_total_amount_raised.get() + investor_investment_amount.get()),
 
         project.set(
