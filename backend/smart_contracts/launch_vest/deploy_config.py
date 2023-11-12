@@ -13,13 +13,9 @@ from algosdk.v2client.algod import AlgodClient
 from algosdk.v2client.indexer import IndexerClient
 from dotenv import load_dotenv
 
-from backend.smart_contracts.helpers.account_helpers.account import (
-    generate_algo_funded_account
-)
+from contract import app as launch_vest
+from staking import app as vest_stake
 from backend.smart_contracts.helpers.build import build
-from backend.smart_contracts.launch_vest.contract import app as launch_vest
-from backend.smart_contracts.vest_stake.contract import app as vest_stake
-
 
 ARTIFACTS_PATH = "../artifacts"
 
@@ -316,7 +312,7 @@ def execute_deployment(network: str = "localnet") -> None:
     if network == "localnet":
         algod_client = algokit_utils.get_algod_client()
         indexer_client = algokit_utils.get_indexer_client()
-        deployer = generate_algo_funded_account(amount=100, client=algod_client)
+        # deployer = generate_algo_funded_account(amount=100, client=algod_client)
     elif network == "testnet":
         algod_client = algokit_utils.get_algod_client(
             config=algokit_utils.get_algonode_config(network="testnet", config="algod", token="")
