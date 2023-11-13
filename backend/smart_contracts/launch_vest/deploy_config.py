@@ -15,7 +15,8 @@ from dotenv import load_dotenv
 
 from contract import app as launch_vest
 from staking import app as vest_stake
-from backend.smart_contracts.helpers.build import build
+# from backend.smart_contracts.helpers.build import build
+from build import build
 
 ARTIFACTS_PATH = "../artifacts"
 
@@ -77,9 +78,10 @@ def deploy(
     app_spec: algokit_utils.ApplicationSpecification,
     deployer: algokit_utils.Account,
 ) -> None:
-    from backend.smart_contracts.artifacts.launch_vest.client import (
-        LaunchVestClient,
-    )
+    # from backend.smart_contracts.launch_vest.client import (
+    #     LaunchVestClient,
+    # )
+    from client import LaunchVestClient
 
     app_client = LaunchVestClient(
         algod_client,
@@ -91,6 +93,7 @@ def deploy(
         on_update=algokit_utils.OnUpdate.AppendApp,
     )
     app_id = app_client.app_id
+    print(f"App ID: {app_id}")
     app_addr = app_client.app_address
 
     # Fund escrow account
@@ -105,7 +108,7 @@ def deploy(
         )
 
     # # Bootstrap app
-    app_client.bootstrap(asset=10458941)
+    app_client.bootstrap()
 
     project_owner_account = Account(private_key=mnemonic.to_private_key(os.getenv("PROJECT_OWNER_MNEMONIC")))
     project_id = project_asset_id = TESTNET_ASSET_ID_T
@@ -120,7 +123,7 @@ def deploy(
 
     current_time = int(time.time())
     print(f"Current local timestamp: {current_time}")
-    project_start_timestamp = current_time - 30  # Subtracting 40sec. so my time can match the
+    project_start_timestamp = current_time - 30  # Subtracting 30sec. so my time can match the
     # pt.Global.latest_timestamp()
     project_end_timestamp = project_start_timestamp + 40
     claim_timestamp = project_end_timestamp + 20
@@ -180,7 +183,7 @@ def deploy(
     print(response.return_value)
 
     # Invest in project
-    time.sleep(15)
+    time.sleep(30)
     investor1_account = Account(private_key=mnemonic.to_private_key(os.getenv("INVESTOR_MNEMONIC")))
 
     investor1_account_client = LaunchVestClient(
@@ -192,21 +195,13 @@ def deploy(
     investor1_account_client.invest(
         is_staking=True,
         project_id=project_id,
-        investment_asset_id=10458941,
+        asset_allocation=10,
         txn=TransactionWithSigner(
-            # txn=PaymentTxn(
-            #     sender=investor1_account.address,
-            #     sp=algod_client.suggested_params(),
-            #     receiver=app_addr,
-            #     amt=MIN_BUY
-            # ),
-            # signer=investor1_account.signer
-            txn=AssetTransferTxn(
+            txn=PaymentTxn(
                 sender=investor1_account.address,
                 sp=algod_client.suggested_params(),
                 receiver=app_addr,
-                amt=MIN_BUY,
-                index=10458941
+                amt=MIN_BUY
             ),
             signer=investor1_account.signer
         ),
@@ -238,7 +233,6 @@ def deploy(
     investor1_account_client.reclaim_investment(
         project_id=project_id,
         is_staking=True,
-        investment_asset_id=10458941,
         transaction_parameters=TransactionParameters(
             boxes=[
                 (app_id, project_id.to_bytes(8, "big")),
@@ -323,12 +317,12 @@ def execute_deployment(network: str = "localnet") -> None:
         deployer = Account(private_key=mnemonic.to_private_key(os.getenv("DEPLOYER_MNEMONIC")))
         # deployer = Account(private_key=mnemonic.to_private_key(os.getenv("PROJECT_OWNER_MNEMONIC")))
 
-    deploy(
-        algod_client=algod_client,
-        indexer_client=indexer_client,
-        app_spec=vest_stake.build(),
-        deployer=deployer
-    )
+    # deploy(
+    #     algod_client=algod_client,
+    #     indexer_client=indexer_client,
+    #     app_spec=vest_stake.build(),
+    #     deployer=deployer
+    # )
     deploy(
         algod_client=algod_client,
         indexer_client=indexer_client,
