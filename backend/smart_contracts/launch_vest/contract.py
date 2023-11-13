@@ -210,12 +210,10 @@ def list_project(
 
     return pt.Seq(
         (asset_total := pt.AssetParam.total(asset_id.asset_id())),
-        # TODO: Uncomment this, fix price and decimal issues!
-        # pt.Assert(
-        #     pt.Not(app.state.pid_to_project[project_id_bytes].exists()),
-        #     comment="Project already exists!"
-        # ),
-        # Checks if its a valid asset ID provided.
+        pt.Assert(
+            pt.Not(app.state.pid_to_project[project_id_bytes].exists()),
+            comment="Project already exists!"
+        ),
         pt.Assert(
             asset_total.value() > pt.Int(0),
             comment="A valid asset ID must be provided",
