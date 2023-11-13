@@ -3,12 +3,7 @@
     "methods": [
         {
             "name": "bootstrap",
-            "args": [
-                {
-                    "type": "asset",
-                    "name": "asset"
-                }
-            ],
+            "args": [],
             "returns": {
                 "type": "void"
             },
@@ -161,11 +156,6 @@
                     "type": "bool",
                     "name": "is_staking",
                     "desc": "Flag to indicate whether investor is current staking $VEST."
-                },
-                {
-                    "type": "asset",
-                    "name": "investment_asset_id",
-                    "desc": "The unique asset ID of investment (ALGO, USDC)."
                 }
             ],
             "returns": {
