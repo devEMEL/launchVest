@@ -17,7 +17,6 @@ from contract import app as launch_vest
 from staking import app as vest_stake
 from backend.smart_contracts.helpers.build import build
 
-
 ARTIFACTS_PATH = "../artifacts"
 
 DOTENV_LOCALNET_PATH = "../../.env.localnet"
