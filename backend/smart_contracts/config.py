@@ -45,8 +45,8 @@ def import_deploy_if_exists(
 
 
 def has_contract_file(directory: Path) -> bool:
-    """Checks whether the directory contains contract.py file."""
-    return (directory / "contract.py").exists()
+    """Checks whether the directory contains staking.py file."""
+    return (directory / "staking.py").exists()
 
 
 # define contracts to build and/or deploy
@@ -58,7 +58,7 @@ contracts = [
 ]
 
 ## Comment the above and uncomment the below and define contracts manually if you want to build and specify them
-## manually otherwise the above code will always include all contracts under contract.py file for any subdirectory
+## manually otherwise the above code will always include all contracts under staking.py file for any subdirectory
 ## in the smart_contracts directory. Optionally it will also grab the deploy function from deploy_config.py if it exists.
 
 # contracts = []
