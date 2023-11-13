@@ -59,7 +59,7 @@ const ListToken = () => {
     },
     algodClient,
   )
-
+ 
   const handleCreate = async () => {
     await launchVestClient.create.bare()
     const launchVestAppId = (await launchVestClient.appClient.getAppReference()).appId
