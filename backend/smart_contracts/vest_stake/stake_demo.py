@@ -2,7 +2,7 @@ import os
 import algokit_utils
 
 from beaker import client
-from backend.smart_contracts.vest_stake.contract import app, bootstrap, fund_escrow_address, get_staker, stake
+from backend.smart_contracts.launch_vest.staking import app, bootstrap, fund_escrow_address, get_staker, stake
 from algosdk.atomic_transaction_composer import TransactionWithSigner
 from algosdk.transaction import AssetTransferTxn, PaymentTxn, SuggestedParams
 from algosdk import encoding, mnemonic
