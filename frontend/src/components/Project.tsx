@@ -4,7 +4,7 @@ import { getAlgodConfigFromViteEnvironment } from '../utils/network/getAlgoClien
 import * as algokit from '@algorandfoundation/algokit-utils'
 import { useWallet } from '@txnlab/use-wallet'
 import { useSnackbar } from 'notistack'
-import algosdk from 'algosdk'
+import algosdk from 'algosdk' 
 import { VestStakeClient } from '../contracts/vest_stake'
 import { useNavigate } from 'react-router-dom'
 
