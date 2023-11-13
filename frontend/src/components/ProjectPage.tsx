@@ -137,7 +137,7 @@ const ProjectPage = () => {
   }, [])
 
   const tokenKey = algosdk.encodeUint64(Number(assetParams.projectId))
-  const buyTxn = async () => {
+  const buyTxn = async () => { 
     let txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: String(activeAddress),
       to: String(project['owner address']),
