@@ -14,11 +14,13 @@ import { VestStakeClient } from '../contracts/vest_stake'
 
 const ProjectPage = () => {
   const [appId, setAppId] = useState<number>(466175126)
+  const [amount, setAmount] = useState<bigint>(0n)
+  const [showModal, setShowModal] = useState<boolean>(false)
   const [investType, setInvestType] = useState<number>(0)
   const [assetName, setAssetName] = useState<string>('')
   const [imageURL, setImageURL] = useState<string>('')
   const [project, setProject] = useState<object>({})
-
+  const [algoInUSD, setAlgoInUSD] = useState<number>(0)
   const { enqueueSnackbar } = useSnackbar()
   const { signer, activeAddress } = useWallet()
   const algodConfig = getAlgodConfigFromViteEnvironment()
@@ -136,17 +138,19 @@ const ProjectPage = () => {
 
   const tokenKey = algosdk.encodeUint64(Number(assetParams.projectId))
   const buyTxn = async () => {
-    const txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+    let txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: String(activeAddress),
       to: String(project['owner address']),
-      amount: BigInt(6_000_000),
+      amount: BigInt(amount),
       suggestedParams: await algodClient.getTransactionParams().do(),
     })
 
     const isStaking = await checkIsStaking()
 
+    const amountInUSD = Number(amount) * algoInUSD;
+    const allocation = (10 ** project['asset decimal'] * amountInUSD) / project['asset price'];
     const tx = await launchVestClient.invest(
-      { is_staking: Boolean(isStaking), project: BigInt(project['asset id']), txn },
+      { is_staking: Boolean(isStaking), project: BigInt(project['asset id']), txn, asset_allocation: BigInt(allocation) },
       {
         boxes: [algosdk.decodeAddress(activeAddress).publicKey, tokenKey],
       },
@@ -266,8 +270,9 @@ const ProjectPage = () => {
             <button
               className="w-full capitalize bg-[#dddddd] text-black py-4 px-10 rounded-full"
               onClick={() => {
-                dispatch(showConfirmModal())
-                setInvestType(0)
+                // dispatch(showConfirmModal())
+                setShowModal(true)
+                // setInvestType(0)
               }}
             >
               Buy
@@ -297,13 +302,80 @@ const ProjectPage = () => {
           </div>
 
           {/* CONFIRM MODAL */}
-          {investType == 0 && <ConfirmModal text="Buy" txn={buyTxnAction} />}
+          {showModal && (
+            <div className="fixed w-full h-full top-[0] left-[0]">
+              <div className="max-w-[400px] bg-gray-200 text-white p-10 w-full fixed top-[40%] left-[50%] -translate-x-[50%] -translate-y-[50%]">
+                <div className="text-[20px] text-center font-bold">
+                  {/* <select
+                    name="currency"
+                    id="currency"
+                    className="bg-black mb-5 p-2"
+                    onChange={(e) => {
+                      console.log(e.target.value)
+                      setCurrency(e.target.value)
+                    }}
+                  >
+                    <option value="algo">ALGO</option>
+                    <option value="usdc">USDC</option>
+                  </select> */}
+                  <input
+                    type="text"
+                    className="w-[100%] h-[50px] text-[16px] p-5 border-2 outline-0 bg-[#f8f6fe] rounded-lg text-black"
+                    onChange={async (e) => {
+                      setAmount(e.target.value as unknown as bigint)
+                      await fetch('https://price-feeds.goracle.io/api/v2/crypto/prices?key=P6hT3kXpqbTNLWzyyyk1R7Crh&assets=algo&curr=usd')
+                        .then((data) => data.json())
+                        .then((result) => {
+                          console.log(result[0].price)
+                          let price = result[0].price
+                          setAlgoInUSD(price)
+                        })
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between items-center mt-5">
+                  <button className="p-3 border-2 bg-white text-black capitalize" onClick={() => setShowModal(false)}>
+                    cancel
+                  </button>
+                  <button
+                    className="p-3 border-2 bg-white text-black capitalize"
+                    onClick={async () => {
+                      // dispatch(hideConfirmModal())
+                      // call function
+                      // txn()
+                      if (Number(amount) >= project['min buy'] && Number(amount) <= project['max buy']) {
+                        await buyTxnAction()
+                        console.log(amount)
+                      } else {
+                        enqueueSnackbar(`Invalid buy amount: `, { variant: 'error' })
+                      }
+                    }}
+                  >
+                    submit
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {investType == 1 && <ConfirmModal text="Claim" txn={claimTxnAction} />}
 
           {investType == 2 && <ConfirmModal text="Reclaim" txn={reclaimTxnAction} />}
         </div>
       </div>
+      {/* <button
+        onClick={async () => {
+          await fetch('https://price-feeds.goracle.io/api/v2/crypto/prices?key=P6hT3kXpqbTNLWzyyyk1R7Crh&assets=algo&curr=usd')
+            .then((data) => data.json())
+            .then((result) => {
+              console.log(result[0].price)
+              let price = result[0].price
+              setAlgoInUSD(price)
+            })
+        }}
+      >
+        getAlgoPriceInUSD
+      </button> */}
     </div>
   )
 }
