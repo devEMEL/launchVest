@@ -10,7 +10,6 @@ from formula_helpers import (
     calculate_project_max_cap
 )
 
-USDC_ASSET_ID = pt.Int(10458941)
 LAUNCH_VEST_FEE = pt.Int(10)  # 10%
 PERCENTAGE = pt.Int(10)
 
@@ -138,7 +137,7 @@ def escrow_asset_opt_in(asset: pt.abi.Asset) -> pt.Expr:
 
 # noinspection PyTypeChecker
 @app.external(authorize=bk.Authorize.only_creator())
-def bootstrap(asset: pt.abi.Asset) -> pt.Expr:
+def bootstrap() -> pt.Expr:
     """
     Initializes Launch Vest application's global state, sets the admin account, and sets the escrow address.
 
@@ -147,9 +146,7 @@ def bootstrap(asset: pt.abi.Asset) -> pt.Expr:
     return pt.Seq(
         app.initialize_global_state(),
         app.state.admin_acct.set(pt.Global.creator_address()),
-        app.state.escrow_address.set(pt.Global.current_application_address()),
-        (escrow_asset_bal := pt.AssetHolding.balance(app.state.escrow_address, asset.asset_id())),
-        pt.If(escrow_asset_bal.value() == pt.Int(0), escrow_asset_opt_in(asset=asset)),
+        app.state.escrow_address.set(pt.Global.current_application_address())
     )
 
 
@@ -409,51 +406,6 @@ def investor_algo_payment(
 
 
 # noinspection PyTypeChecker
-@pt.Subroutine(pt.TealType.uint64)
-def investor_usdc_payment(
-    min_investment: pt.abi.Uint64,
-    max_investment: pt.abi.Uint64,
-    asset_id: pt.abi.Asset,
-    txn: pt.abi.Transaction
-) -> pt.Expr:
-    """
-    USDC transaction from investor, investment must be within the min and max limits.
-
-    Arguments must be passed in their order, since this is ``pt.Subroutine`` which only accepts positional args.
-
-    :param pt.abi.Uint64 min_investment: The minimum investment amount allowed.
-    :param pt.abi.Uint64 max_investment: The maximum investment amount allowed.
-    :param pt.abi.Uint64 asset_id: The unique ID of the asset.
-    :param pt.abi.Transaction txn: The transaction containing investment details (type_enum must be of AssetTransfer).
-    :rtype: pt.Expr
-    """
-    return pt.Seq(
-        pt.Assert(
-            txn.get().type_enum() == pt.TxnType.AssetTransfer,
-            comment="Transaction type must be AssetTransfer."
-        ),
-        pt.Assert(
-            asset_id.asset_id() == USDC_ASSET_ID,
-            comment="Invalid asset ID for USDC."
-        ),
-        pt.Assert(
-            txn.get().asset_receiver() == app.state.escrow_address.get(),
-            txn.get().xfer_asset() == asset_id.asset_id(),
-            comment="Invalid receiver or transaction type."
-        ),
-        pt.Assert(
-            pt.Or(
-                txn.get().asset_amount() >= min_investment.get(),
-                txn.get().asset_amount() <= max_investment.get(),
-            ),
-            comment="Asset amount must be greater or equal to min_investment"
-                    " and must be less than or equal to max_investment."
-        ),
-        pt.Return(txn.get().asset_amount())
-    )
-
-
-# noinspection PyTypeChecker
 @app.external
 def invest(
     is_staking: pt.abi.Bool,
@@ -687,14 +639,12 @@ def claim_ido_asset(
 def reclaim_investment(
     project_id: pt.abi.Asset,
     is_staking: pt.abi.Bool,
-    investment_asset_id: pt.abi.Asset
 ) -> pt.Expr:
     """
     Allows investors to reclaim their investment.
 
     :param pt.abi.Asset project_id: Project (asset) ID to be claimed.
     :param is_staking: Flag to indicate whether investor is current staking $VEST.
-    :param investment_asset_id: The unique asset ID of investment (ALGO, USDC).
     :rtype: pt.Expr.
     """
     investor = Investor()
@@ -750,27 +700,12 @@ def reclaim_investment(
             RECLAIM_WINDOW >= (pt.Global.latest_timestamp() - project_claim_timestamp.get()),
             comment="Claim must be within reclaim window."
         ),
-        pt.If(investment_asset_id.asset_id() == pt.Int(0))
-        .Then(
-            pt.InnerTxnBuilder.Execute({
-                pt.TxnField.type_enum: pt.TxnType.Payment,
-                pt.TxnField.receiver: investor_address.get(),
-                pt.TxnField.amount: investor_investment_amount.get(),
-                pt.TxnField.fee: pt.Int(0)
-            }),
-        ).Else(
-            pt.Assert(
-                investment_asset_id.asset_id() == USDC_ASSET_ID,
-                comment=f"Reclaim asset must be USDC asset ID: {USDC_ASSET_ID}"
-            ),
-            pt.InnerTxnBuilder.Execute({
-                pt.TxnField.type_enum: pt.TxnType.AssetTransfer,
-                pt.TxnField.asset_receiver: investor_address.get(),
-                pt.TxnField.asset_amount: investor_investment_amount.get(),
-                pt.TxnField.xfer_asset: investment_asset_id.asset_id(),
-                pt.TxnField.fee: pt.Int(0)
-            }),
-        ),
+        pt.InnerTxnBuilder.Execute({
+            pt.TxnField.type_enum: pt.TxnType.Payment,
+            pt.TxnField.receiver: investor_address.get(),
+            pt.TxnField.amount: investor_investment_amount.get(),
+            pt.TxnField.fee: pt.Int(0)
+        }),
         investor_investment_amount.set(pt.Int(0)),
         investor_asset_allocation.set(pt.Int(0)),
         investor_reclaimed_investment.set(TRUE),
