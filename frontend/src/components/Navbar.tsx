@@ -2,12 +2,13 @@ import { useWallet } from '@txnlab/use-wallet'
 import { useDispatch } from 'react-redux'
 import { showConnectModal } from '../services/features/connectModal/connectModalSlice'
 import { ellipseAddress } from '../utils/ellipseAddress'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
 const Navbar = () => {
   const dispatch = useDispatch()
   const { activeAccount, activeAddress, providers } = useWallet()
 
+  const navigate = useNavigate()
   const disconnectWallet = async () => {
     if (providers) {
       const activeProvider = providers.find((p) => p.isActive)
@@ -38,7 +39,10 @@ const Navbar = () => {
 
           <button
             className="capitalize bg-black text-white py-4 px-10 rounded-full"
-            onClick={!activeAccount ? () => dispatch(showConnectModal()) : () => disconnectWallet()}
+            onClick={!activeAccount ? () => dispatch(showConnectModal()) : () => {
+              disconnectWallet()
+              navigate("/")
+            }}
           >
             {!activeAccount ? 'connect your wallet' : 'Disconnect Wallet'}
           </button>

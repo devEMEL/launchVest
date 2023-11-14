@@ -22,7 +22,7 @@ const PER_BYTE_MBR = 0.0004e6
 const USDC_ASSET_ID = 10458941
 
 const ListToken = () => {
-  const [appId, setAppId] = useState<number>(479456212)
+  const [appId, setAppId] = useState<number>(479531574)
   const [amountOfAsset, setAmountOfAsset] = useState<bigint>(0n)
   const [assetId, setAssetId] = useState<bigint>(0n)
   const [startTimestamp, setStartTimestamp] = useState<string>('')
@@ -109,7 +109,6 @@ const ListToken = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    // if (!(assetId && startTimestamp && endTimestamp && claimTimestamp && assetPrice && minimumBuy && maximumBuy && imageURL)) return
     setLoading(true)
 
     try {
@@ -158,8 +157,11 @@ const ListToken = () => {
         const appAddress = (await launchVestClient.appClient.getAppReference()).appAddress
 
         const decimals = (await algodClient.getAssetByID(Number(assetId)).do()).params.decimals
-
-        const _amountOfAsset = amountOfAsset * BigInt(10 ** decimals)
+        console.log(decimals);
+        
+        const _amountOfAsset = BigInt(amountOfAsset) * BigInt(10 ** decimals)
+        console.log(_amountOfAsset);
+        
         const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
           from: String(activeAddress),
           to: appAddress,

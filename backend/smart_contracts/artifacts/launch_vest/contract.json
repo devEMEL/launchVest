@@ -110,6 +110,10 @@
                     "desc": "The project (asset) ID to invest in."
                 },
                 {
+                    "type": "uint64",
+                    "name": "amount_in_usd"
+                },
+                {
                     "type": "txn",
                     "name": "txn",
                     "desc": "The payment transaction for the investment."

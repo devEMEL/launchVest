@@ -13,7 +13,7 @@ import ConfirmModal from './Modals/ConfirmModal'
 import { VestStakeClient } from '../contracts/vest_stake'
 
 const ProjectPage = () => {
-  const [appId, setAppId] = useState<number>(479456212)
+  const [appId, setAppId] = useState<number>(479531574)
   const [amount, setAmount] = useState<bigint>(0n)
   const [showModal, setShowModal] = useState<boolean>(false)
   const [investType, setInvestType] = useState<number>(0)
@@ -137,7 +137,7 @@ const ProjectPage = () => {
   }, [])
 
   const tokenKey = algosdk.encodeUint64(Number(assetParams.projectId))
-  const buyTxn = async () => { 
+  const buyTxn = async () => {
     let txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: String(activeAddress),
       to: String(project['owner address']),
@@ -147,11 +147,17 @@ const ProjectPage = () => {
 
     const isStaking = await checkIsStaking()
 
-    const amountInUSD = Number(amount) * algoInUSD;
+    const amountInUSD = Number(amount) * algoInUSD
     // const allocation = Math.trunc((10 ** project['asset decimal'] * amountInUSD) / project['asset price']);
     const allocation = 2
     const tx = await launchVestClient.invest(
-      { is_staking: Boolean(isStaking), project_id: BigInt(project['asset id']), txn, asset_allocation: BigInt(allocation) },
+      {
+        is_staking: Boolean(isStaking),
+        project_id: BigInt(project['asset id']),
+        amount_in_usd: BigInt(amountInUSD),
+        txn,
+        asset_allocation: BigInt(allocation),
+      },
       {
         boxes: [algosdk.decodeAddress(activeAddress).publicKey, tokenKey],
       },

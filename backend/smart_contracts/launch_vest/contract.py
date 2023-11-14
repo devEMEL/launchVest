@@ -208,10 +208,10 @@ def list_project(
 
     return pt.Seq(
         (asset_decimal := pt.AssetParam.decimals(asset_id.asset_id())),
-        pt.Assert(
-            pt.Not(app.state.pid_to_project[project_id_bytes].exists()),
-            comment="Project already exists!"
-        ),
+        # pt.Assert(
+        #     pt.Not(app.state.pid_to_project[project_id_bytes].exists()),
+        #     comment="Project already exists!"
+        # ),
         pt.Assert(
             asset_decimal.value() != pt.Int(0),
             comment="A valid asset ID must be provided",
@@ -305,10 +305,10 @@ def deposit_ido_assets(
     project_id_bytes = pt.Itob(project_id)
 
     return pt.Seq(
-        pt.Assert(
-            app.state.pid_to_project[project_id_bytes].exists(),
-            comment="A valid project ID must be provided"
-        ),
+        # pt.Assert(
+        #     app.state.pid_to_project[project_id_bytes].exists(),
+        #     comment="A valid project ID must be provided"
+        # ),
 
         project.decode(app.state.pid_to_project[project_id_bytes].get()),
         (project_owner_address := pt.abi.Address()).set(project.owner_address),
@@ -373,48 +373,11 @@ def deposit_ido_assets(
 
 
 # noinspection PyTypeChecker
-@pt.Subroutine(pt.TealType.uint64)
-def investor_algo_payment(
-    min_investment: pt.abi.Uint64,
-    max_investment: pt.abi.Uint64,
-    txn: pt.abi.Transaction,
-) -> pt.Expr:
-    """
-    ALGO transaction from investor, investment must be within the min and max limits.
-
-    Arguments must be passed in their order, since this is ``pt.Subroutine`` which only accepts positional args.
-
-    :param pt.abi.Uint64 min_investment: The minimum investment amount allowed.
-    :param pt.abi.Uint64 max_investment: The maximum investment amount allowed.
-    :param pt.abi.Transaction txn: The transaction containing investment details (type_enum must be of Payment).
-    :rtype: pt.Expr.
-    """
-    return pt.Seq(
-        pt.Assert(
-            txn.get().type_enum() == pt.TxnType.Payment,
-            comment="Transaction type must be Payment."
-        ),
-        pt.Assert(
-            txn.get().receiver() == app.state.escrow_address.get(),
-            comment="Invalid receiver or transaction type."
-        ),
-        pt.Assert(
-            pt.Or(
-                txn.get().amount() >= min_investment.get(),
-                txn.get().amount() <= max_investment.get(),
-            ),
-            comment="Asset amount must be greater or equal to min_investment"
-                    " and must be less than or equal to max_investment."
-        ),
-        pt.Return(txn.get().amount())
-    )
-
-
-# noinspection PyTypeChecker
 @app.external
 def invest(
     is_staking: pt.abi.Bool,
     project_id: pt.abi.Asset,
+    amount_in_usd: pt.abi.Uint64,
     txn: pt.abi.Transaction,
     asset_allocation: pt.abi.Uint64
 ) -> pt.Expr:
@@ -491,15 +454,17 @@ def invest(
             asset_allocation.get() > pt.Int(0),
             comment="Asset allocation must be greater than 0."
         ),
-
-        (investor_investment_amount := pt.abi.Uint64()).set(pt.Int(0)),
-        investor_investment_amount.set(
-            investor_algo_payment(
-                project_min_investment_per_user,
-                project_max_investment_per_user,
-                txn
-            )
+        pt.Assert(
+            amount_in_usd.get() >= project_min_investment_per_user.get(),
+            amount_in_usd.get() <= project_max_investment_per_user.get(),
+            comment="Invalid amount."
         ),
+        pt.Assert(
+            txn.get().type_enum() == pt.TxnType.Payment,
+            txn.get().receiver() == app.state.escrow_address.get(),
+            comment="Invalid receiver or transaction type."
+        ),
+        (investor_investment_amount := pt.abi.Uint64()).set(txn.get().amount()),
         (investor_address := pt.abi.Address()).set(pt.Txn.sender()),
         (investor_project_id := pt.abi.Uint64()).set(project_id),
         (investor_asset_claim_timestamp := pt.abi.Uint64()).set(pt.Int(0)),
