@@ -13,7 +13,7 @@ import ConfirmModal from './Modals/ConfirmModal'
 import { VestStakeClient } from '../contracts/vest_stake'
 
 const ProjectPage = () => {
-  const [appId, setAppId] = useState<number>(479531574)
+  const [appId, setAppId] = useState<number>(479545536)
   const [amount, setAmount] = useState<bigint>(0n)
   const [showModal, setShowModal] = useState<boolean>(false)
   const [investType, setInvestType] = useState<number>(0)
@@ -137,19 +137,25 @@ const ProjectPage = () => {
   }, [])
 
   const tokenKey = algosdk.encodeUint64(Number(assetParams.projectId))
+  
   const buyTxn = async () => {
+    const appAddress = (await launchVestClient.appClient.getAppReference()).appAddress
     let txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: String(activeAddress),
-      to: String(project['owner address']),
+      to: String(appAddress),
       amount: BigInt(amount),
       suggestedParams: await algodClient.getTransactionParams().do(),
     })
 
     const isStaking = await checkIsStaking()
 
-    const amountInUSD = Number(amount) * algoInUSD
-    // const allocation = Math.trunc((10 ** project['asset decimal'] * amountInUSD) / project['asset price']);
-    const allocation = 2
+    const amountInUSD = Math.trunc(Number(amount) * Number(algoInUSD))
+    
+    const allocation = Math.trunc((10 ** project['asset decimal'] * amountInUSD) / project['asset price']);
+    console.log(amountInUSD);
+    console.log(allocation);
+    
+    
     const tx = await launchVestClient.invest(
       {
         is_staking: Boolean(isStaking),
@@ -327,6 +333,7 @@ const ProjectPage = () => {
                   </select> */}
                   <input
                     type="text"
+                    placeholder='Enter amount in Algo'
                     className="w-[100%] h-[50px] text-[16px] p-5 border-2 outline-0 bg-[#f8f6fe] rounded-lg text-black"
                     onChange={async (e) => {
                       setAmount(e.target.value as unknown as bigint)

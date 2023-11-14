@@ -51,7 +51,7 @@ const projects_ = [
 ]
 
 const Projects = () => {
-  const [appId, setAppId] = useState<number>(479531574)
+  const [appId, setAppId] = useState<number>(479545536)
   const [projects, setProjects] = useState<Array<object>>([])
   const { enqueueSnackbar } = useSnackbar()
   const { signer, activeAddress } = useWallet()
