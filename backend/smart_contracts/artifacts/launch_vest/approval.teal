@@ -1,5 +1,5 @@
 #pragma version 8
-intcblock 0 1 32 48 139 848 849 131 512 513
+intcblock 0 1 32 48 147 912 913 131 139 512 513
 bytecblock 0x 0x00 0x657363726f775f61646472657373 0x61646d696e5f61636374 0x151f7c75
 txn NumAppArgs
 intc_0 // 0
@@ -54,7 +54,7 @@ pushbytes 0x5313374d // "get_investor(address)(address,uint64,uint64,uint64,uint
 ==
 bnz main_l16
 txna ApplicationArgs 0
-pushbytes 0xf3158ff4 // "get_project(uint64)(address,uint64,uint64,uint64,uint64,string,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64,uint64,uint64)"
+pushbytes 0x5cdc6c33 // "get_project(uint64)(address,uint64,uint64,uint64,uint64,uint64,string,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64,uint64,uint64)"
 ==
 bnz main_l15
 err
@@ -317,15 +317,27 @@ proto 9 0
 bytec_0 // ""
 dup
 intc_0 // 0
-dupn 10
+dupn 11
 bytec_0 // ""
 dup
 frame_dig -9
 txnas Assets
-asset_params_get AssetTotal
+asset_params_get AssetDecimals
+store 1
 store 0
+frame_dig -9
+txnas Assets
+itob
+box_len
+store 3
+store 2
+load 3
+!
+// Project already exists!
+assert
+load 0
 intc_0 // 0
->
+!=
 // A valid asset ID must be provided
 assert
 frame_dig -4
@@ -395,8 +407,7 @@ pushint 4 // axfer
 itxn_field TypeEnum
 intc_0 // 0
 itxn_field AssetAmount
-bytec_2 // "escrow_address"
-app_global_get
+global CurrentApplicationAddress
 itxn_field AssetReceiver
 frame_dig -9
 txnas Assets
@@ -414,28 +425,30 @@ assert
 frame_dig -9
 txnas Assets
 frame_bury 2
-intc_0 // 0
+load 0
 frame_bury 3
 intc_0 // 0
 frame_bury 4
 intc_0 // 0
-!
-!
 frame_bury 5
 intc_0 // 0
 !
 !
 frame_bury 6
 intc_0 // 0
+!
+!
 frame_bury 7
 intc_0 // 0
 frame_bury 8
 intc_0 // 0
 frame_bury 9
+intc_0 // 0
+frame_bury 10
 global LatestTimestamp
 frame_dig -1
 +
-frame_bury 10
+frame_bury 11
 frame_dig 1
 frame_dig -7
 itob
@@ -449,13 +462,16 @@ concat
 frame_dig 2
 itob
 concat
+frame_dig 3
+itob
+concat
 frame_dig -8
+frame_bury 15
+frame_dig 15
 frame_bury 14
-frame_dig 14
-frame_bury 13
-intc 4 // 139
-frame_bury 11
-frame_dig 11
+intc 4 // 147
+frame_bury 12
+frame_dig 12
 itob
 extract 6 0
 concat
@@ -468,22 +484,19 @@ concat
 frame_dig -2
 itob
 concat
-frame_dig 3
+frame_dig 4
 itob
 concat
-frame_dig 4
+frame_dig 5
 itob
 concat
 bytec_1 // 0x00
 intc_0 // 0
-frame_dig 5
-setbit
-intc_1 // 1
 frame_dig 6
 setbit
-concat
+intc_1 // 1
 frame_dig 7
-itob
+setbit
 concat
 frame_dig 8
 itob
@@ -494,7 +507,10 @@ concat
 frame_dig 10
 itob
 concat
-frame_dig 13
+frame_dig 11
+itob
+concat
+frame_dig 14
 concat
 frame_bury 0
 frame_dig -9
@@ -515,7 +531,7 @@ proto 2 0
 bytec_0 // ""
 dup
 intc_0 // 0
-dupn 3
+dupn 4
 bytec_0 // ""
 intc_0 // 0
 dupn 12
@@ -525,20 +541,20 @@ frame_dig -1
 txnas Assets
 itob
 box_len
-store 2
-store 1
-load 2
+store 5
+store 4
+load 5
 // A valid project ID must be provided
 assert
 frame_dig -1
 txnas Assets
 itob
 box_get
-store 4
-store 3
-load 4
+store 7
+store 6
+load 7
 assert
-load 3
+load 6
 frame_bury 0
 frame_dig 0
 extract 0 32
@@ -597,16 +613,16 @@ pushint 56 // 56
 extract_uint64
 frame_bury 5
 frame_dig 0
-frame_dig 0
 pushint 64 // 64
+extract_uint64
+frame_bury 6
+frame_dig 0
+frame_dig 0
+pushint 72 // 72
 extract_uint16
 dig 1
 len
 substring3
-frame_bury 6
-frame_dig 0
-pushint 66 // 66
-extract_uint64
 frame_bury 7
 frame_dig 0
 pushint 74 // 74
@@ -616,20 +632,20 @@ frame_dig 0
 pushint 82 // 82
 extract_uint64
 frame_bury 9
+frame_dig 0
+pushint 90 // 90
+extract_uint64
+frame_bury 10
 frame_dig -2
 gtxns AssetAmount
-frame_bury 10
-frame_dig 0
-intc 5 // 848
-getbit
 frame_bury 11
 frame_dig 0
-intc 6 // 849
+intc 5 // 912
 getbit
 frame_bury 12
 frame_dig 0
-pushint 107 // 107
-extract_uint64
+intc 6 // 913
+getbit
 frame_bury 13
 frame_dig 0
 pushint 115 // 115
@@ -643,10 +659,14 @@ frame_dig 0
 intc 7 // 131
 extract_uint64
 frame_bury 16
-frame_dig 10
-frame_dig 7
-callsub calculateprojectmaxcap_0
+frame_dig 0
+intc 8 // 139
+extract_uint64
 frame_bury 17
+frame_dig 11
+frame_dig 8
+callsub calculateprojectmaxcap_0
+frame_bury 18
 frame_dig 1
 frame_dig 2
 itob
@@ -661,17 +681,17 @@ frame_dig 5
 itob
 concat
 frame_dig 6
-frame_bury 21
-frame_dig 21
-frame_bury 20
-intc 4 // 139
-frame_bury 18
-frame_dig 18
 itob
-extract 6 0
 concat
 frame_dig 7
+frame_bury 22
+frame_dig 22
+frame_bury 21
+intc 4 // 147
+frame_bury 19
+frame_dig 19
 itob
+extract 6 0
 concat
 frame_dig 8
 itob
@@ -679,22 +699,22 @@ concat
 frame_dig 9
 itob
 concat
-frame_dig 17
+frame_dig 10
 itob
 concat
-frame_dig 10
+frame_dig 18
+itob
+concat
+frame_dig 11
 itob
 concat
 bytec_1 // 0x00
 intc_0 // 0
-frame_dig 11
-setbit
-intc_1 // 1
 frame_dig 12
 setbit
-concat
+intc_1 // 1
 frame_dig 13
-itob
+setbit
 concat
 frame_dig 14
 itob
@@ -705,7 +725,10 @@ concat
 frame_dig 16
 itob
 concat
-frame_dig 20
+frame_dig 17
+itob
+concat
+frame_dig 21
 concat
 frame_bury 0
 frame_dig -1
@@ -757,7 +780,7 @@ proto 4 0
 bytec_0 // ""
 dupn 2
 intc_0 // 0
-dupn 3
+dupn 4
 bytec_0 // ""
 intc_0 // 0
 dupn 11
@@ -779,27 +802,27 @@ frame_dig -3
 txnas Assets
 itob
 box_len
-store 6
-store 5
-load 6
+store 9
+store 8
+load 9
 // A valid project ID must be provided
 assert
 frame_dig -3
 txnas Assets
 itob
 box_get
-store 8
-store 7
-load 8
+store 11
+store 10
+load 11
 assert
-load 7
+load 10
 frame_bury 1
 bytec_2 // "escrow_address"
 app_global_get
 frame_dig -3
 txnas Assets
 asset_holding_get AssetBalance
-store 9
+store 12
 intc_0 // 0
 >
 // Project assets must be available in escrow.
@@ -824,16 +847,16 @@ pushint 56 // 56
 extract_uint64
 frame_bury 6
 frame_dig 1
-frame_dig 1
 pushint 64 // 64
+extract_uint64
+frame_bury 7
+frame_dig 1
+frame_dig 1
+pushint 72 // 72
 extract_uint16
 dig 1
 len
 substring3
-frame_bury 7
-frame_dig 1
-pushint 66 // 66
-extract_uint64
 frame_bury 8
 frame_dig 1
 pushint 74 // 74
@@ -852,16 +875,16 @@ pushint 98 // 98
 extract_uint64
 frame_bury 12
 frame_dig 1
-intc 5 // 848
-getbit
+pushint 106 // 106
+extract_uint64
 frame_bury 13
 frame_dig 1
-intc 6 // 849
+intc 5 // 912
 getbit
 frame_bury 14
 frame_dig 1
-pushint 107 // 107
-extract_uint64
+intc 6 // 913
+getbit
 frame_bury 15
 frame_dig 1
 pushint 115 // 115
@@ -875,13 +898,17 @@ frame_dig 1
 intc 7 // 131
 extract_uint64
 frame_bury 18
-frame_dig 13
+frame_dig 1
+intc 8 // 139
+extract_uint64
+frame_bury 19
+frame_dig 14
 intc_0 // 0
 ==
 // Project must not be paused.
 assert
-frame_dig 16
-frame_dig 11
+frame_dig 17
+frame_dig 12
 <
 // Total amount raised must be less than max. cap
 assert
@@ -895,85 +922,74 @@ frame_dig 4
 <
 // Project must be live and ongoing.
 assert
-frame_dig -2
-gtxns TypeEnum
-intc_1 // pay
-==
-frame_dig -2
-gtxns TypeEnum
-pushint 4 // axfer
-==
-||
-// Invalid transaction type. Must be of type Payment or AssetTransfer.
-assert
 frame_dig -1
 intc_0 // 0
 >
 // Asset allocation must be greater than 0.
 assert
 intc_0 // 0
-frame_bury 19
-frame_dig 9
+frame_bury 20
 frame_dig 10
+frame_dig 11
 frame_dig -2
 callsub investoralgopayment_7
-frame_bury 19
-txn Sender
 frame_bury 20
-frame_dig 20
+txn Sender
+frame_bury 21
+frame_dig 21
 len
 intc_2 // 32
 ==
 assert
 frame_dig -3
 txnas Assets
-frame_bury 21
-intc_0 // 0
 frame_bury 22
 intc_0 // 0
-!
-!
 frame_bury 23
 intc_0 // 0
 !
 !
 frame_bury 24
-frame_dig 20
+intc_0 // 0
+!
+!
+frame_bury 25
 frame_dig 21
+frame_dig 22
 itob
 concat
-frame_dig 19
+frame_dig 20
 itob
 concat
 frame_dig -1
 itob
 concat
-frame_dig 22
+frame_dig 23
 itob
 concat
 bytec_1 // 0x00
 intc_0 // 0
-frame_dig 23
+frame_dig 24
 setbit
 intc_1 // 1
-frame_dig 24
+frame_dig 25
 setbit
 concat
 frame_bury 0
-frame_dig 20
+frame_dig 21
 box_del
 pop
-frame_dig 20
+frame_dig 21
 frame_dig 0
 box_put
-frame_dig 12
+frame_dig 13
 frame_dig -1
 -
-frame_bury 15
-frame_dig 16
-frame_dig 19
-+
 frame_bury 16
+frame_dig 17
+frame_dig 20
++
+frame_bury 17
 frame_dig 2
 frame_dig 3
 itob
@@ -988,17 +1004,17 @@ frame_dig 6
 itob
 concat
 frame_dig 7
-frame_bury 32
-frame_dig 32
-frame_bury 31
-intc 4 // 139
-frame_bury 29
-frame_dig 29
 itob
-extract 6 0
 concat
 frame_dig 8
+frame_bury 33
+frame_dig 33
+frame_bury 32
+intc 4 // 147
+frame_bury 30
+frame_dig 30
 itob
+extract 6 0
 concat
 frame_dig 9
 itob
@@ -1012,16 +1028,16 @@ concat
 frame_dig 12
 itob
 concat
+frame_dig 13
+itob
+concat
 bytec_1 // 0x00
 intc_0 // 0
-frame_dig 13
-setbit
-intc_1 // 1
 frame_dig 14
 setbit
-concat
+intc_1 // 1
 frame_dig 15
-itob
+setbit
 concat
 frame_dig 16
 itob
@@ -1032,7 +1048,10 @@ concat
 frame_dig 18
 itob
 concat
-frame_dig 31
+frame_dig 19
+itob
+concat
+frame_dig 32
 concat
 frame_bury 1
 frame_dig -3
@@ -1060,29 +1079,29 @@ bytec_0 // ""
 dup
 txn Sender
 box_len
-store 11
-store 10
-load 11
+store 14
+store 13
+load 14
 // Invalid investor.
 assert
 frame_dig -2
 txnas Assets
 itob
 box_len
-store 13
-store 12
-load 13
+store 16
+store 15
+load 16
 // Invalid project.
 assert
 frame_dig -2
 txnas Assets
 itob
 box_get
-store 15
-store 14
-load 15
+store 18
+store 17
+load 18
 assert
-load 14
+load 17
 frame_bury 1
 frame_dig 1
 intc_3 // 48
@@ -1095,11 +1114,11 @@ frame_dig 2
 assert
 txn Sender
 box_get
-store 17
-store 16
-load 17
+store 20
+store 19
+load 20
 assert
-load 16
+load 19
 frame_bury 0
 frame_dig 0
 extract 0 32
@@ -1121,11 +1140,11 @@ pushint 56 // 56
 extract_uint64
 frame_bury 7
 frame_dig 0
-intc 8 // 512
+intc 9 // 512
 getbit
 frame_bury 8
 frame_dig 0
-intc 9 // 513
+intc 10 // 513
 getbit
 frame_bury 9
 frame_dig -1
@@ -1218,27 +1237,27 @@ bytec_0 // ""
 dup
 txn Sender
 box_len
-store 19
-store 18
-load 19
+store 22
+store 21
+load 22
 // Invalid investor.
 assert
 frame_dig -2
 txnas Assets
 itob
 box_len
-store 21
-store 20
-load 21
+store 24
+store 23
+load 24
 // Invalid project ID.
 assert
 txn Sender
 box_get
-store 23
-store 22
-load 23
+store 26
+store 25
+load 26
 assert
-load 22
+load 25
 frame_bury 0
 frame_dig 0
 extract 0 32
@@ -1256,7 +1275,7 @@ intc_3 // 48
 extract_uint64
 frame_bury 5
 frame_dig 0
-intc 8 // 512
+intc 9 // 512
 getbit
 frame_bury 6
 frame_dig 0
@@ -1264,18 +1283,18 @@ pushint 56 // 56
 extract_uint64
 frame_bury 7
 frame_dig 0
-intc 9 // 513
+intc 10 // 513
 getbit
 frame_bury 8
 frame_dig -2
 txnas Assets
 itob
 box_get
-store 25
-store 24
-load 25
+store 28
+store 27
+load 28
 assert
-load 24
+load 27
 frame_bury 1
 frame_dig 1
 intc_3 // 48
@@ -1286,7 +1305,7 @@ app_global_get
 frame_dig -2
 txnas Assets
 asset_holding_get AssetBalance
-store 26
+store 29
 intc_0 // 0
 >
 // Project assets must be available in escrow.
@@ -1372,7 +1391,7 @@ proto 1 0
 bytec_0 // ""
 dup
 intc_0 // 0
-dupn 3
+dupn 4
 bytec_0 // ""
 intc_0 // 0
 dupn 16
@@ -1381,19 +1400,19 @@ dup
 frame_dig -1
 itob
 box_len
-store 28
-store 27
-load 28
+store 31
+store 30
+load 31
 // Invalid project ID.
 assert
 frame_dig -1
 itob
 box_get
-store 30
-store 29
-load 30
+store 33
+store 32
+load 33
 assert
-load 29
+load 32
 frame_bury 0
 frame_dig 0
 extract 0 32
@@ -1415,16 +1434,16 @@ pushint 56 // 56
 extract_uint64
 frame_bury 5
 frame_dig 0
-frame_dig 0
 pushint 64 // 64
+extract_uint64
+frame_bury 6
+frame_dig 0
+frame_dig 0
+pushint 72 // 72
 extract_uint16
 dig 1
 len
 substring3
-frame_bury 6
-frame_dig 0
-pushint 66 // 66
-extract_uint64
 frame_bury 7
 frame_dig 0
 pushint 74 // 74
@@ -1443,16 +1462,16 @@ pushint 98 // 98
 extract_uint64
 frame_bury 11
 frame_dig 0
-intc 5 // 848
-getbit
+pushint 106 // 106
+extract_uint64
 frame_bury 12
 frame_dig 0
-intc 6 // 849
+intc 5 // 912
 getbit
 frame_bury 13
 frame_dig 0
-pushint 107 // 107
-extract_uint64
+intc 6 // 913
+getbit
 frame_bury 14
 frame_dig 0
 pushint 115 // 115
@@ -1466,12 +1485,16 @@ frame_dig 0
 intc 7 // 131
 extract_uint64
 frame_bury 17
+frame_dig 0
+intc 8 // 139
+extract_uint64
+frame_bury 18
 txn Sender
 frame_dig 1
 ==
 // Invalid sender.
 assert
-frame_dig 15
+frame_dig 16
 intc_0 // 0
 >
 // Amount raised must be greater than 0.
@@ -1482,51 +1505,51 @@ frame_dig 4
 // Withdrawal must be after claim period.
 assert
 pushint 10 // 10
-frame_bury 18
-frame_dig 15
-frame_dig 18
-callsub calculateproceedsafterfeededuction_1
 frame_bury 19
-pushint 10 // 10
-frame_bury 20
+frame_dig 16
 frame_dig 19
-frame_dig 20
-callsub calculatedisbursement_2
+callsub calculateproceedsafterfeededuction_1
+frame_bury 20
+pushint 10 // 10
 frame_bury 21
-frame_dig 13
+frame_dig 20
+frame_dig 21
+callsub calculatedisbursement_2
+frame_bury 22
+frame_dig 14
 intc_0 // 0
 ==
 bnz withdrawamountraised_11_l2
 global LatestTimestamp
-frame_dig 17
+frame_dig 18
 >
 // Subsequent withdrawal must be after vesting period.
 assert
-frame_dig 16
-frame_dig 19
+frame_dig 17
+frame_dig 20
 <
 // Accumulated withdrawn amount must be less than amount raised.
 assert
 itxn_begin
 intc_1 // pay
 itxn_field TypeEnum
-frame_dig 21
+frame_dig 22
 itxn_field Amount
 frame_dig 1
 itxn_field Receiver
 intc_0 // 0
 itxn_field Fee
 itxn_submit
-frame_dig 16
-frame_dig 21
+frame_dig 17
+frame_dig 22
 +
-frame_bury 16
+frame_bury 17
 b withdrawamountraised_11_l3
 withdrawamountraised_11_l2:
 itxn_begin
 intc_1 // pay
 itxn_field TypeEnum
-frame_dig 21
+frame_dig 22
 itxn_field Amount
 frame_dig 1
 itxn_field Receiver
@@ -1536,11 +1559,11 @@ itxn_submit
 intc_1 // 1
 !
 !
-frame_bury 13
-frame_dig 16
-frame_dig 21
+frame_bury 14
+frame_dig 17
+frame_dig 22
 +
-frame_bury 16
+frame_bury 17
 withdrawamountraised_11_l3:
 frame_dig 1
 frame_dig 2
@@ -1556,17 +1579,17 @@ frame_dig 5
 itob
 concat
 frame_dig 6
-frame_bury 25
-frame_dig 25
-frame_bury 24
-intc 4 // 139
-frame_bury 22
-frame_dig 22
 itob
-extract 6 0
 concat
 frame_dig 7
+frame_bury 26
+frame_dig 26
+frame_bury 25
+intc 4 // 147
+frame_bury 23
+frame_dig 23
 itob
+extract 6 0
 concat
 frame_dig 8
 itob
@@ -1580,16 +1603,16 @@ concat
 frame_dig 11
 itob
 concat
+frame_dig 12
+itob
+concat
 bytec_1 // 0x00
 intc_0 // 0
-frame_dig 12
-setbit
-intc_1 // 1
 frame_dig 13
 setbit
-concat
+intc_1 // 1
 frame_dig 14
-itob
+setbit
 concat
 frame_dig 15
 itob
@@ -1600,7 +1623,10 @@ concat
 frame_dig 17
 itob
 concat
-frame_dig 24
+frame_dig 18
+itob
+concat
+frame_dig 25
 concat
 frame_bury 0
 frame_dig -1
@@ -1619,7 +1645,7 @@ proto 1 0
 bytec_0 // ""
 dup
 intc_0 // 0
-dupn 3
+dupn 4
 bytec_0 // ""
 intc_0 // 0
 dupn 12
@@ -1633,19 +1659,19 @@ assert
 frame_dig -1
 itob
 box_len
-store 32
-store 31
-load 32
+store 35
+store 34
+load 35
 // Invalid project ID.
 assert
 frame_dig -1
 itob
 box_get
-store 34
-store 33
-load 34
+store 37
+store 36
+load 37
 assert
-load 33
+load 36
 frame_bury 0
 frame_dig 0
 extract 0 32
@@ -1667,16 +1693,16 @@ pushint 56 // 56
 extract_uint64
 frame_bury 5
 frame_dig 0
-frame_dig 0
 pushint 64 // 64
+extract_uint64
+frame_bury 6
+frame_dig 0
+frame_dig 0
+pushint 72 // 72
 extract_uint16
 dig 1
 len
 substring3
-frame_bury 6
-frame_dig 0
-pushint 66 // 66
-extract_uint64
 frame_bury 7
 frame_dig 0
 pushint 74 // 74
@@ -1695,16 +1721,16 @@ pushint 98 // 98
 extract_uint64
 frame_bury 11
 frame_dig 0
-intc 5 // 848
-getbit
+pushint 106 // 106
+extract_uint64
 frame_bury 12
 frame_dig 0
-intc 6 // 849
+intc 5 // 912
 getbit
 frame_bury 13
 frame_dig 0
-pushint 107 // 107
-extract_uint64
+intc 6 // 913
+getbit
 frame_bury 14
 frame_dig 0
 pushint 115 // 115
@@ -1718,7 +1744,11 @@ frame_dig 0
 intc 7 // 131
 extract_uint64
 frame_bury 17
-frame_dig 12
+frame_dig 0
+intc 8 // 139
+extract_uint64
+frame_bury 18
+frame_dig 13
 intc_0 // 0
 ==
 // Project must not be unpaused before trying to pause.
@@ -1726,7 +1756,7 @@ assert
 intc_1 // 1
 !
 !
-frame_bury 12
+frame_bury 13
 frame_dig 1
 frame_dig 2
 itob
@@ -1741,17 +1771,17 @@ frame_dig 5
 itob
 concat
 frame_dig 6
-frame_bury 21
-frame_dig 21
-frame_bury 20
-intc 4 // 139
-frame_bury 18
-frame_dig 18
 itob
-extract 6 0
 concat
 frame_dig 7
+frame_bury 22
+frame_dig 22
+frame_bury 21
+intc 4 // 147
+frame_bury 19
+frame_dig 19
 itob
+extract 6 0
 concat
 frame_dig 8
 itob
@@ -1765,16 +1795,16 @@ concat
 frame_dig 11
 itob
 concat
+frame_dig 12
+itob
+concat
 bytec_1 // 0x00
 intc_0 // 0
-frame_dig 12
-setbit
-intc_1 // 1
 frame_dig 13
 setbit
-concat
+intc_1 // 1
 frame_dig 14
-itob
+setbit
 concat
 frame_dig 15
 itob
@@ -1785,7 +1815,10 @@ concat
 frame_dig 17
 itob
 concat
-frame_dig 20
+frame_dig 18
+itob
+concat
+frame_dig 21
 concat
 frame_bury 0
 frame_dig -1
@@ -1804,7 +1837,7 @@ proto 1 0
 bytec_0 // ""
 dup
 intc_0 // 0
-dupn 3
+dupn 4
 bytec_0 // ""
 intc_0 // 0
 dupn 12
@@ -1818,19 +1851,19 @@ assert
 frame_dig -1
 itob
 box_len
-store 36
-store 35
-load 36
+store 39
+store 38
+load 39
 // Invalid project ID.
 assert
 frame_dig -1
 itob
 box_get
-store 38
-store 37
-load 38
+store 41
+store 40
+load 41
 assert
-load 37
+load 40
 frame_bury 0
 frame_dig 0
 extract 0 32
@@ -1852,16 +1885,16 @@ pushint 56 // 56
 extract_uint64
 frame_bury 5
 frame_dig 0
-frame_dig 0
 pushint 64 // 64
+extract_uint64
+frame_bury 6
+frame_dig 0
+frame_dig 0
+pushint 72 // 72
 extract_uint16
 dig 1
 len
 substring3
-frame_bury 6
-frame_dig 0
-pushint 66 // 66
-extract_uint64
 frame_bury 7
 frame_dig 0
 pushint 74 // 74
@@ -1880,16 +1913,16 @@ pushint 98 // 98
 extract_uint64
 frame_bury 11
 frame_dig 0
-intc 5 // 848
-getbit
+pushint 106 // 106
+extract_uint64
 frame_bury 12
 frame_dig 0
-intc 6 // 849
+intc 5 // 912
 getbit
 frame_bury 13
 frame_dig 0
-pushint 107 // 107
-extract_uint64
+intc 6 // 913
+getbit
 frame_bury 14
 frame_dig 0
 pushint 115 // 115
@@ -1903,7 +1936,11 @@ frame_dig 0
 intc 7 // 131
 extract_uint64
 frame_bury 17
-frame_dig 12
+frame_dig 0
+intc 8 // 139
+extract_uint64
+frame_bury 18
+frame_dig 13
 intc_1 // 1
 ==
 // Project must be paused before attempting to unpause.
@@ -1911,7 +1948,7 @@ assert
 intc_0 // 0
 !
 !
-frame_bury 12
+frame_bury 13
 frame_dig 1
 frame_dig 2
 itob
@@ -1926,17 +1963,17 @@ frame_dig 5
 itob
 concat
 frame_dig 6
-frame_bury 21
-frame_dig 21
-frame_bury 20
-intc 4 // 139
-frame_bury 18
-frame_dig 18
 itob
-extract 6 0
 concat
 frame_dig 7
+frame_bury 22
+frame_dig 22
+frame_bury 21
+intc 4 // 147
+frame_bury 19
+frame_dig 19
 itob
+extract 6 0
 concat
 frame_dig 8
 itob
@@ -1950,16 +1987,16 @@ concat
 frame_dig 11
 itob
 concat
+frame_dig 12
+itob
+concat
 bytec_1 // 0x00
 intc_0 // 0
-frame_dig 12
-setbit
-intc_1 // 1
 frame_dig 13
 setbit
-concat
+intc_1 // 1
 frame_dig 14
-itob
+setbit
 concat
 frame_dig 15
 itob
@@ -1970,7 +2007,10 @@ concat
 frame_dig 17
 itob
 concat
-frame_dig 20
+frame_dig 18
+itob
+concat
+frame_dig 21
 concat
 frame_bury 0
 frame_dig -1
@@ -2002,11 +2042,11 @@ proto 1 1
 bytec_0 // ""
 frame_dig -1
 box_get
-store 40
-store 39
-load 40
+store 43
+store 42
+load 43
 assert
-load 39
+load 42
 frame_bury 0
 retsub
 
@@ -2017,11 +2057,11 @@ bytec_0 // ""
 frame_dig -1
 itob
 box_get
-store 42
-store 41
-load 42
+store 45
+store 44
+load 45
 assert
-load 41
+load 44
 frame_bury 0
 retsub
 

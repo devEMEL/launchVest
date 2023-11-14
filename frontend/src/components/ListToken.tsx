@@ -22,7 +22,8 @@ const PER_BYTE_MBR = 0.0004e6
 const USDC_ASSET_ID = 10458941
 
 const ListToken = () => {
-  const [appId, setAppId] = useState<number>(0)
+  const [appId, setAppId] = useState<number>(479456212)
+  const [amountOfAsset, setAmountOfAsset] = useState<bigint>(0n)
   const [assetId, setAssetId] = useState<bigint>(0n)
   const [startTimestamp, setStartTimestamp] = useState<string>('')
   const [endTimestamp, setEndTimestamp] = useState<string>('')
@@ -153,6 +154,25 @@ const ListToken = () => {
             sendParams: { fee: algokit.microAlgos(200_000) },
           },
         )
+
+        const appAddress = (await launchVestClient.appClient.getAppReference()).appAddress
+
+        const decimals = (await algodClient.getAssetByID(Number(assetId)).do()).params.decimals
+
+        const _amountOfAsset = amountOfAsset * BigInt(10 ** decimals)
+        const txn = algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+          from: String(activeAddress),
+          to: appAddress,
+          amount: BigInt(_amountOfAsset),
+          assetIndex: Number(assetId),
+          suggestedParams: await algodClient.getTransactionParams().do(),
+        })
+        await launchVestClient.depositIdoAssets(
+          {txn: txn, asset: BigInt(assetId)},
+          {
+            boxes: [tokenKey],
+          },
+        )
         console.log(listToken)
         enqueueSnackbar(`Project Listed successfully`)
       }
@@ -179,6 +199,23 @@ const ListToken = () => {
                 className="w-[100%] h-[50px] text-[16px] p-5 border-2 outline-0 bg-[#f8f6fe] rounded-lg"
                 onChange={(e) => {
                   setAssetId(e.target.value as unknown as bigint)
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="mb-5">
+            <label htmlFor="amount_of_asset" className="text-2xl capitalize">
+              Amount of asset
+            </label>
+            <div className="mt-3">
+              <input
+                type="text"
+                name="amount_of_asset"
+                id="amount_of_asset"
+                className="w-[100%] h-[50px] text-[16px] p-5 border-2 outline-0 bg-[#f8f6fe] rounded-lg "
+                onChange={(e) => {
+                  setAmountOfAsset(e.target.value as unknown as bigint)
                 }}
               />
             </div>

@@ -13,7 +13,7 @@ import ConfirmModal from './Modals/ConfirmModal'
 import { VestStakeClient } from '../contracts/vest_stake'
 
 const ProjectPage = () => {
-  const [appId, setAppId] = useState<number>(466175126)
+  const [appId, setAppId] = useState<number>(479456212)
   const [amount, setAmount] = useState<bigint>(0n)
   const [showModal, setShowModal] = useState<boolean>(false)
   const [investType, setInvestType] = useState<number>(0)
@@ -37,7 +37,7 @@ const ProjectPage = () => {
   const vestStakeClient = new VestStakeClient(
     {
       resolveBy: 'id',
-      id: 462048462,
+      id: 479411007,
       sender,
     },
     algodClient,
@@ -148,9 +148,10 @@ const ProjectPage = () => {
     const isStaking = await checkIsStaking()
 
     const amountInUSD = Number(amount) * algoInUSD;
-    const allocation = (10 ** project['asset decimal'] * amountInUSD) / project['asset price'];
+    // const allocation = Math.trunc((10 ** project['asset decimal'] * amountInUSD) / project['asset price']);
+    const allocation = 2
     const tx = await launchVestClient.invest(
-      { is_staking: Boolean(isStaking), project: BigInt(project['asset id']), txn, asset_allocation: BigInt(allocation) },
+      { is_staking: Boolean(isStaking), project_id: BigInt(project['asset id']), txn, asset_allocation: BigInt(allocation) },
       {
         boxes: [algosdk.decodeAddress(activeAddress).publicKey, tokenKey],
       },

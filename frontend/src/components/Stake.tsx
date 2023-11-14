@@ -9,8 +9,8 @@ import { useWallet } from '@txnlab/use-wallet'
 import { useSnackbar } from 'notistack'
 import algosdk from 'algosdk'
 
-const QUATERLY = 7_884_000n
-const HALF_A_YEAR = 15_768_000n
+const QUATERLY = 7_776_000n
+const HALF_A_YEAR = 15_552_000n
 const YEARLY = 31_536_000n
 
 const ASSET_ID = 460043736
@@ -41,7 +41,7 @@ const Stake = () => {
   const vestStakeClient = new VestStakeClient(
     {
       resolveBy: 'id',
-      id: 462048462,
+      id: 479411007,
       sender,
     },
     algodClient,
@@ -253,7 +253,7 @@ const Stake = () => {
           await vestStakeClient.create.bare()
           const vestStakeAppId = (await vestStakeClient.appClient.getAppReference()).appId
           await vestStakeClient.appClient.fundAppAccount(algokit.microAlgos(300_000))
-          await vestStakeClient.bootstrap({ asset: BigInt(ASSET_ID) })
+          await vestStakeClient.bootstrap({ asset: BigInt(ASSET_ID) }, { sendParams: { fee: algokit.microAlgos(200_000) }})
 
           console.log(vestStakeAppId)
 

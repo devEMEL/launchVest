@@ -69,6 +69,7 @@ class Project(pt.abi.NamedTuple):
     end_timestamp: pt.abi.Field[pt.abi.Uint64]
     claim_timestamp: pt.abi.Field[pt.abi.Uint64]
     asset_id: pt.abi.Field[pt.abi.Uint64]
+    asset_decimal: pt.abi.Field[pt.abi.Uint64]
     image_url: pt.abi.Field[pt.abi.String]
     price_per_asset: pt.abi.Field[pt.abi.Uint64]
     min_investment_per_investor: pt.abi.Field[pt.abi.Uint64]
@@ -127,7 +128,7 @@ def escrow_asset_opt_in(asset: pt.abi.Asset) -> pt.Expr:
             {
                 pt.TxnField.type_enum: pt.TxnType.AssetTransfer,
                 pt.TxnField.asset_amount: pt.Int(0),
-                pt.TxnField.asset_receiver: app.state.escrow_address,
+                pt.TxnField.asset_receiver: pt.Global.current_application_address(),
                 pt.TxnField.xfer_asset: asset.asset_id(),
                 pt.TxnField.fee: pt.Int(0)
             },
@@ -206,13 +207,13 @@ def list_project(
     project_id_bytes = pt.Itob(project_id)
 
     return pt.Seq(
-        (asset_total := pt.AssetParam.total(asset_id.asset_id())),
-        # pt.Assert(
-        #     pt.Not(app.state.pid_to_project[project_id_bytes].exists()),
-        #     comment="Project already exists!"
-        # ),
+        (asset_decimal := pt.AssetParam.decimals(asset_id.asset_id())),
         pt.Assert(
-            asset_total.value() > pt.Int(0),
+            pt.Not(app.state.pid_to_project[project_id_bytes].exists()),
+            comment="Project already exists!"
+        ),
+        pt.Assert(
+            asset_decimal.value() != pt.Int(0),
             comment="A valid asset ID must be provided",
         ),
         pt.Assert(
@@ -252,6 +253,7 @@ def list_project(
         escrow_asset_opt_in(asset=asset_id),
         (project_owner_address := pt.abi.Address()).set(pt.Txn.sender()),
         (project_asset_id := pt.abi.Uint64()).set(asset_id.asset_id()),
+        (project_asset_decimal := pt.abi.Uint64()).set(asset_decimal.value()),
         (project_max_cap := pt.abi.Uint64()).set(pt.Int(0)),
         (project_total_assets_for_sale := pt.abi.Uint64()).set(pt.Int(0)),
         (project_is_paused := pt.abi.Bool()).set(FALSE),
@@ -267,6 +269,7 @@ def list_project(
             end_timestamp,
             claim_timestamp,
             project_asset_id,
+            project_asset_decimal,
             image_url,
             price_per_asset,
             min_investment_per_investor,
@@ -326,6 +329,7 @@ def deposit_ido_assets(
         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
         (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
+        (project_asset_decimal := pt.abi.Uint64()).set(project.asset_decimal),
         (project_image_url := pt.abi.String()).set(project.image_url),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
@@ -350,6 +354,7 @@ def deposit_ido_assets(
             project_end_timestamp,
             project_claim_timestamp,
             project_asset_id,
+            project_asset_decimal,
             project_image_url,
             project_price_per_asset,
             project_min_investment_per_investor,
@@ -455,6 +460,7 @@ def invest(
         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
         (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
+        (project_asset_decimal := pt.abi.Uint64()).set(project.asset_decimal),
         (project_image_url := pt.abi.String()).set(project.image_url),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_user := pt.abi.Uint64()).set(project.min_investment_per_investor),
@@ -480,13 +486,6 @@ def invest(
             pt.Global.latest_timestamp() >= project_start_timestamp.get(),
             pt.Global.latest_timestamp() < project_end_timestamp.get(),
             comment="Project must be live and ongoing."
-        ),
-        pt.Assert(
-            pt.Or(
-                txn.get().type_enum() == pt.TxnType.Payment,
-                txn.get().type_enum() == pt.TxnType.AssetTransfer
-            ),
-            comment="Invalid transaction type. Must be of type Payment or AssetTransfer."
         ),
         pt.Assert(
             asset_allocation.get() > pt.Int(0),
@@ -526,6 +525,7 @@ def invest(
             project_end_timestamp,
             project_claim_timestamp,
             project_asset_id,
+            project_asset_decimal,
             project_image_url,
             project_price_per_asset,
             project_min_investment_per_user,
@@ -768,6 +768,7 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
         (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
+        (project_asset_decimal := pt.abi.Uint64()).set(project.asset_decimal),
         (project_image_url := pt.abi.String()).set(project.image_url),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
@@ -833,6 +834,7 @@ def withdraw_amount_raised(project_id: pt.abi.Uint64) -> pt.Expr:
             project_end_timestamp,
             project_claim_timestamp,
             project_asset_id,
+            project_asset_decimal,
             project_image_url,
             project_price_per_asset,
             project_min_investment_per_investor,
@@ -874,6 +876,7 @@ def pause_project(project_id: pt.abi.Uint64) -> pt.Expr:
         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
         (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
+        (project_asset_decimal := pt.abi.Uint64()).set(project.asset_decimal),
         (project_image_url := pt.abi.String()).set(project.image_url),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
@@ -899,6 +902,7 @@ def pause_project(project_id: pt.abi.Uint64) -> pt.Expr:
             project_end_timestamp,
             project_claim_timestamp,
             project_asset_id,
+            project_asset_decimal,
             project_image_url,
             project_price_per_asset,
             project_min_investment_per_investor,
@@ -940,6 +944,7 @@ def unpause_project(project_id: pt.abi.Uint64) -> pt.Expr:
         (project_end_timestamp := pt.abi.Uint64()).set(project.end_timestamp),
         (project_claim_timestamp := pt.abi.Uint64()).set(project.claim_timestamp),
         (project_asset_id := pt.abi.Uint64()).set(project.asset_id),
+        (project_asset_decimal := pt.abi.Uint64()).set(project.asset_decimal),
         (project_image_url := pt.abi.String()).set(project.image_url),
         (project_price_per_asset := pt.abi.Uint64()).set(project.price_per_asset),
         (project_min_investment_per_investor := pt.abi.Uint64()).set(project.min_investment_per_investor),
@@ -965,6 +970,7 @@ def unpause_project(project_id: pt.abi.Uint64) -> pt.Expr:
             project_end_timestamp,
             project_claim_timestamp,
             project_asset_id,
+            project_asset_decimal,
             project_image_url,
             project_price_per_asset,
             project_min_investment_per_investor,
