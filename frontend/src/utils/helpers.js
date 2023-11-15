@@ -28,7 +28,7 @@ const account = algosdk.mnemonicToSecretKey('');
   const swapTxGroup = await swap.prepareTxGroup(account.addr);
   const signedTxs = swapTxGroup.signTxn(account.sk)
   await algod.sendRawTransaction(signedTxs).do();
-  console.log(Swap transaction group ${swapTxGroup.groupId});
+  // console.log(Swap transaction group ${swapTxGroup.groupId});
 })();
 
 
