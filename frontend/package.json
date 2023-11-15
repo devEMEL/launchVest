@@ -51,7 +51,6 @@
     "tslib": "^2.6.2"
   },
   "scripts": {
-    "generate:app-clients": "algokit generate client -o src/contracts/{contract_name}.ts ../backend",
     "dev": "vite",
     "build": "npm run generate:app-clients && tsc && vite build",
     "test": "jest --coverage --passWithNoTests",
