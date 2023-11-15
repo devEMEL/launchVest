@@ -236,10 +236,10 @@ def stake(
     """
     staker = Staker()
     return pt.Seq(
-        pt.Assert(
-            pt.Not(app.state.staker_to_stake[pt.Txn.sender()].exists()),
-            comment="Staker already staking."
-        ),
+        # pt.Assert(
+        #     pt.Not(app.state.staker_to_stake[pt.Txn.sender()].exists()),
+        #     comment="Staker already staking."
+        # ),
         pt.Assert(
             txn.get().type_enum() == pt.TxnType.AssetTransfer,
             txn.get().asset_receiver() == app.state.escrow_address,

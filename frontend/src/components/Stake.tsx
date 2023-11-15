@@ -41,7 +41,7 @@ const Stake = () => {
   const vestStakeClient = new VestStakeClient(
     {
       resolveBy: 'id',
-      id: 479411007,
+      id: 479773538,
       sender,
     },
     algodClient,
@@ -248,7 +248,7 @@ const Stake = () => {
         <ConfirmModal text={`Unstake vest`} txn={unstakeTxnAction} />
       )}
 
-      <button
+      {/* <button
         onClick={async () => {
           await vestStakeClient.create.bare()
           const vestStakeAppId = (await vestStakeClient.appClient.getAppReference()).appId
@@ -258,35 +258,35 @@ const Stake = () => {
           console.log(vestStakeAppId)
 
           // read box
-          // let StakersArr = []
-          //this below
-          // for (let _box of await vestStakeClient.appClient.getBoxNames()) {
-          //   let result = await vestStakeClient.appClient.getBoxValue(_box)
+          let StakersArr = []
+          // this below
+          for (let _box of await vestStakeClient.appClient.getBoxNames()) {
+            let result = await vestStakeClient.appClient.getBoxValue(_box)
 
-          //   const resultCodec = algosdk.ABIType.from('(address,uint64,uint64,bool,uint64,uint64)')
-          //   const stakingList = resultCodec.decode(result)
-          //   console.log('stakingList: ', stakingList[5])
-          //this above
-          // let obj = {
-          //   address: stakingList[0],
-          //   amount: Number(stakingList[1]),
-          //   assetId: Number(stakingList[2]),
-          //   isStaking: stakingList[3],
-          //   startTimestamp: Number(stakingList[4]),
-          //   endTimestamp: Number(stakingList[5]),
-          // }
-          // StakersArr.push(obj)
-          //this below
-          // }
-          //this above
-          // console.log(StakersArr)
-          // return StakersArr
+            const resultCodec = algosdk.ABIType.from('(address,uint64,uint64,bool,uint64,uint64)')
+            const stakingList = resultCodec.decode(result)
+            console.log('stakingList: ', stakingList[5])
+          // this above
+          let obj = {
+            address: stakingList[0],
+            amount: Number(stakingList[1]),
+            assetId: Number(stakingList[2]),
+            isStaking: stakingList[3],
+            startTimestamp: Number(stakingList[4]),
+            endTimestamp: Number(stakingList[5]),
+          }
+          StakersArr.push(obj)
+          // this below
+          }
+          // this above
+          console.log(StakersArr)
+          return StakersArr
 
-          // if currentTimestamp > endTimestamp (show unstake) else show stake
+          if currentTimestamp > endTimestamp (show unstake) else show stake
         }}
       >
-        create staking app
-      </button>
+         create staking app
+      </button> */}
     </div>
   )
 }

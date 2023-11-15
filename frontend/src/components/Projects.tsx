@@ -51,7 +51,7 @@ const projects_ = [
 ]
 
 const Projects = () => {
-  const [appId, setAppId] = useState<number>(479545536)
+  const [appId, setAppId] = useState<number>(479772966)
   const [projects, setProjects] = useState<Array<object>>([])
   const { enqueueSnackbar } = useSnackbar()
   const { signer, activeAddress } = useWallet()
@@ -79,6 +79,10 @@ const Projects = () => {
     for (let _box of await launchVestClient.appClient.getBoxNames()) {
       let result = await launchVestClient.appClient.getBoxValue(_box)
 
+      // const resultCodec = algosdk.ABIType.from(
+      //   '(address,uint64,uint64,uint64,uint64,uint64,string,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64,uint64,uint64)',
+      // )
+      // const tokenList = resultCodec.decode(result)
       const resultCodec = algosdk.ABIType.from(
         '(address,uint64,uint64,uint64,uint64,uint64,string,uint64,uint64,uint64,uint64,uint64,bool,bool,uint64,uint64,uint64,uint64)',
       )
@@ -86,14 +90,33 @@ const Projects = () => {
       console.log(tokenList)
       if (tokenList.length == 18) {
         // use length to get specific boxes
+        // let project = {
+        //   'owner address': String(tokenList[0]),
+        //   'start timestamp': Number(tokenList[1]),
+        //   'end timestamp': Number(tokenList[2]),
+        //   'claim timestamp': Number(tokenList[3]),
+        //   'asset id': Number(tokenList[4]),
+        //   'asset decimal': Number(tokenList[5]),
+        //   'image url': String(tokenList[6]),
+        //   'asset price': Number(tokenList[7]),
+        //   'min buy': Number(tokenList[8]),
+        //   'max buy': Number(tokenList[9]),
+        //   'max cap': Number(tokenList[10]),
+        //   'assets for sale': Number(tokenList[11]),
+        //   ispaused: tokenList[12],
+        //   'initiated withdrawal': tokenList[13],
+        //   'assets sold': Number(tokenList[14]),
+        //   'amount raised': Number(tokenList[15]),
+        //   'proceeds withdrawn': tokenList[16],
+        //   'vesting schedule': Number(tokenList[17]),
         let project = {
-          'owner address': String(tokenList[0]),
+          'owner address': tokenList[0],
           'start timestamp': Number(tokenList[1]),
           'end timestamp': Number(tokenList[2]),
           'claim timestamp': Number(tokenList[3]),
           'asset id': Number(tokenList[4]),
           'asset decimal': Number(tokenList[5]),
-          'image url': String(tokenList[6]),
+          'image url': tokenList[6],
           'asset price': Number(tokenList[7]),
           'min buy': Number(tokenList[8]),
           'max buy': Number(tokenList[9]),
@@ -103,13 +126,12 @@ const Projects = () => {
           'initiated withdrawal': tokenList[13],
           'assets sold': Number(tokenList[14]),
           'amount raised': Number(tokenList[15]),
-          'proceeds withdrawn': tokenList[16],
+          'proceeds withdrawn': Number(tokenList[16]),
           'vesting schedule': Number(tokenList[17]),
         }
         projectsArr.push(project)
       }
     }
-
     return projectsArr
   }
 

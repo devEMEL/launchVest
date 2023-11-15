@@ -208,10 +208,10 @@ def list_project(
 
     return pt.Seq(
         (asset_decimal := pt.AssetParam.decimals(asset_id.asset_id())),
-        # pt.Assert(
-        #     pt.Not(app.state.pid_to_project[project_id_bytes].exists()),
-        #     comment="Project already exists!"
-        # ),
+        pt.Assert(
+            pt.Not(app.state.pid_to_project[project_id_bytes].exists()),
+            comment="Project already exists!"
+        ),
         pt.Assert(
             asset_decimal.value() != pt.Int(0),
             comment="A valid asset ID must be provided",
@@ -386,10 +386,12 @@ def invest(
 
     :param pt.abi.Bool is_staking: Indicates whether the investor is staking $VEST
     :param pt.abi.Asset project_id: The project (asset) ID to invest in.
+    :param pt.abi.Uint64 amount_in_usd: The investment amount in USD.
     :param pt.abi.PaymentTransaction txn: The payment transaction for the investment.
     :param asset_allocation: Asset allocation for investor.
     :rtype: pt.Expr.
     """
+    # TODO: Calculate and set the allocation amount on-chain.
     investor = Investor()
 
     project = Project()

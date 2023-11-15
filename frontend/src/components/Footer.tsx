@@ -16,6 +16,9 @@ const Footer = () => {
             <p>
               <Link to="/stake">Stake</Link>
             </p>
+            <p>
+              <Link to="/withdraw-funds">Withdraw</Link>
+            </p>
           </div>
           <div>
             <p></p>

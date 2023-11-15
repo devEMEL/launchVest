@@ -22,7 +22,7 @@ const PER_BYTE_MBR = 0.0004e6
 const USDC_ASSET_ID = 10458941
 
 const ListToken = () => {
-  const [appId, setAppId] = useState<number>(479545536)
+  const [appId, setAppId] = useState<number>(479772966)
   const [amountOfAsset, setAmountOfAsset] = useState<bigint>(0n)
   const [assetId, setAssetId] = useState<bigint>(0n)
   const [startTimestamp, setStartTimestamp] = useState<string>('')

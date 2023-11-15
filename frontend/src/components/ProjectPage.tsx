@@ -13,7 +13,7 @@ import ConfirmModal from './Modals/ConfirmModal'
 import { VestStakeClient } from '../contracts/vest_stake'
 
 const ProjectPage = () => {
-  const [appId, setAppId] = useState<number>(479545536)
+  const [appId, setAppId] = useState<number>(479772966)
   const [amount, setAmount] = useState<bigint>(0n)
   const [showModal, setShowModal] = useState<boolean>(false)
   const [investType, setInvestType] = useState<number>(0)
@@ -37,7 +37,7 @@ const ProjectPage = () => {
   const vestStakeClient = new VestStakeClient(
     {
       resolveBy: 'id',
-      id: 479411007,
+      id: 479773538,
       sender,
     },
     algodClient,
@@ -64,13 +64,13 @@ const ProjectPage = () => {
       console.log(tokenList)
       if (tokenList.length == 18 && tokenList[4] == assetParams.projectId) {
         let project = {
-          'owner address': String(tokenList[0]),
+          'owner address': tokenList[0],
           'start timestamp': Number(tokenList[1]),
           'end timestamp': Number(tokenList[2]),
           'claim timestamp': Number(tokenList[3]),
           'asset id': Number(tokenList[4]),
           'asset decimal': Number(tokenList[5]),
-          'image url': String(tokenList[6]),
+          'image url': tokenList[6],
           'asset price': Number(tokenList[7]),
           'min buy': Number(tokenList[8]),
           'max buy': Number(tokenList[9]),
@@ -80,7 +80,7 @@ const ProjectPage = () => {
           'initiated withdrawal': tokenList[13],
           'assets sold': Number(tokenList[14]),
           'amount raised': Number(tokenList[15]),
-          'proceeds withdrawn': tokenList[16],
+          'proceeds withdrawn': Number(tokenList[16]),
           'vesting schedule': Number(tokenList[17]),
         }
         projectObj = project
@@ -91,7 +91,19 @@ const ProjectPage = () => {
   }
   const convertTimestampToDate = (timestamp: number) => {
     let dateFormat = new Date(timestamp * 1000)
-    return ''.concat(dateFormat.getDate(), '/', dateFormat.getMonth() + 1, '/', dateFormat.getFullYear(), ' ')
+    return ''.concat(
+      dateFormat.getDate(),
+      '/',
+      dateFormat.getMonth() + 1,
+      '/',
+      dateFormat.getFullYear(),
+      ' ',
+      dateFormat.getHours(),
+      ":",
+      dateFormat.getMinutes(),
+      ":",
+      dateFormat.getSeconds()
+    )
   }
   const handleShowProjectsAction = async () => {
     await handleShowProjects().then(async (project) => {
@@ -137,25 +149,33 @@ const ProjectPage = () => {
   }, [])
 
   const tokenKey = algosdk.encodeUint64(Number(assetParams.projectId))
-  
+
   const buyTxn = async () => {
     const appAddress = (await launchVestClient.appClient.getAppReference()).appAddress
     let txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
       from: String(activeAddress),
       to: String(appAddress),
+      // amount: BigInt(algosdk.algosToMicroalgos(Number(amount))),
       amount: BigInt(amount),
       suggestedParams: await algodClient.getTransactionParams().do(),
     })
 
-    const isStaking = await checkIsStaking()
+    // const isStaking = await checkIsStaking()
+    const isStaking = true
+    console.log(isStaking)
+
+    if (isStaking == true) {
+      console.log('Staking')
+    } else {
+      console.log("Ain't staking bruh")
+    }
 
     const amountInUSD = Math.trunc(Number(amount) * Number(algoInUSD))
-    
-    const allocation = Math.trunc((10 ** project['asset decimal'] * amountInUSD) / project['asset price']);
-    console.log(amountInUSD);
-    console.log(allocation);
-    
-    
+
+    const allocation = Math.trunc((10 ** project['asset decimal'] * amountInUSD) / project['asset price'])
+    console.log(amountInUSD)
+    console.log(allocation)
+
     const tx = await launchVestClient.invest(
       {
         is_staking: Boolean(isStaking),
@@ -165,18 +185,20 @@ const ProjectPage = () => {
         asset_allocation: BigInt(allocation),
       },
       {
-        boxes: [algosdk.decodeAddress(activeAddress).publicKey, tokenKey],
+        boxes: [tokenKey, algosdk.decodeAddress(activeAddress).publicKey],
       },
     )
     console.log(tx)
+    // await handleShowProjectsAction()
   }
 
   const claimTxn = async () => {
-    const isStaking = await checkIsStaking()
+    // const isStaking = await checkIsStaking()
+    const isStaking = true
     const tx = await launchVestClient.claimIdoAsset(
-      { project: BigInt(project['asset id']), is_staking: Boolean(isStaking) },
+      { project_id: BigInt(project['asset id']), is_staking: Boolean(isStaking) },
       {
-        boxes: [algosdk.decodeAddress(activeAddress).publicKey, tokenKey],
+        boxes: [tokenKey, algosdk.decodeAddress(activeAddress).publicKey],
       },
     )
     console.log(tx)
@@ -184,11 +206,12 @@ const ProjectPage = () => {
   }
 
   const reclaimTxn = async () => {
-    const isStaking = await checkIsStaking()
+    // const isStaking = await checkIsStaking()
+    const isStaking = true
     const tx = await launchVestClient.reclaimInvestment(
-      { project: BigInt(project['asset id']), is_staking: Boolean(isStaking) },
+      { project_id: BigInt(project['asset id']), is_staking: Boolean(isStaking) },
       {
-        boxes: [algosdk.decodeAddress(activeAddress).publicKey, tokenKey],
+        boxes: [tokenKey, algosdk.decodeAddress(activeAddress).publicKey],
       },
     )
     console.log(tx)
@@ -221,6 +244,11 @@ const ProjectPage = () => {
       .catch((err) => {
         enqueueSnackbar(`Reclaiming failed: ${(err as Error).message}`, { variant: 'error' })
       })
+  }
+  const truncateDecimal = (value, decimal) => {
+    const str = String(value)
+    let ans = str.substring(0, str.length - Number(decimal))
+    return Number(ans)
   }
 
   return (
@@ -263,7 +291,7 @@ const ProjectPage = () => {
 
           <div className="capitalize p-2 flex justify-between">
             <h1>max cap</h1>
-            <h1>{project['max cap']}</h1>
+            <h1>{truncateDecimal(project['max cap'], project['asset decimal'])}</h1>
           </div>
           <div className="capitalize p-2 flex justify-between">
             <h1>amount raised</h1>
@@ -271,7 +299,7 @@ const ProjectPage = () => {
           </div>
           <div className="capitalize p-2 flex justify-between">
             <h1>assets for sale</h1>
-            <h1>{project['assets for sale']}</h1>
+            <h1>{truncateDecimal(project['assets for sale'], project['asset decimal'])}</h1>
           </div>
           <div className="capitalize p-2 flex justify-between">
             <h1>assets sold</h1>
@@ -333,7 +361,7 @@ const ProjectPage = () => {
                   </select> */}
                   <input
                     type="text"
-                    placeholder='Enter amount in Algo'
+                    placeholder="Enter amount in Algo"
                     className="w-[100%] h-[50px] text-[16px] p-5 border-2 outline-0 bg-[#f8f6fe] rounded-lg text-black"
                     onChange={async (e) => {
                       setAmount(e.target.value as unknown as bigint)
@@ -377,19 +405,6 @@ const ProjectPage = () => {
           {investType == 2 && <ConfirmModal text="Reclaim" txn={reclaimTxnAction} />}
         </div>
       </div>
-      {/* <button
-        onClick={async () => {
-          await fetch('https://price-feeds.goracle.io/api/v2/crypto/prices?key=P6hT3kXpqbTNLWzyyyk1R7Crh&assets=algo&curr=usd')
-            .then((data) => data.json())
-            .then((result) => {
-              console.log(result[0].price)
-              let price = result[0].price
-              setAlgoInUSD(price)
-            })
-        }}
-      >
-        getAlgoPriceInUSD
-      </button> */}
     </div>
   )
 }

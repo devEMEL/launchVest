@@ -15,6 +15,7 @@ import Stake from './components/Stake'
 import { useEffect } from 'react'
 import ProjectPage from './components/ProjectPage'
 import HomePage from './components/HomePage'
+import Withdraw from './components/Withdraw'
 
 let providersArray: ProvidersArray
 
@@ -71,6 +72,7 @@ export default function App() {
             <Route path="/list-project" element={<ListToken />} />
             <Route path="/projects" element={<Projects />} />
             <Route path="/stake" element={<Stake />} />
+            <Route path="/withdraw-funds" element={<Withdraw />} />
             <Route path="/project/:projectId" element={<ProjectPage />} />
             {/* <Route path="/asset/:assetId" element={<Asset />} /> */}
             {/* <Route path="*" element={<NotFound />} /> */}
