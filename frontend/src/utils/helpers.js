@@ -30,3 +30,15 @@ const account = algosdk.mnemonicToSecretKey('');
   await algod.sendRawTransaction(signedTxs).do();
   console.log(Swap transaction group ${swapTxGroup.groupId});
 })();
+
+
+"scripts": {
+  "generate:app-clients": "algokit generate client -o src/contracts/{contract_name}.ts ../backend",
+  "dev": "vite",
+  "build": "npm run generate:app-clients && tsc && vite build",
+  "test": "jest --coverage --passWithNoTests",
+  "playwright:test": "playwright test",
+  "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+  "lint:fix": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --fix",
+  "preview": "vite preview"
+},
