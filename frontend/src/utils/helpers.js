@@ -17,7 +17,8 @@ const account = algosdk.mnemonicToSecretKey('');
   const optInTxn = await usdc.prepareOptInTx(account.addr);
   const sentOptInTxn = await pact.algod.sendRawTransaction(optInTxn.signTxn(account.sk)).do();
   await algosdk.waitForConfirmation(pact.algod, sentOptInTxn.txId, 2);
-  console.log(OptIn transaction ${sentOptInTxn.txId});
+  // console.log(OptIn transaction ${sentOptInTxn.txId});
+
 
   // Do a swap.
   const swap = pool[0].prepareSwap({

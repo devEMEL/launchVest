@@ -13,7 +13,7 @@ import ConfirmModal from './Modals/ConfirmModal'
 import { VestStakeClient } from '../contracts/vest_stake'
 
 const ProjectPage = () => {
-  const [appId, setAppId] = useState<number>(479772966)
+  const [appId, setAppId] = useState<number>(479832604)
   const [amount, setAmount] = useState<bigint>(0n)
   const [showModal, setShowModal] = useState<boolean>(false)
   const [investType, setInvestType] = useState<number>(0)

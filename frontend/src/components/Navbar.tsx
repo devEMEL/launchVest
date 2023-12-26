@@ -4,6 +4,7 @@ import { showConnectModal } from '../services/features/connectModal/connectModal
 import { ellipseAddress } from '../utils/ellipseAddress'
 import { Link, useNavigate } from 'react-router-dom'
 
+
 const Navbar = () => {
   const dispatch = useDispatch()
   const { activeAccount, activeAddress, providers } = useWallet()
